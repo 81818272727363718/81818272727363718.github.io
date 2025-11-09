@@ -72,7 +72,8 @@
     section { display: none; background: var(--card-bg); padding: 20px; border-radius: 12px; margin-bottom: 30px; }
     section.active { display: block; }
     pre { background: rgba(0,0,0,0.3); color: #fff; padding: 14px; border-radius: 8px; margin-top: 16px; width: 100%; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word; }
-    .CodeMirror { height: auto; background: rgba(0,0,0,0.2); color: #fff; border-radius: 8px; }
+    .CodeMirror { height: auto; background: rgba(0,0,0,0.2); color: #fff; border-radius: 8px; padding-left: 10px; }
+    .error-line { background-color: rgba(255,0,0,0.2) !important; }
   </style>
 </head>
 <body>
@@ -101,6 +102,7 @@
 
     <section id="codeSection">
       <h2>Python Code Sandbox</h2>
+      <label><input type="checkbox" id="toggleLineNumbers" checked> Show Line Numbers</label>
       <textarea id="codeInput" rows="10"></textarea>
       <button id="runCode" class="submit">Run Python</button>
       <pre id="codeOutput"></pre>
@@ -110,6 +112,8 @@
   <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/matchbrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closebrackets.min.js"></script>
   <script>
     const sidebar = document.getElementById('sidebar');
     const toggleBtn = document.getElementById('toggleSidebar');
@@ -128,6 +132,44 @@
       });
     });
 
+    // Roblox Badge Checker
+    document.getElementById('checkBadge').addEventListener('click', async () => {
+      const username = document.getElementById('rbUsername').value.trim();
+      const badgeId = document.getElementById('badgeId').value.trim();
+      const output = document.getElementById('rbOutput');
+      if(!username || !badgeId){ output.textContent = 'Please provide both username and badge ID.'; return; }
+      output.textContent = 'Fetching...';
+      try{
+        const userRes = await fetch(`https://users.roblox.com/v1/users/search?username=${encodeURIComponent(username)}`);
+        const userData = await userRes.json();
+        if(!userData.data || userData.data.length === 0){ output.textContent = 'User not found.'; return; }
+        const userId = userData.data[0].id;
+        const badgeRes = await fetch(`https://badges.roblox.com/v1/users/${userId}/badges`);
+        const badgeData = await badgeRes.json();
+        const badge = badgeData.data.find(b => b.id == badgeId);
+        if(badge){ output.textContent = `Badge awarded on: ${new Date(badge.earnedDate).toLocaleString()}`; }
+        else{ output.textContent = 'Badge not found for this user.'; }
+      }catch(err){ output.textContent = 'Error fetching data.'; }
+    });
+
+    // Discord Webhook Sender
+    document.getElementById('sendWebhook').addEventListener('click', async () => {
+      const url = document.getElementById('webhookUrl').value.trim();
+      const msg = document.getElementById('webhookMsg').value;
+      const output = document.getElementById('discordOutput');
+      if(!url || !msg){ output.textContent = 'Please provide both webhook URL and message.'; return; }
+      output.textContent = 'Sending...';
+      try{
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: msg })
+        });
+        output.textContent = res.ok ? 'Message sent successfully.' : 'Failed to send message.';
+      }catch(err){ output.textContent = 'Error sending message.'; }
+    });
+
+    // Python Sandbox
     async function initPySandbox(){
       const pyodide = await loadPyodide();
       const codeArea = CodeMirror.fromTextArea(document.getElementById('codeInput'), {
@@ -136,10 +178,18 @@
         indentUnit: 4,
         matchBrackets: true,
         autoCloseBrackets: true,
+        styleActiveLine: true,
       });
+
+      const lineToggle = document.getElementById('toggleLineNumbers');
+      lineToggle.addEventListener('change', ()=>{
+        codeArea.setOption('lineNumbers', lineToggle.checked);
+      });
+
       document.getElementById('runCode').addEventListener('click', async ()=>{
         const code = codeArea.getValue();
         const output = document.getElementById('codeOutput');
+        codeArea.getAllMarks().forEach(m => m.clear());
         output.textContent = 'Running...';
         try {
           await pyodide.runPythonAsync(`
@@ -159,6 +209,11 @@ exec('''${code.replace(/`/g,'\`')}''')
           output.textContent = captured || 'Code executed successfully with no output.';
         } catch(e){
           output.textContent = e;
+          const lineMatch = e.toString().match(/<string>\,(\d+)/);
+          if(lineMatch){
+            const errLine = parseInt(lineMatch[1])-1;
+            codeArea.addLineClass(errLine, 'background', 'error-line');
+          }
         }
       });
     }
