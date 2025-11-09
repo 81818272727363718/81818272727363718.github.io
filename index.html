@@ -4,15 +4,34 @@
     <meta charset="UTF-8">
     <title>Mini VM</title>
     <style>
-        body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        canvas { border: 2px solid #fff; }
+        body {
+            margin: 0;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #fff;
+            font-family: monospace;
+        }
+        canvas {
+            border: 2px solid #fff;
+        }
+        #loading {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
+    <div id="loading">Loading Mini VM...</div>
     <canvas id="screen" width="800" height="600"></canvas>
 
     <script src="https://copy.sh/v86/build/libv86.js"></script>
     <script>
+        const loadingText = document.getElementById("loading");
+
         const emulator = new V86Starter({
             wasm_path: "https://copy.sh/v86/build/v86.wasm",
             memory_size: 64 * 1024 * 1024,
@@ -22,8 +41,20 @@
             cdrom: { url: "https://copy.sh/v86/images/linux.iso" } // small bootable Linux ISO
         });
 
+        // Update loading progress
+        emulator.add_listener("emulator-message", function(e) {
+            if (e.message) {
+                loadingText.textContent = "Loading Mini VM... " + e.message;
+            }
+        });
+
         emulator.add_listener("emulator-ready", function() {
-            console.log("Mini VM is ready!");
+            loadingText.textContent = "Mini VM Ready!";
+        });
+
+        emulator.add_listener("screen-update", function() {
+            // Optionally, hide loading after first screen render
+            // loadingText.style.display = "none";
         });
     </script>
 </body>
