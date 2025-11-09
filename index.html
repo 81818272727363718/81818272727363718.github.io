@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Python Sandbox v2</title>
+  <title>Python Sandbox v2 (Fixed Output)</title>
   <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
@@ -33,7 +33,7 @@
     }
     #output {
       background: #0b0b0b; padding: 10px; white-space: pre-wrap;
-      border-left: 2px solid #333;
+      border-left: 2px solid #333; font-size: 15px;
     }
     .error {
       color: #ff4c4c;
@@ -77,17 +77,6 @@
       },
     });
 
-    // --- Load Pyodide ---
-    async function init() {
-      pyodide = await loadPyodide();
-      await pyodide.loadPackage(["micropip"]);
-      output.textContent = "Pyodide loaded. Ready to run Python 🐍\n";
-      pyodide.runPython(`
-__builtins__.input = lambda prompt='': js.prompt(prompt)
-`);
-    }
-    init();
-
     // --- Output Helper ---
     function printOut(text) {
       output.textContent += text + "\n";
@@ -110,6 +99,28 @@ __builtins__.input = lambda prompt='': js.prompt(prompt)
       }
       printOut("");
     }
+
+    // --- Load Pyodide ---
+    async function init() {
+      pyodide = await loadPyodide();
+      await pyodide.loadPackage(["micropip"]);
+
+      // Redirect Python stdout/stderr to JS
+      pyodide.runPython(`
+import sys
+class JSWriter:
+    def write(self, s):
+        if s.strip() != '':
+            js.printOut(s)
+    def flush(self): pass
+sys.stdout = JSWriter()
+sys.stderr = JSWriter()
+
+__builtins__.input = lambda prompt='': js.prompt(prompt)
+`);
+      output.textContent = "Pyodide loaded. Ready to run Python 🐍\n";
+    }
+    init();
 
     // --- Run Code ---
     async function runCode(code = editor.getValue()) {
