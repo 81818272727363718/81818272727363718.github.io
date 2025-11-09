@@ -1,0 +1,108 @@
+<!--
+Quick guide + single-file homepage for GitHub Pages.
+Save this file as `index.html` and upload it to a repository named either:
+  - `yourusername.github.io` -> becomes https://yourusername.github.io  (personal site)
+  - OR any repo name -> becomes https://yourusername.github.io/reponame (project site)
+
+Steps to publish (short):
+1. Create a GitHub account if you don't have one: https://github.com/signup
+2. Create a new repository on GitHub (for a personal site name it exactly yourusername.github.io).
+3. Upload this `index.html` file into the repository (use the web UI: Add file → Upload files).
+4. Commit the upload. Then go to Settings → Pages → Source and choose `main` branch (root) and save.
+5. Wait ~1–2 minutes and open your site URL.
+
+This file includes a tiny responsive homepage, a nav, an example image placeholder, and a contact button.
+-->
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Your GitHub Pages Homepage</title>
+  <meta name="description" content="A simple homepage hosted on GitHub Pages" />
+  <style>
+    /* Simple styles (inline so it's a single file) */
+    :root{--maxw:900px;--accent:#2563eb}
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;line-height:1.45;margin:0;color:#0f172a}
+    header{background:linear-gradient(90deg,#f8fafc,#eef2ff);padding:28px 16px}
+    .container{max-width:var(--maxw);margin:0 auto;padding:0 16px}
+    h1{margin:0 0 8px;font-size:clamp(22px,4vw,36px)}
+    p.lead{margin:0 0 18px;color:#334155}
+    nav{display:flex;gap:12px;margin-top:12px}
+    a.btn{display:inline-block;padding:8px 12px;border-radius:8px;text-decoration:none;background:var(--accent);color:white}
+    main{padding:28px 0}
+    .card{background:white;border-radius:12px;padding:18px;box-shadow:0 6px 20px rgba(12,13,16,0.06)}
+    .grid{display:grid;grid-template-columns:1fr;gap:14px}
+    @media(min-width:720px){.grid{grid-template-columns:1fr 320px}}
+    img.hero{width:100%;height:220px;object-fit:cover;border-radius:10px}
+    footer{padding:20px 0;color:#64748b;font-size:14px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Hi — welcome to my GitHub Pages site</h1>
+      <p class="lead">This is a tiny static homepage served directly from a GitHub repository. Edit this file and push changes to update the site.</p>
+      <nav>
+        <a class="btn" href="#about">About</a>
+        <a class="btn" href="#projects">Projects</a>
+        <a class="btn" href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="grid">
+      <section class="card">
+        <h2 id="about">About this page</h2>
+        <p>This single-file page demonstrates the minimal structure you need for GitHub Pages:
+        <ol>
+          <li>An <code>index.html</code> at the repository root</li>
+          <li>Static assets (images, CSS, JS) in the same repo or in folders like <code>/assets</code></li>
+          <li>GitHub Pages set to serve from the main branch (root) or the docs/ folder</li>
+        </ol>
+        </p>
+
+        <h3 id="projects">Example project</h3>
+        <p>Link your project repos here, embed a GitHub gist, or add links to your social profiles.</p>
+        <p><strong>Tip:</strong> For more complex sites (React, Vue) build to a static folder and upload the compiled files.</p>
+      </section>
+
+      <aside class="card">
+        <img class="hero" src="https://via.placeholder.com/800x400.png?text=Your+Hero+Image" alt="placeholder hero">
+        <div style="margin-top:12px">
+          <strong>One-click contact</strong>
+          <p style="margin:6px 0">Click the button below to open your email client pre-filled.</p>
+          <a class="btn" id="contact" href="mailto:you@example.com?subject=Hi%20from%20GitHub%20Pages">Email me</a>
+        </div>
+      </aside>
+    </div>
+
+    <section style="margin-top:18px" class="card">
+      <h3>How to edit</h3>
+      <ol>
+        <li>Open your repository on GitHub and click <strong>Add file → Create new file</strong>.</li>
+        <li>Name it <code>index.html</code> (or edit the existing one) and paste this HTML content.</li>
+        <li>Commit the change and visit <code>https://yourusername.github.io</code> (or the project URL).</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="container">
+    <div class="card">
+      <small>Made with ♥ — Hosted on GitHub Pages</small>
+    </div>
+  </footer>
+
+  <!-- Optional tiny script: shows a popup when loaded (safe for static hosting) -->
+  <script>
+    // Only show once per session
+    if (!sessionStorage.getItem('seenWelcome')) {
+      sessionStorage.setItem('seenWelcome', '1');
+      console.log('Welcome to your GitHub Pages site — edit index.html to customize it.');
+    }
+  </script>
+</body>
+</html>
