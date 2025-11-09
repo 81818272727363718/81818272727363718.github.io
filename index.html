@@ -1,200 +1,197 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Python Sandbox v2.1 (Fixed JS Bridge)</title>
-  <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
-  <style>
-    body {
-      margin: 0; height: 100vh; display: flex; flex-direction: column;
-      background-color: #121212; color: white; font-family: monospace;
-    }
-    #toolbar {
-      background: #1e1e1e; padding: 8px; display: flex; gap: 8px; align-items: center;
-      border-bottom: 1px solid #333;
-    }
-    button {
-      background: #282828; color: white; border: none; padding: 6px 12px;
-      border-radius: 6px; cursor: pointer; transition: background 0.2s;
-    }
-    button:hover { background: #3a3a3a; }
-    input[type="file"] { display: none; }
-    #sandbox { flex: 1; display: flex; overflow: hidden; }
-    #editor, #output {
-      flex: 1; overflow: auto;
-    }
-    .CodeMirror {
-      height: 100%; font-size: 15px;
-    }
-    #output {
-      background: #0b0b0b; padding: 10px; white-space: pre-wrap;
-      border-left: 2px solid #333; font-size: 15px;
-    }
-    .error {
-      color: #ff4c4c;
-      cursor: pointer;
-      text-decoration: underline dotted;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python Sandbox v3</title>
+
+<!-- Pyodide -->
+<script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
+
+<!-- CodeMirror -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
+
+<style>
+body {
+  margin: 0; height: 100vh; display: flex; flex-direction: column;
+  background-color: #121212; color: white; font-family: monospace;
+}
+#toolbar {
+  background: #1e1e1e; padding: 8px; display: flex; gap: 8px; align-items: center;
+  border-bottom: 1px solid #333;
+}
+button {
+  background: #282828; color: white; border: none; padding: 6px 12px;
+  border-radius: 6px; cursor: pointer; transition: background 0.2s;
+}
+button:hover { background: #3a3a3a; }
+input[type="file"] { display: none; }
+#sandbox { flex: 1; display: flex; overflow: hidden; }
+#editor { width: 30%; overflow: auto; }
+#output { width: 70%; overflow: auto; background: #0b0b0b; padding: 10px; white-space: pre-wrap; font-size: 15px; }
+.error { color: #ff4c4c; cursor: pointer; text-decoration: underline dotted; }
+</style>
 </head>
 <body>
-  <div id="toolbar">
-    <button id="run">▶ Run</button>
-    <button id="runSel">▶ Run Selection</button>
-    <button id="format">🧹 Format</button>
-    <button id="loadPkg">📦 Load Package</button>
-    <button id="openBtn">📂 Open</button>
-    <button id="saveBtn">💾 Save</button>
-    <input type="file" id="fileInput" accept=".py">
-    <span id="status"></span>
-  </div>
 
-  <div id="sandbox">
-    <div id="editor"></div>
-    <pre id="output">Loading Pyodide...</pre>
-  </div>
+<div id="toolbar">
+  <button id="run">▶ Run</button>
+  <button id="runSel">▶ Run Selection</button>
+  <button id="format">🧹 Format</button>
+  <button id="loadPkg">📦 Load Package</button>
+  <button id="openBtn">📂 Open</button>
+  <button id="saveBtn">💾 Save</button>
+  <input type="file" id="fileInput" accept=".py">
+  <span id="status"></span>
+</div>
 
-  <script>
-    let pyodide;
-    const output = document.getElementById("output");
-    const status = document.getElementById("status");
+<div id="sandbox">
+  <div id="editor"></div>
+  <pre id="output">Loading Pyodide...</pre>
+</div>
 
-    // --- Initialize CodeMirror ---
-    const editor = CodeMirror(document.getElementById("editor"), {
-      value: 'print("Hello, world!")',
-      mode: "python",
-      theme: "dracula",
-      lineNumbers: true,
-      indentUnit: 4,
-      extraKeys: {
-        "Tab": cm => cm.replaceSelection(" ".repeat(4)),
-        "Ctrl-Enter": () => runCode(),
-      },
-    });
+<script>
+let pyodide;
+const output = document.getElementById("output");
+const status = document.getElementById("status");
 
-    // --- Output Helper ---
-    function printOut(text) {
-      output.textContent += text;
-      output.scrollTop = output.scrollHeight;
-    }
+// --- Initialize CodeMirror ---
+const editor = CodeMirror(document.getElementById("editor"), {
+  value: 'print("Hello, world!")',
+  mode: "python",
+  theme: "dracula",
+  lineNumbers: true,
+  indentUnit: 4,
+  extraKeys: {
+    "Tab": cm => cm.replaceSelection(" ".repeat(4)),
+    "Ctrl-Enter": () => runCode(),
+  },
+});
 
-    // --- Error Display Helper (Clickable Traceback) ---
-    function showError(err) {
-      const msg = err.toString();
-      const lineMatch = msg.match(/line (\d+)/);
-      if (lineMatch) {
-        const line = parseInt(lineMatch[1]);
-        const span = document.createElement("span");
-        span.textContent = msg;
-        span.className = "error";
-        span.onclick = () => editor.setCursor(line - 1);
-        output.appendChild(span);
-      } else {
-        printOut(msg + "\n");
-      }
-      printOut("\n");
-    }
+// --- Output Helper ---
+function printOut(text) {
+  output.textContent += text + "\n";
+  output.scrollTop = output.scrollHeight;
+}
 
-    // --- Load Pyodide ---
-    async function init() {
-      pyodide = await loadPyodide();
-      await pyodide.loadPackage(["micropip"]);
+// --- Error Display Helper (Clickable Traceback) ---
+function showError(err) {
+  const msg = err.toString();
+  const lineMatch = msg.match(/line (\d+)/);
+  if (lineMatch) {
+    const line = parseInt(lineMatch[1]);
+    const span = document.createElement("span");
+    span.textContent = msg;
+    span.className = "error";
+    span.onclick = () => editor.setCursor(line - 1);
+    output.appendChild(span);
+  } else {
+    printOut(msg);
+  }
+  printOut("");
+}
 
-      // ✅ Redirect stdout/stderr & define input() properly
-      pyodide.runPython(`
-from pyodide.ffi import to_js, create_proxy, JsProxy, JsException, JsModule, JsFunction, JsValue, JsObject, JsArray, JsTypedArray, JsBuffer, JsArrayBuffer, JsDataView, JsDate, JsError, JsPromise, JsWeakMap, JsWeakRef, JsWeakSet, JsSymbol, JsAsyncIterator, JsGenerator, JsAsyncGenerator, JsMap, JsSet, JsRegExp, JsIterator, JsTypedArray, JsArrayBuffer, JsFunction, JsModule, JsObject, JsProxy, JsValue
+// --- Load Pyodide ---
+async function init() {
+  pyodide = await loadPyodide();
+  await pyodide.loadPackage(["micropip"]);
+
+  // Expose printOut to Python
+  pyodide.globals.set("printOut", printOut);
+
+  // Redirect stdout/stderr and input()
+  await pyodide.runPythonAsync(`
 import sys
 import builtins
-import js
+from pyodide.ffi import create_proxy
+
+printOut = create_proxy(printOut)
 
 class JSWriter:
     def write(self, s):
-        if s and not s.isspace():
-            js.printOut(s)
+        if s.strip() != "":
+            printOut(s)
     def flush(self): pass
 
 sys.stdout = JSWriter()
 sys.stderr = JSWriter()
-
 builtins.input = lambda prompt='': js.prompt(prompt)
-`);
-      output.textContent = "Pyodide loaded. Ready to run Python 🐍\n";
-    }
-    init();
+  `);
 
-    // --- Run Code ---
-    async function runCode(code = editor.getValue()) {
-      if (!pyodide) return;
-      output.textContent = "";
-      status.textContent = "Running...";
-      try {
-        let result = await pyodide.runPythonAsync(code);
-        if (result !== undefined) printOut(result.toString() + "\n");
-      } catch (err) {
-        showError(err);
-      }
-      status.textContent = "";
-    }
+  output.textContent = "Pyodide loaded. Ready to run Python 🐍\n";
+}
+init();
 
-    // --- Run Selection ---
-    document.getElementById("runSel").onclick = () => {
-      const sel = editor.getSelection();
-      if (sel.trim()) runCode(sel);
-      else runCode();
-    };
-    document.getElementById("run").onclick = () => runCode();
+// --- Run Code ---
+async function runCode(code = editor.getValue()) {
+  if (!pyodide) return;
+  output.textContent = "";
+  status.textContent = "Running...";
+  try {
+    const result = await pyodide.runPythonAsync(code);
+    if (result !== undefined) printOut(result.toString());
+  } catch (err) {
+    showError(err);
+  }
+  status.textContent = "";
+}
 
-    // --- Format Code (Black-like) ---
-    document.getElementById("format").onclick = async () => {
-      if (!pyodide) return;
-      try {
-        await pyodide.runPythonAsync(`
+// --- Run Selection ---
+document.getElementById("runSel").onclick = () => {
+  const sel = editor.getSelection();
+  if (sel.trim()) runCode(sel);
+  else runCode();
+};
+document.getElementById("run").onclick = () => runCode();
+
+// --- Format Code (Black-like) ---
+document.getElementById("format").onclick = async () => {
+  if (!pyodide) return;
+  try {
+    await pyodide.runPythonAsync(`
 import micropip
 await micropip.install("black")
 `);
-        const code = editor.getValue();
-        const formatted = await pyodide.runPythonAsync(`
+    const code = editor.getValue();
+    const formatted = await pyodide.runPythonAsync(`
 from black import format_str, FileMode
 format_str("""${code.replace(/`/g, "\\`")}""", mode=FileMode())
 `);
-        editor.setValue(formatted);
-      } catch (e) {
-        printOut("Formatter error: " + e + "\n");
-      }
-    };
+    editor.setValue(formatted);
+  } catch (e) {
+    printOut("Formatter error: " + e);
+  }
+};
 
-    // --- Load Custom Package ---
-    document.getElementById("loadPkg").onclick = async () => {
-      const pkg = prompt("Enter package name to install (PyPI):");
-      if (!pkg) return;
-      try {
-        await pyodide.runPythonAsync(`import micropip; await micropip.install("${pkg}")`);
-        printOut(`✅ Package "${pkg}" installed\n`);
-      } catch (e) {
-        printOut(`❌ Failed to install ${pkg}: ${e}\n`);
-      }
-    };
+// --- Load Custom Package ---
+document.getElementById("loadPkg").onclick = async () => {
+  const pkg = prompt("Enter package name to install (PyPI):");
+  if (!pkg) return;
+  try {
+    await pyodide.runPythonAsync(`import micropip; await micropip.install("${pkg}")`);
+    printOut(`✅ Package "${pkg}" installed`);
+  } catch (e) {
+    printOut(`❌ Failed to install ${pkg}: ${e}`);
+  }
+};
 
-    // --- File Upload/Download ---
-    document.getElementById("openBtn").onclick = () => {
-      document.getElementById("fileInput").click();
-    };
-    document.getElementById("fileInput").onchange = e => {
-      const file = e.target.files[0];
-      file.text().then(txt => editor.setValue(txt));
-    };
-    document.getElementById("saveBtn").onclick = () => {
-      const blob = new Blob([editor.getValue()], {type: "text/plain"});
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "script.py";
-      a.click();
-    };
-  </script>
+// --- File Upload/Download ---
+document.getElementById("openBtn").onclick = () => document.getElementById("fileInput").click();
+document.getElementById("fileInput").onchange = e => {
+  const file = e.target.files[0];
+  file.text().then(txt => editor.setValue(txt));
+};
+document.getElementById("saveBtn").onclick = () => {
+  const blob = new Blob([editor.getValue()], {type: "text/plain"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "script.py";
+  a.click();
+};
+</script>
+
 </body>
 </html>
