@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Python Sandbox v4 </title>
+<title>Python Sandbox v4 - Resizable</title>
 
 <!-- Pyodide -->
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
@@ -26,7 +26,7 @@ body { margin:0; height:100vh; display:flex; flex-direction:column; background:#
 button { background:#282828; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; transition:0.2s; }
 button:hover { background:#3a3a3a; }
 input[type="file"] { display:none; }
-#sandbox { flex:1; display:flex; overflow:hidden; height:100%; }
+#sandbox { flex:1; display:flex; overflow:hidden; height: calc(100% - 50px); }
 #editor { overflow:auto; }
 #output { overflow:auto; background:#0b0b0b; padding:10px; white-space:pre-wrap; font-size:15px; }
 .error { color:#ff4c4c; cursor:pointer; text-decoration:underline dotted; }
@@ -61,10 +61,11 @@ Split(['#editor', '#output'], {
   sizes: [30, 70],
   minSize: [200, 300],
   gutterSize: 8,
-  cursor: 'col-resize'
+  cursor: 'col-resize',
+  onDrag: () => editor.refresh() // <-- refresh editor when resized
 });
 
-// --- Initialize CodeMirror with Python hint ---
+// --- Initialize CodeMirror ---
 const editor = CodeMirror(document.getElementById("editor"), {
   value:'print("Hello, world!")',
   mode:'python',
@@ -130,7 +131,6 @@ builtins.input = lambda prompt='': getInput()
 
   output.textContent = "Pyodide loaded. Input() and auto-completion ready.\n";
 }
-init();
 
 // --- Run code ---
 async function runCode(code=editor.getValue()){
@@ -144,50 +144,48 @@ async function runCode(code=editor.getValue()){
   status.textContent="";
 }
 
-// --- Run selection ---
-document.getElementById("runSel").onclick = ()=>{
-  const sel = editor.getSelection();
-  if(sel.trim()) runCode(sel); else runCode();
-};
-document.getElementById("run").onclick = ()=>runCode();
-
-// --- Format code ---
-document.getElementById("format").onclick = async ()=>{
-  if(!pyodide) return;
-  try{
-    await pyodide.runPythonAsync(`import micropip; await micropip.install("black")`);
-    const code = editor.getValue();
-    const formatted = await pyodide.runPythonAsync(`
+// --- Buttons event handlers ---
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("run").onclick = () => runCode();
+  document.getElementById("runSel").onclick = () => {
+    const sel = editor.getSelection();
+    runCode(sel.trim() ? sel : editor.getValue());
+  };
+  document.getElementById("format").onclick = async () => {
+    if(!pyodide) return;
+    try{
+      await pyodide.runPythonAsync(`import micropip; await micropip.install("black")`);
+      const code = editor.getValue();
+      const formatted = await pyodide.runPythonAsync(`
 from black import format_str, FileMode
 format_str("""${code.replace(/`/g,"\\`")}""", mode=FileMode())
 `);
-    editor.setValue(formatted);
-  } catch(e){ printOut("Formatter error: "+e); }
-};
+      editor.setValue(formatted);
+    } catch(e){ printOut("Formatter error: "+e); }
+  };
+  document.getElementById("loadPkg").onclick = async () => {
+    const pkg = prompt("Enter package name to install (PyPI):");
+    if(!pkg) return;
+    try{
+      await pyodide.runPythonAsync(`import micropip; await micropip.install("${pkg}")`);
+      printOut(\`✅ Package "\${pkg}" installed\`);
+    } catch(e){ printOut(\`❌ Failed: \${e}\`); }
+  };
+  document.getElementById("openBtn").onclick = () => document.getElementById("fileInput").click();
+  document.getElementById("fileInput").onchange = e=>{
+    const file = e.target.files[0];
+    file.text().then(txt=>editor.setValue(txt));
+  };
+  document.getElementById("saveBtn").onclick = () => {
+    const blob = new Blob([editor.getValue()],{type:"text/plain"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download="script.py";
+    a.click();
+  };
+});
 
-// --- Load custom package ---
-document.getElementById("loadPkg").onclick = async ()=>{
-  const pkg = prompt("Enter package name to install (PyPI):");
-  if(!pkg) return;
-  try{
-    await pyodide.runPythonAsync(`import micropip; await micropip.install("${pkg}")`);
-    printOut(\`✅ Package "\${pkg}" installed\`);
-  } catch(e){ printOut(\`❌ Failed: \${e}\`); }
-};
-
-// --- File upload/download ---
-document.getElementById("openBtn").onclick = ()=>document.getElementById("fileInput").click();
-document.getElementById("fileInput").onchange = e=>{
-  const file = e.target.files[0];
-  file.text().then(txt=>editor.setValue(txt));
-};
-document.getElementById("saveBtn").onclick = ()=>{
-  const blob = new Blob([editor.getValue()],{type:"text/plain"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download="script.py";
-  a.click();
-};
+init();
 </script>
 </body>
 </html>
