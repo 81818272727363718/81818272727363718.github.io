@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Python Sandbox v8</title>
+<title>Python Sandbox v5</title>
 
 <!-- Pyodide -->
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
@@ -18,137 +18,114 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/show-hint.min.css">
 
 <style>
+/* --- Global --- */
 body {
-  margin:0;
-  height:100vh;
-  display:flex;
-  flex-direction:column;
-  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background:#0f111a;
-  color:#fff;
-  overflow:hidden;
-  transition: background 0.3s;
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #0f111a;
+  color: #fff;
 }
 
-/* Toolbar */
+/* --- Toolbar --- */
 #toolbar {
   background: linear-gradient(90deg, #1e1f2a, #272936);
-  padding:8px;
-  display:flex;
-  align-items:center;
-  border-bottom:1px solid #333;
-  gap:8px;
-  flex-wrap:wrap;
-  transition: max-height 0.4s ease, opacity 0.4s ease, padding 0.4s ease;
-  overflow:hidden;
-  max-height:200px;
-  opacity:1;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #333;
+  gap: 8px;
+  flex-wrap: wrap;
+  transition: height 0.3s ease;
 }
 
 button {
-  background:#3a3b4d;
-  color:white;
-  border:none;
-  padding:8px 14px;
-  border-radius:8px;
-  cursor:pointer;
-  font-weight:500;
-  transition: 0.2s all ease;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  background: #3a3b4d;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s;
 }
+
 button:hover {
-  background:#505164;
-  transform: translateY(-2px);
+  background: #505164;
 }
 
-#status { margin-left:auto; font-size:14px; color:#bbb; }
-
-#toolbarToggle, #themeBtn, #toolbarRestore {
-  background:#2c2d3c;
-  border-radius:50%;
-  width:35px;
-  height:35px;
-  text-align:center;
-  line-height:35px;
-  cursor:pointer;
-  font-weight:bold;
-  margin-left:5px;
-  transition:0.3s all ease;
-}
-#toolbarToggle:hover, #themeBtn:hover, #toolbarRestore:hover {
-  background:#444;
-  transform: translateY(-2px);
+button.close-btn {
+  background: #ff4c4c;
 }
 
-/* Restore toolbar button */
-#toolbarRestore {
-  position:fixed;
-  top:10px;
-  left:10px;
-  z-index:50;
-  display:none;
+#status {
+  margin-left: auto;
+  font-size: 14px;
+  color: #bbb;
 }
 
-/* Theme panel */
-#themePanel {
-  position:absolute;
-  top:60px;
-  right:20px;
-  background:#222;
-  padding:12px;
-  border-radius:12px;
-  display:none;
-  z-index:10;
-  border:1px solid #444;
-  box-shadow:0 4px 12px rgba(0,0,0,0.5);
-  transition: all 0.3s ease;
+/* --- Collapsible Toolbar --- */
+#toolbarToggle {
+  background: #2c2d3c;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  line-height: 30px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-left: auto;
 }
-#themePanel label { display:block; margin:5px 0 2px; font-size:13px; }
-#themePanel input[type=color] { width:100%; height:30px; border:none; cursor:pointer; border-radius:6px; }
 
-/* Sandbox */
+/* --- Sandbox --- */
 #sandbox {
-  flex:1;
-  display:flex;
-  overflow:hidden;
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  border-top: 1px solid #333;
 }
 
-/* Editor */
+/* --- Editor --- */
 #editor {
-  width:35%;
-  overflow:auto;
-  border-right:5px solid #333;
-  transition:width 0.3s;
-  min-width:150px;
+  width: 35%;
+  overflow: auto;
+  border-right: 1px solid #333;
+  transition: width 0.3s ease;
 }
 
-/* Divider */
-#divider {
-  width:5px;
-  cursor:col-resize;
-  background:#333;
-  transition:background 0.2s;
-}
-#divider:hover { background:#555; }
-
-/* Output */
+/* --- Output --- */
 #output {
-  flex:1;
-  overflow:auto;
-  background:#0b0b0b;
-  padding:12px;
-  white-space:pre-wrap;
-  font-size:15px;
-  transition: background 0.3s;
+  flex: 1;
+  overflow: auto;
+  background: #0b0b0b;
+  padding: 12px;
+  white-space: pre-wrap;
+  font-size: 15px;
+  border-left: 1px solid #333;
 }
 
-/* Errors */
-.error { color:#ff6b6b; cursor:pointer; text-decoration:underline dotted; }
+/* --- Error styling --- */
+.error {
+  color: #ff6b6b;
+  cursor: pointer;
+  text-decoration: underline dotted;
+}
 
-/* Scrollbar */
-#output::-webkit-scrollbar, #editor::-webkit-scrollbar { width:10px; }
-#output::-webkit-scrollbar-thumb, #editor::-webkit-scrollbar-thumb { background:#444; border-radius:5px; }
-#output::-webkit-scrollbar-track, #editor::-webkit-scrollbar-track { background:#1a1a1a; }
+/* --- Smooth scrollbar --- */
+#output::-webkit-scrollbar, #editor::-webkit-scrollbar {
+  width: 10px;
+}
+
+#output::-webkit-scrollbar-thumb, #editor::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 5px;
+}
+
+#output::-webkit-scrollbar-track, #editor::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
 </style>
 </head>
 <body>
@@ -160,39 +137,26 @@ button:hover {
   <button id="loadPkg">📦 Load Package</button>
   <button id="openBtn">📂 Open</button>
   <button id="saveBtn">💾 Save</button>
-  <div id="themeBtn">🎨</div>
-  <span id="status">Loading...</span>
-  <div id="toolbarToggle">−</div>
-</div>
-
-<!-- Restore toolbar button -->
-<div id="toolbarRestore">☰</div>
-
-<!-- Theme panel -->
-<div id="themePanel">
-  <label>Background:</label><input type="color" id="bgColor" value="#0f111a">
-  <label>Editor:</label><input type="color" id="editorColor" value="#1e1f2a">
-  <label>Output:</label><input type="color" id="outputColor" value="#0b0b0b">
+  <input type="file" id="fileInput" accept=".py">
 </div>
 
 <div id="sandbox">
   <div id="editor"></div>
-  <div id="divider"></div>
   <pre id="output">Loading Pyodide...</pre>
 </div>
 
 <script>
-// --- Pyodide init ---
 let pyodide;
 const output = document.getElementById("output");
 const status = document.getElementById("status");
 
+// --- Initialize CodeMirror ---
 const editor = CodeMirror(document.getElementById("editor"), {
-  value: 'print("Hello, world!")',
-  mode: 'python',
-  theme: 'dracula',
-  lineNumbers: true,
-  indentUnit: 4,
+  value:'print("Hello, world!")',
+  mode:'python',
+  theme:'dracula',
+  lineNumbers:true,
+  indentUnit:4,
   extraKeys: {
     "Tab": cm => cm.replaceSelection(" ".repeat(4)),
     "Ctrl-Enter": ()=>runCode(),
@@ -200,9 +164,14 @@ const editor = CodeMirror(document.getElementById("editor"), {
   }
 });
 
-// Output helper
-function printOut(text) { output.textContent += text + "\n"; output.scrollTop = output.scrollHeight; }
-function showError(err) {
+// --- Output helper ---
+function printOut(text) {
+  output.textContent += text + "\n";
+  output.scrollTop = output.scrollHeight;
+}
+
+// --- Error helper ---
+function showError(err){
   const msg = err.toString();
   const lineMatch = msg.match(/line (\d+)/);
   if(lineMatch){
@@ -216,48 +185,59 @@ function showError(err) {
   printOut("");
 }
 
-// Load Pyodide
-async function init() {
+// --- Load Pyodide ---
+async function init(){
   pyodide = await loadPyodide();
   await pyodide.loadPackage(["micropip"]);
+  
   pyodide.globals.set("printOut", printOut);
-  pyodide.globals.set("getInput", ()=>prompt("Input:")||"");
+  pyodide.globals.set("getInput", () => prompt("Input:") || "");
+
   await pyodide.runPythonAsync(`
 import sys
 from pyodide.ffi import create_proxy
 import builtins
-printOut=create_proxy(printOut)
-getInput=create_proxy(getInput)
+
+printOut = create_proxy(printOut)
+getInput = create_proxy(getInput)
+
 class JSWriter:
     def write(self,s):
         if s.strip()!="": printOut(s)
     def flush(self): pass
-sys.stdout=JSWriter()
-sys.stderr=JSWriter()
-builtins.input=lambda prompt='': getInput()
+
+sys.stdout = JSWriter()
+sys.stderr = JSWriter()
+builtins.input = lambda prompt='': getInput()
   `);
+
   output.textContent = "Pyodide loaded. Input() and auto-completion ready.\n";
 }
 init();
 
 // --- Run code ---
-async function runCode(code=editor.getValue()) {
+async function runCode(code=editor.getValue()){
   if(!pyodide) return;
-  output.textContent = "";
-  status.textContent = "Running...";
-  try { const result = await pyodide.runPythonAsync(code); if(result!==undefined) printOut(result.toString()); }
-  catch(err){ showError(err); }
-  status.textContent = "";
+  output.textContent="";
+  status.textContent="Running...";
+  try{
+    const result = await pyodide.runPythonAsync(code);
+    if(result!==undefined) printOut(result.toString());
+  } catch(err){ showError(err); }
+  status.textContent="";
 }
 
-// --- Buttons ---
-document.getElementById("run").onclick = ()=>runCode();
-document.getElementById("runSel").onclick = ()=>{
+// --- Run selection ---
+document.getElementById("runSel").onclick = ()=> {
   const sel = editor.getSelection();
-  runCode(sel.trim()? sel : undefined);
+  if(sel.trim()) runCode(sel); else runCode();
 };
-document.getElementById("format").onclick = async ()=>{
-  try {
+document.getElementById("run").onclick = ()=>runCode();
+
+// --- Format code ---
+document.getElementById("format").onclick = async ()=> {
+  if(!pyodide) return;
+  try{
     await pyodide.runPythonAsync(`import micropip; await micropip.install("black")`);
     const code = editor.getValue();
     const formatted = await pyodide.runPythonAsync(`
@@ -267,59 +247,51 @@ format_str("""${code.replace(/`/g,"\\`")}""", mode=FileMode())
     editor.setValue(formatted);
   } catch(e){ printOut("Formatter error: "+e); }
 };
-document.getElementById("loadPkg").onclick = async ()=>{
-  const pkg = prompt("Enter package name (PyPI):");
+
+// --- Load custom package ---
+document.getElementById("loadPkg").onclick = async ()=> {
+  const pkg = prompt("Enter package name to install (PyPI):");
   if(!pkg) return;
-  try{ await pyodide.runPythonAsync(`import micropip; await micropip.install("${pkg}")`); printOut(`✅ Package "${pkg}" installed`); }
-  catch(e){ printOut(`❌ Failed: ${e}`); }
+  try{
+    await pyodide.runPythonAsync(`import micropip; await micropip.install("${pkg}")`);
+    printOut(`✅ Package "${pkg}" installed`);
+  } catch(e){ printOut(`❌ Failed: ${e}`); }
 };
 
-// File open/save
-const fileInput = document.getElementById("fileInput");
-document.getElementById("openBtn").onclick = ()=>fileInput.click();
-fileInput.onchange = e => e.target.files[0].text().then(txt=>editor.setValue(txt));
+// --- File upload/download ---
+document.getElementById("openBtn").onclick = ()=>document.getElementById("fileInput").click();
+document.getElementById("fileInput").onchange = e=>{
+  const file = e.target.files[0];
+  file.text().then(txt=>editor.setValue(txt));
+};
 document.getElementById("saveBtn").onclick = ()=>{
-  const blob = new Blob([editor.getValue()], {type:"text/plain"});
+  const blob = new Blob([editor.getValue()],{type:"text/plain"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "script.py";
+  a.download="script.py";
   a.click();
 };
 
-// Toolbar toggle
+// --- Toolbar toggle ---
 const toolbar = document.getElementById("toolbar");
 const toggle = document.getElementById("toolbarToggle");
-const restore = document.getElementById("toolbarRestore");
-toggle.onclick = ()=>{
-  toolbar.style.maxHeight = "0";
-  toolbar.style.opacity = "0";
-  toolbar.style.padding = "0";
-  setTimeout(()=>{ toolbar.style.display = "none"; restore.style.display = "block"; },400);
+let collapsed = false;
+toggle.onclick = () => {
+  collapsed = !collapsed;
+  if(collapsed){
+    toolbar.style.height = "40px";
+    Array.from(toolbar.children).forEach(c=>{
+      if(c.id !== "toolbarToggle") c.style.display = "none";
+    });
+    toggle.textContent = "+";
+  } else {
+    toolbar.style.height = "auto";
+    Array.from(toolbar.children).forEach(c=>{
+      c.style.display = "inline-flex";
+    });
+    toggle.textContent = "−";
+  }
 };
-restore.onclick = ()=>{
-  toolbar.style.display = "flex";
-  setTimeout(()=>{ toolbar.style.maxHeight="200px"; toolbar.style.opacity="1"; toolbar.style.padding="8px"; restore.style.display="none"; },10);
-};
-
-// Theme panel
-const themePanel = document.getElementById("themePanel");
-document.getElementById("themeBtn").onclick = ()=>themePanel.style.display = themePanel.style.display==="block"?"none":"block";
-document.getElementById("bgColor").oninput = e=>document.body.style.background = e.target.value;
-document.getElementById("editorColor").oninput = e=>editor.getWrapperElement().style.background = e.target.value;
-document.getElementById("outputColor").oninput = e=>output.style.background = e.target.value;
-
-// Resizable editor/output
-const divider = document.getElementById("divider");
-let isResizing=false;
-divider.addEventListener("mousedown",()=>isResizing=true);
-document.addEventListener("mousemove",e=>{
-  if(!isResizing) return;
-  let newWidth=e.clientX;
-  if(newWidth<150) newWidth=150;
-  if(newWidth>window.innerWidth-150) newWidth=window.innerWidth-150;
-  document.getElementById("editor").style.width=newWidth+"px";
-});
-document.addEventListener("mouseup",()=>isResizing=false);
 </script>
 </body>
 </html>
