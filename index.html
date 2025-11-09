@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Python Sandbox</title>
 
-  <!-- CodeMirror (for syntax highlighting) -->
+  <!-- CodeMirror for syntax highlighting -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
 
-  <!-- Pyodide (for running Python in browser) -->
+  <!-- Pyodide (Python in browser) -->
   <script src="https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js"></script>
 
   <style>
@@ -112,15 +112,27 @@
       }
 
       const outputEl = document.getElementById("output");
-      outputEl.textContent = "Running...\n";
+      outputEl.textContent = "";
+
+      // Capture stdout and stderr
+      let code = editor.getValue();
 
       try {
-        let code = editor.getValue();
-        let result = await pyodide.runPythonAsync(code);
-        outputEl.textContent = result === undefined ? "✅ Finished (no output)" : result;
-        outputEl.classList.remove("error");
+        pyodide.setStdout({
+          batched: (msg) => {
+            outputEl.textContent += msg;
+          },
+        });
+        pyodide.setStderr({
+          batched: (msg) => {
+            outputEl.textContent += "\n❌ " + msg;
+            outputEl.classList.add("error");
+          },
+        });
+
+        await pyodide.runPythonAsync(code);
       } catch (err) {
-        outputEl.textContent = "❌ Error:\n" + err;
+        outputEl.textContent += "\n❌ Error: " + err;
         outputEl.classList.add("error");
       }
     });
