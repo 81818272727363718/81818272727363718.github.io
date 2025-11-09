@@ -3,51 +3,114 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simple Button Page</title>
+  <title>Popup Example</title>
   <style>
     body {
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       height: 100vh;
-      background-color: #121212;
+      background-color: #0e0e0e;
       color: white;
       font-family: Arial, sans-serif;
+      margin: 0;
     }
 
     button {
-      padding: 10px 20px;
+      padding: 12px 24px;
       font-size: 16px;
       background-color: #1e90ff;
       border: none;
       border-radius: 8px;
       color: white;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: background-color 0.3s ease;
     }
 
     button:hover {
       background-color: #0b74da;
     }
 
-    #text {
-      margin-top: 20px;
-      font-size: 18px;
+    /* Popup background overlay */
+    .popup-overlay {
       display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+
+    /* Popup box */
+    .popup {
+      background-color: #1e1e1e;
+      padding: 20px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      text-align: center;
+      position: relative;
+      max-width: 300px;
+      animation: popIn 0.2s ease-out;
+    }
+
+    /* Close button (X) */
+    .close-btn {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    @keyframes popIn {
+      from {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
     }
   </style>
 </head>
 <body>
-  <button id="showTextBtn">Click Me</button>
-  <p id="text">Hello! You clicked the button 🎉</p>
+  <button id="openPopup">Show Message</button>
+
+  <!-- Popup structure -->
+  <div class="popup-overlay" id="popupOverlay">
+    <div class="popup">
+      <button class="close-btn" id="closePopup">&times;</button>
+      <h2>Hello!</h2>
+      <p>You clicked the button 🎉</p>
+    </div>
+  </div>
 
   <script>
-    const button = document.getElementById('showTextBtn');
-    const text = document.getElementById('text');
+    const openPopup = document.getElementById('openPopup');
+    const closePopup = document.getElementById('closePopup');
+    const popupOverlay = document.getElementById('popupOverlay');
 
-    button.addEventListener('click', () => {
-      text.style.display = 'block';
+    openPopup.addEventListener('click', () => {
+      popupOverlay.style.display = 'flex';
+    });
+
+    closePopup.addEventListener('click', () => {
+      popupOverlay.style.display = 'none';
+    });
+
+    // Optional: close popup if user clicks outside the box
+    popupOverlay.addEventListener('click', (event) => {
+      if (event.target === popupOverlay) {
+        popupOverlay.style.display = 'none';
+      }
     });
   </script>
 </body>
