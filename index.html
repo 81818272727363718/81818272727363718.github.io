@@ -1,115 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Popup Example</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Python Sandbox</title>
+
+  <!-- CodeMirror (for syntax highlighting) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+
+  <!-- Pyodide (for running Python in browser) -->
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js"></script>
+
   <style>
     body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: #0e0e0e;
-      color: white;
-      font-family: Arial, sans-serif;
+      background-color: #1e1e1e;
+      color: #ffffff;
+      font-family: "Consolas", "Courier New", monospace;
       margin: 0;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #editor-container, #output-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+    }
+
+    #editor {
+      flex: 1;
+      border: 1px solid #333;
+    }
+
+    #output {
+      flex: 1;
+      background: #111;
+      border: 1px solid #333;
+      padding: 10px;
+      overflow-y: auto;
+      white-space: pre-wrap;
     }
 
     button {
-      padding: 12px 24px;
-      font-size: 16px;
-      background-color: #1e90ff;
-      border: none;
-      border-radius: 8px;
+      background: #0078d7;
       color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 6px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      margin-top: 10px;
+      align-self: flex-start;
     }
 
     button:hover {
-      background-color: #0b74da;
+      background: #005fa3;
     }
 
-    /* Popup background overlay */
-    .popup-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
+    .error {
+      color: #ff5555;
+      font-weight: bold;
+    }
+
+    .CodeMirror {
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.7);
-      justify-content: center;
-      align-items: center;
-      z-index: 10;
-    }
-
-    /* Popup box */
-    .popup {
-      background-color: #1e1e1e;
-      padding: 20px 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-      text-align: center;
-      position: relative;
-      max-width: 300px;
-      animation: popIn 0.2s ease-out;
-    }
-
-    /* Close button (X) */
-    .close-btn {
-      position: absolute;
-      top: 8px;
-      right: 10px;
-      background: none;
-      border: none;
-      color: #fff;
-      font-size: 20px;
-      cursor: pointer;
-    }
-
-    @keyframes popIn {
-      from {
-        transform: scale(0.8);
-        opacity: 0;
-      }
-      to {
-        transform: scale(1);
-        opacity: 1;
-      }
+      font-size: 15px;
     }
   </style>
 </head>
 <body>
-  <button id="openPopup">Show Message</button>
+  <div id="editor-container">
+    <h3>Python Code</h3>
+    <textarea id="editor">print("Hello, world!")</textarea>
+    <button id="runBtn">Run ▶</button>
+  </div>
 
-  <!-- Popup structure -->
-  <div class="popup-overlay" id="popupOverlay">
-    <div class="popup">
-      <button class="close-btn" id="closePopup">&times;</button>
-      <h2>Hello!</h2>
-      <p>You clicked the button 🎉</p>
-    </div>
+  <div id="output-container">
+    <h3>Output</h3>
+    <pre id="output">Waiting for code...</pre>
   </div>
 
   <script>
-    const openPopup = document.getElementById('openPopup');
-    const closePopup = document.getElementById('closePopup');
-    const popupOverlay = document.getElementById('popupOverlay');
-
-    openPopup.addEventListener('click', () => {
-      popupOverlay.style.display = 'flex';
+    let editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
+      mode: "python",
+      theme: "dracula",
+      lineNumbers: true,
+      indentUnit: 4,
+      autoCloseBrackets: true,
     });
 
-    closePopup.addEventListener('click', () => {
-      popupOverlay.style.display = 'none';
-    });
+    let pyodideReady = false;
+    let pyodide;
 
-    // Optional: close popup if user clicks outside the box
-    popupOverlay.addEventListener('click', (event) => {
-      if (event.target === popupOverlay) {
-        popupOverlay.style.display = 'none';
+    async function loadPyodideAndPackages() {
+      document.getElementById("output").textContent = "Loading Python environment...";
+      pyodide = await loadPyodide();
+      pyodideReady = true;
+      document.getElementById("output").textContent = "Ready! Write Python code and click Run ▶";
+    }
+
+    loadPyodideAndPackages();
+
+    document.getElementById("runBtn").addEventListener("click", async () => {
+      if (!pyodideReady) {
+        alert("Python is still loading, please wait...");
+        return;
+      }
+
+      const outputEl = document.getElementById("output");
+      outputEl.textContent = "Running...\n";
+
+      try {
+        let code = editor.getValue();
+        let result = await pyodide.runPythonAsync(code);
+        outputEl.textContent = result === undefined ? "✅ Finished (no output)" : result;
+        outputEl.classList.remove("error");
+      } catch (err) {
+        outputEl.textContent = "❌ Error:\n" + err;
+        outputEl.classList.add("error");
       }
     });
   </script>
