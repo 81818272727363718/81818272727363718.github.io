@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Python Sandbox v4 - Resizable</title>
+<title>Python Sandbox v5</title>
 
 <!-- Pyodide -->
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
@@ -17,20 +17,115 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/show-hint.min.css">
 
-<!-- Split.js -->
-<script src="https://cdn.jsdelivr.net/npm/split.js/dist/split.min.js"></script>
-
 <style>
-body { margin:0; height:100vh; display:flex; flex-direction:column; background:#121212; color:white; font-family: monospace;}
-#toolbar { background:#1e1e1e; padding:8px; display:flex; gap:8px; align-items:center; border-bottom:1px solid #333; }
-button { background:#282828; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; transition:0.2s; }
-button:hover { background:#3a3a3a; }
-input[type="file"] { display:none; }
-#sandbox { flex:1; display:flex; overflow:hidden; height: calc(100% - 50px); }
-#editor { overflow:auto; }
-#output { overflow:auto; background:#0b0b0b; padding:10px; white-space:pre-wrap; font-size:15px; }
-.error { color:#ff4c4c; cursor:pointer; text-decoration:underline dotted; }
-.gutter { background-color: #333; cursor: col-resize; width: 8px; }
+/* --- Global --- */
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #0f111a;
+  color: #fff;
+}
+
+/* --- Toolbar --- */
+#toolbar {
+  background: linear-gradient(90deg, #1e1f2a, #272936);
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #333;
+  gap: 8px;
+  flex-wrap: wrap;
+  transition: height 0.3s ease;
+}
+
+button {
+  background: #3a3b4d;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #505164;
+}
+
+button.close-btn {
+  background: #ff4c4c;
+}
+
+#status {
+  margin-left: auto;
+  font-size: 14px;
+  color: #bbb;
+}
+
+/* --- Collapsible Toolbar --- */
+#toolbarToggle {
+  background: #2c2d3c;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  line-height: 30px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-left: auto;
+}
+
+/* --- Sandbox --- */
+#sandbox {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  border-top: 1px solid #333;
+}
+
+/* --- Editor --- */
+#editor {
+  width: 35%;
+  overflow: auto;
+  border-right: 1px solid #333;
+  transition: width 0.3s ease;
+}
+
+/* --- Output --- */
+#output {
+  flex: 1;
+  overflow: auto;
+  background: #0b0b0b;
+  padding: 12px;
+  white-space: pre-wrap;
+  font-size: 15px;
+  border-left: 1px solid #333;
+}
+
+/* --- Error styling --- */
+.error {
+  color: #ff6b6b;
+  cursor: pointer;
+  text-decoration: underline dotted;
+}
+
+/* --- Smooth scrollbar --- */
+#output::-webkit-scrollbar, #editor::-webkit-scrollbar {
+  width: 10px;
+}
+
+#output::-webkit-scrollbar-thumb, #editor::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 5px;
+}
+
+#output::-webkit-scrollbar-track, #editor::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
 </style>
 </head>
 <body>
@@ -43,7 +138,8 @@ input[type="file"] { display:none; }
   <button id="openBtn">📂 Open</button>
   <button id="saveBtn">💾 Save</button>
   <input type="file" id="fileInput" accept=".py">
-  <span id="status"></span>
+  <span id="status">Loading...</span>
+  <div id="toolbarToggle">−</div>
 </div>
 
 <div id="sandbox">
@@ -55,15 +151,6 @@ input[type="file"] { display:none; }
 let pyodide;
 const output = document.getElementById("output");
 const status = document.getElementById("status");
-
-// --- Initialize Split.js for resizable panes ---
-Split(['#editor', '#output'], {
-  sizes: [30, 70],
-  minSize: [200, 300],
-  gutterSize: 8,
-  cursor: 'col-resize',
-  onDrag: () => editor.refresh() // <-- refresh editor when resized
-});
 
 // --- Initialize CodeMirror ---
 const editor = CodeMirror(document.getElementById("editor"), {
@@ -105,11 +192,9 @@ async function init(){
   pyodide = await loadPyodide();
   await pyodide.loadPackage(["micropip"]);
   
-  // Expose JS functions to Python
   pyodide.globals.set("printOut", printOut);
   pyodide.globals.set("getInput", () => prompt("Input:") || "");
 
-  // Redirect stdout/stderr and input()
   await pyodide.runPythonAsync(`
 import sys
 from pyodide.ffi import create_proxy
@@ -125,12 +210,12 @@ class JSWriter:
 
 sys.stdout = JSWriter()
 sys.stderr = JSWriter()
-
 builtins.input = lambda prompt='': getInput()
   `);
 
   output.textContent = "Pyodide loaded. Input() and auto-completion ready.\n";
 }
+init();
 
 // --- Run code ---
 async function runCode(code=editor.getValue()){
@@ -144,48 +229,71 @@ async function runCode(code=editor.getValue()){
   status.textContent="";
 }
 
-// --- Buttons event handlers ---
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("run").onclick = () => runCode();
-  document.getElementById("runSel").onclick = () => {
-    const sel = editor.getSelection();
-    runCode(sel.trim() ? sel : editor.getValue());
-  };
-  document.getElementById("format").onclick = async () => {
-    if(!pyodide) return;
-    try{
-      await pyodide.runPythonAsync(`import micropip; await micropip.install("black")`);
-      const code = editor.getValue();
-      const formatted = await pyodide.runPythonAsync(`
+// --- Run selection ---
+document.getElementById("runSel").onclick = ()=> {
+  const sel = editor.getSelection();
+  if(sel.trim()) runCode(sel); else runCode();
+};
+document.getElementById("run").onclick = ()=>runCode();
+
+// --- Format code ---
+document.getElementById("format").onclick = async ()=> {
+  if(!pyodide) return;
+  try{
+    await pyodide.runPythonAsync(`import micropip; await micropip.install("black")`);
+    const code = editor.getValue();
+    const formatted = await pyodide.runPythonAsync(`
 from black import format_str, FileMode
 format_str("""${code.replace(/`/g,"\\`")}""", mode=FileMode())
 `);
-      editor.setValue(formatted);
-    } catch(e){ printOut("Formatter error: "+e); }
-  };
-  document.getElementById("loadPkg").onclick = async () => {
-    const pkg = prompt("Enter package name to install (PyPI):");
-    if(!pkg) return;
-    try{
-      await pyodide.runPythonAsync(`import micropip; await micropip.install("${pkg}")`);
-      printOut(\`✅ Package "\${pkg}" installed\`);
-    } catch(e){ printOut(\`❌ Failed: \${e}\`); }
-  };
-  document.getElementById("openBtn").onclick = () => document.getElementById("fileInput").click();
-  document.getElementById("fileInput").onchange = e=>{
-    const file = e.target.files[0];
-    file.text().then(txt=>editor.setValue(txt));
-  };
-  document.getElementById("saveBtn").onclick = () => {
-    const blob = new Blob([editor.getValue()],{type:"text/plain"});
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download="script.py";
-    a.click();
-  };
-});
+    editor.setValue(formatted);
+  } catch(e){ printOut("Formatter error: "+e); }
+};
 
-init();
+// --- Load custom package ---
+document.getElementById("loadPkg").onclick = async ()=> {
+  const pkg = prompt("Enter package name to install (PyPI):");
+  if(!pkg) return;
+  try{
+    await pyodide.runPythonAsync(`import micropip; await micropip.install("${pkg}")`);
+    printOut(`✅ Package "${pkg}" installed`);
+  } catch(e){ printOut(`❌ Failed: ${e}`); }
+};
+
+// --- File upload/download ---
+document.getElementById("openBtn").onclick = ()=>document.getElementById("fileInput").click();
+document.getElementById("fileInput").onchange = e=>{
+  const file = e.target.files[0];
+  file.text().then(txt=>editor.setValue(txt));
+};
+document.getElementById("saveBtn").onclick = ()=>{
+  const blob = new Blob([editor.getValue()],{type:"text/plain"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download="script.py";
+  a.click();
+};
+
+// --- Toolbar toggle ---
+const toolbar = document.getElementById("toolbar");
+const toggle = document.getElementById("toolbarToggle");
+let collapsed = false;
+toggle.onclick = () => {
+  collapsed = !collapsed;
+  if(collapsed){
+    toolbar.style.height = "40px";
+    Array.from(toolbar.children).forEach(c=>{
+      if(c.id !== "toolbarToggle") c.style.display = "none";
+    });
+    toggle.textContent = "+";
+  } else {
+    toolbar.style.height = "auto";
+    Array.from(toolbar.children).forEach(c=>{
+      c.style.display = "inline-flex";
+    });
+    toggle.textContent = "−";
+  }
+};
 </script>
 </body>
 </html>
