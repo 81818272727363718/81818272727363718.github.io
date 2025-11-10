@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Python Sandbox v5 — Dark Neon Glass</title>
+<title>Python Sandbox v5 — Floating Panels + ChatGPT</title>
 
 <!-- Pyodide -->
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
@@ -19,408 +19,228 @@
 
 <style>
 :root{
-  --bg-1: #081123; /* deep navy */
-  --bg-2: #0e1020; /* dark panel */
-  --glass: rgba(255,255,255,0.06);
-  --accent: 160, 80, 255; /* purple (rgb without alpha) */
+  --bg-1: #081123;
+  --accent: 160, 80, 255;
+  --glass-blur: 12px;
   --accent-hex: #A050FF;
-  --glass-border: rgba(255,255,255,0.06);
-  --glass-blur: 10px;
 }
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
-body{
-  background: radial-gradient(1200px 600px at 10% 10%, rgba(160,80,255,0.12), transparent),
-              radial-gradient(900px 400px at 90% 90%, rgba(0,210,255,0.06), transparent),
-              linear-gradient(180deg,var(--bg-1), #02030a);
-  color: #e9eef8;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-  overflow:hidden;
+html,body{height:100%;margin:0;font-family:Inter, sans-serif;background:linear-gradient(180deg,var(--bg-1),#02030a);color:#e9eef8;overflow:hidden}
+
+/* Floating panel common style */
+.fpanel{
+  position:absolute;background:rgba(255,255,255,0.03);backdrop-filter:blur(var(--glass-blur));border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:12px;box-shadow:0 12px 40px rgba(0,0,0,0.6);overflow:hidden;cursor:move;
 }
-/* floating container centered */
-.app {
-  position: absolute;
-  inset: 3vh 3vw 3vh 3vw;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  gap: 18px;
-  align-items:start;
-}
-.header {
-  display:flex;align-items:center;gap:12px;
-}
-.brand {
-  display:flex;gap:12px;align-items:center;
-}
-.logo {
-  width:48px;height:48px;border-radius:12px;
-  background: linear-gradient(135deg, rgba(var(--accent),0.18), rgba(0,210,255,0.06));
-  box-shadow: 0 6px 30px rgba(var(--accent),0.12), inset 0 1px 0 rgba(255,255,255,0.04);
-  display:flex;align-items:center;justify-content:center;font-weight:700;color:transparent;
-  -webkit-backdrop-filter: blur(var(--glass-blur));backdrop-filter: blur(var(--glass-blur));
-}
-.title { font-size:18px;font-weight:600; }
-.subtitle { font-size:12px; color:rgba(255,255,255,0.6); }
+.fpanel .header{font-weight:600;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+.fpanel .closeBtn{cursor:pointer;font-weight:bold;color:var(--accent-hex)}
+.fpanel pre{background:transparent;overflow:auto;height:calc(100% - 32px);white-space:pre-wrap}
 
-/* floating toolbar (compact) */
-.toolbar {
-  margin-left:auto; display:flex;gap:8px;align-items:center;
-}
-.tool-btn {
-  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-  border:1px solid rgba(255,255,255,0.04);
-  padding:8px 12px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
-  box-shadow: 0 6px 20px rgba(8,8,12,0.6);
-  transition:transform .18s ease, box-shadow .18s ease;
-}
-.tool-btn:hover{ transform:translateY(-4px); box-shadow: 0 12px 40px rgba(var(--accent),0.12); }
-.tool-ico { width:16px; height:16px; opacity:0.95; filter: drop-shadow(0 3px 8px rgba(var(--accent),0.18)); }
+/* Main output panel */
+#outputPanel{width:48%;height:60%;right:4%;bottom:4%}
+#outputPanel pre{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Courier New,monospace;font-size:14px}
 
-/* main content area with glass panels */
-.workspace {
-  display:grid; grid-template-columns: 40% 1fr; gap:18px; height: calc(100% - 72px);
-}
-.panel {
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  border-radius:14px; padding:12px; overflow:hidden; position:relative;
-  border: 1px solid var(--glass-border);
-  -webkit-backdrop-filter: blur(var(--glass-blur)); backdrop-filter: blur(var(--glass-blur));
-  box-shadow: 0 8px 40px rgba(2,4,8,0.6);
-}
-.panel .header-row{ display:flex;align-items:center;justify-content:space-between;padding:6px 8px 12px 8px}
-.panel .panel-title{font-weight:600}
-.panel .panel-sub{font-size:12px;color:rgba(255,255,255,0.6)}
+/* Tabbed Editor */
+#editorPanel{width:48%;height:60%;left:4%;bottom:4%}
+.CodeMirror{height:100%;border-radius:8px}
+.tabBar{display:flex;gap:6px;margin-bottom:6px}
+.tabBar .tab{padding:4px 10px;border-radius:6px;background:rgba(255,255,255,0.02);cursor:pointer;transition:0.2s}
+.tabBar .tab.active{background:rgba(var(--accent),0.12);color:#fff;font-weight:600}
 
-/* editor specifics */
-#editor { height: calc(100% - 54px); border-radius:10px; overflow:auto; }
-.CodeMirror { height:100%; font-size:13px; border-radius:8px }
+/* File Explorer */
+#fileExplorer{width:220px;height:320px;top:10%;left:2%}
+#fileExplorer ul{list-style:none;padding:0;margin:0;max-height:250px;overflow:auto}
+#fileExplorer li{padding:4px 6px;border-radius:6px;cursor:pointer}
+#fileExplorer li:hover{background:rgba(var(--accent),0.12)}
+#fileExplorer input{width:100%;margin-top:6px;padding:4px;border-radius:6px;border:none}
 
-/* output */
-#output { height: calc(100% - 54px); background:transparent; border-radius:8px; padding:12px; overflow:auto; white-space:pre-wrap; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, 'Courier New', monospace; }
-.output-line { color: #cfe8ff }
-.output-err { color:#ffb3b3 }
+/* Variable Inspector modal */
+#varInspector{width:320px;height:360px;top:20%;right:10%;display:none;flex-direction:column}
+#varInspector h4{margin:0 0 8px 0;font-size:14px}
+#varInspector pre{flex:1;overflow:auto}
+#varInspector .closeBtn{cursor:pointer;align-self:flex-end;font-weight:bold;color:var(--accent-hex)}
 
-/* vertical splitter */
-.splitter { width:12px; cursor:col-resize; display:flex; align-items:center; justify-content:center; }
-.splitter .grip { width:3px; height:40px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(var(--accent),0.12)); border-radius:4px; }
+/* Discord Webhook panel */
+#discordPanel{width:280px;height:120px;top:5%;right:4%;display:none;flex-direction:column}
+#discordPanel label,input{margin:2px 0}
 
-/* bottom mini controls */
-.bottom-controls{ position:absolute; left:12px; bottom:12px; display:flex;gap:8px }
-.small-btn{ padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.03); cursor:pointer }
-.small-btn:hover{ transform:translateY(-3px) }
+/* ChatGPT panel */
+#chatPanel{width:360px;height:400px;top:10%;right:2%;display:none;flex-direction:column}
+#chatPanel textarea{width:100%;height:100px;border-radius:6px;padding:6px;margin-bottom:6px;background:rgba(255,255,255,0.05);border:none;color:#fff}
+#chatPanel pre{flex:1;overflow:auto;background:rgba(255,255,255,0.03);border-radius:6px;padding:6px;white-space:pre-wrap;}
 
-/* floating color customizer */
-.customizer{ position: absolute; right:12px; bottom:12px; padding:10px; border-radius:12px; width:230px; background:linear-gradient(180deg, rgba(20,20,30,0.7), rgba(8,8,12,0.55)); border:1px solid rgba(255,255,255,0.04); }
-.customizer h4{ margin:0 0 8px 0; font-size:13px }
-.color-row{ display:flex; gap:8px; align-items:center }
-input[type=color]{ width:42px; height:36px; border-radius:8px; border:none; padding:0 }
-.range{ width:100% }
-
-/* responsive */
-@media (max-width:900px){
-  .workspace{ grid-template-columns: 1fr; grid-auto-rows: 50% 50% }
-  .splitter{ display:none }
-}
-
-/* small animated glow around focused panel */
-.panel.focused{ box-shadow: 0 18px 60px rgba(var(--accent),0.12), 0 6px 24px rgba(0,0,0,0.7); border-color: rgba(var(--accent),0.16) }
-
-/* hidden toolbar state (makes top area go away cleanly) */
-.header.collapsed{ transform: translateY(-60px); opacity:0; pointer-events:none; transition:all .3s cubic-bezier(.2,.9,.3,1) }
-
+/* Floating buttons */
+.floatingBtn{position:fixed;bottom:12px;left:12px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);cursor:pointer;transition:0.2s}
+.floatingBtn:hover{transform:translateY(-3px)}
 </style>
 </head>
 <body>
-<div class="app">
-  <div class="header" id="mainHeader">
-    <div class="brand">
-      <div class="logo">Py</div>
-      <div>
-        <div class="title">Python Sandbox v5</div>
-        <div class="subtitle">Dark Neon Glass — Pyodide + CodeMirror</div>
-      </div>
-    </div>
 
-    <div class="toolbar" id="toolbar">
-      <button class="tool-btn" id="run"><svg class="tool-ico" viewBox="0 0 24 24" fill="none"><path d="M5 3v18l15-9L5 3z" fill="white"/></svg> Run</button>
-      <button class="tool-btn" id="runSel">⤷ Sel</button>
-      <button class="tool-btn" id="format">Format</button>
-      <button class="tool-btn" id="loadPkg">Install</button>
-      <button class="tool-btn" id="openBtn">Open</button>
-      <button class="tool-btn" id="saveBtn">Save</button>
-      <div style="width:8px"></div>
-      <button class="tool-btn" id="toggleHeader">Hide Top</button>
-    </div>
-  </div>
-
-  <div class="workspace">
-    <div class="panel" id="leftPanel">
-      <div class="header-row">
-        <div><div class="panel-title">Editor</div><div class="panel-sub">Write Python — smart autocomplete, run with Ctrl+Enter</div></div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <button class="small-btn" id="editorThemeBtn">Theme</button>
-        </div>
-      </div>
-      <div id="editor"></div>
-      <div class="bottom-controls">
-        <button class="small-btn" id="openFileBtn">📂</button>
-        <button class="small-btn" id="saveFileBtn">💾</button>
-        <input type="file" id="fileInput" accept=".py" style="display:none">
-      </div>
-    </div>
-
-    <div class="splitter" id="splitter"><div class="grip"></div></div>
-
-    <div class="panel" id="rightPanel">
-      <div class="header-row">
-        <div><div class="panel-title">Output</div><div class="panel-sub">Program output, errors, and logs</div></div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <div id="status" class="panel-sub">Loading...</div>
-        </div>
-      </div>
-      <pre id="output">Loading Pyodide...</pre>
-      <div class="bottom-controls" style="right:12px; left:auto;">
-        <button class="small-btn" id="clearOut">Clear</button>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="customizer" id="customizer">
-    <h4>Customize Accent</h4>
-    <div class="color-row">
-      <input type="color" id="accentPicker" value="#A050FF">
-      <div style="flex:1">
-        <label style="font-size:12px;color:rgba(255,255,255,0.7)">Intensity</label>
-        <input type="range" min="40" max="220" value="160" id="accentVal" class="range">
-      </div>
-    </div>
-    <div style="height:8px"></div>
-    <div style="display:flex;gap:8px">
-      <button class="small-btn" id="resetAccent">Reset</button>
-      <button class="small-btn" id="toggleCustomizer">Close</button>
-    </div>
-  </div>
+<!-- Editor Panel -->
+<div class="fpanel" id="editorPanel">
+  <div class="header">Editor <span class="closeBtn" onclick="editorPanel.style.display='none'">✖</span></div>
+  <div class="tabBar" id="tabBar"></div>
+  <div id="editor"></div>
 </div>
+
+<!-- Output Panel -->
+<div class="fpanel" id="outputPanel">
+  <div class="header">Output <span class="closeBtn" onclick="outputPanel.style.display='none'">✖</span></div>
+  <pre id="output">Loading Pyodide...</pre>
+</div>
+
+<!-- ChatGPT Panel -->
+<div class="fpanel" id="chatPanel">
+  <div class="header">ChatGPT <span class="closeBtn" onclick="chatPanel.style.display='none'">✖</span></div>
+  <textarea id="chatInput" placeholder="Ask ChatGPT..."></textarea>
+  <button onclick="sendChat()">Send</button>
+  <pre id="chatOutput"></pre>
+</div>
+
+<!-- File Explorer -->
+<div class="fpanel" id="fileExplorer">
+  <div class="header">Files <span class="closeBtn" onclick="fileExplorer.style.display='none'">✖</span></div>
+  <ul id="fileList"></ul>
+  <input type="text" id="newFileName" placeholder="New file name">
+  <button onclick="createFile()">Create</button>
+</div>
+
+<!-- Variable Inspector -->
+<div class="fpanel" id="varInspector" style="display:none;flex">
+  <div class="header">Variables <span class="closeBtn" onclick="varInspector.style.display='none'">✖</span></div>
+  <pre id="varsOut">Variables will appear here</pre>
+</div>
+
+<!-- Discord Webhook Panel -->
+<div class="fpanel" id="discordPanel" style="display:none;flex">
+  <div class="header">Discord Webhook <span class="closeBtn" onclick="discordPanel.style.display='none'">✖</span></div>
+  <label>Webhook URL:</label>
+  <input type="text" id="webhookURL" placeholder="https://discord.com/api/webhooks/...">
+  <label><input type="checkbox" id="discordToggle"> Enable logging</label>
+</div>
+
+<!-- Floating Buttons -->
+<button class="floatingBtn" onclick="editorPanel.style.display='flex'">Editor</button>
+<button class="floatingBtn" style="left:120px" onclick="outputPanel.style.display='flex'">Output</button>
+<button class="floatingBtn" style="left:230px" onclick="fileExplorer.style.display='flex'">Files</button>
+<button class="floatingBtn" style="left:350px" onclick="varInspector.style.display='flex'">Variables</button>
+<button class="floatingBtn" style="left:480px" onclick="discordPanel.style.display='flex'">Discord</button>
+<button class="floatingBtn" style="left:600px" onclick="chatPanel.style.display='flex'">ChatGPT</button>
 
 <script>
 // -----------------------------
-// Basic state + helpers
-// -----------------------------
-let pyodide = null;
-const output = document.getElementById('output');
-const status = document.getElementById('status');
-
-function appendOut(txt, cls){
-  const line = document.createElement('div');
-  line.textContent = txt;
-  line.className = cls || 'output-line';
-  output.appendChild(line);
-  output.scrollTop = output.scrollHeight;
-}
-
-function clearOut(){ output.textContent = ''; }
-
-// -----------------------------
-// Initialize CodeMirror
+// CodeMirror
 // -----------------------------
 const editor = CodeMirror(document.getElementById('editor'), {
-  value: `# Hello — Python Sandbox v5\nprint('Hello, world!')`,
-  mode: 'python', theme: 'dracula', lineNumbers: true, indentUnit: 4,
-  extraKeys: {
-    'Tab': cm => cm.replaceSelection(' '.repeat(4)),
-    'Ctrl-Enter': () => runCode(),
-    'Ctrl-Space': 'autocomplete'
-  }
+  value: `# Floating Panels Python Sandbox\nprint('Hello World')`,
+  mode:'python',theme:'dracula',lineNumbers:true,indentUnit:4,
+  extraKeys:{'Tab':cm=>cm.replaceSelection(' '.repeat(4)),'Ctrl-Enter':()=>runCode(),'Ctrl-Space':'autocomplete'}
 });
 
 // -----------------------------
-// Pyodide initialization
+// File Tabs
 // -----------------------------
-async function initPyodide(){
-  status.textContent = 'Loading Pyodide...';
-  pyodide = await loadPyodide();
-  await pyodide.loadPackage(['micropip']);
-  pyodide.globals.set('appendOut', text => appendOut(text));
-  pyodide.globals.set('getInput', () => prompt('Input:') || '');
+let files = {}, currentFile = 'main.py';
+function createFile(){
+  const name = document.getElementById('newFileName').value.trim();
+  if(!name) return;
+  files[name]='';
+  updateFileList();
+}
+function updateFileList(){
+  const ul = document.getElementById('fileList'); ul.innerHTML='';
+  for(let f in files){
+    const li=document.createElement('li'); li.textContent=f; li.onclick=()=>{ loadFile(f); }; ul.appendChild(li);
+  }
+  updateTabs();
+}
+function loadFile(name){
+  saveCurrentFile(); currentFile=name; editor.setValue(files[name]); updateTabs();
+}
+function saveCurrentFile(){ files[currentFile]=editor.getValue(); }
+function updateTabs(){
+  const tabBar=document.getElementById('tabBar'); tabBar.innerHTML='';
+  for(let f in files){
+    const t=document.createElement('div'); t.className='tab'+(f===currentFile?' active':''); t.textContent=f; t.onclick=()=>loadFile(f); tabBar.appendChild(t);
+  }
+}
+files[currentFile]=''; updateFileList();
 
+// -----------------------------
+// Pyodide Init
+// -----------------------------
+let pyodide=null;
+const output=document.getElementById('output');
+const varsOut=document.getElementById('varsOut');
+async function initPyodide(){
+  output.textContent='Loading Pyodide...';
+  pyodide=await loadPyodide();
+  await pyodide.loadPackage(['micropip']);
+  pyodide.globals.set('appendOut', txt=>{ output.textContent+=txt+'\n'; });
+  pyodide.globals.set('getInput', ()=>prompt('Input:')||'');
   await pyodide.runPythonAsync(`
 import sys
 from pyodide.ffi import create_proxy
-appendOut = create_proxy(appendOut)
-getInput = create_proxy(getInput)
+appendOut=create_proxy(appendOut)
+getInput=create_proxy(getInput)
 class JSWriter:
     def write(self,s):
         if s and str(s).strip(): appendOut(str(s))
     def flush(self): pass
-sys.stdout = JSWriter()
-sys.stderr = JSWriter()
+sys.stdout=JSWriter()
+sys.stderr=JSWriter()
 import builtins
-builtins.input = lambda prompt='': getInput()
+builtins.input=lambda prompt='':getInput()
   `);
-  status.textContent = 'Ready';
-  output.textContent = 'Pyodide loaded. Use Run to execute the code.\n';
+  output.textContent='Pyodide loaded.\n';
 }
 initPyodide();
 
 // -----------------------------
-// Run code
+// Run code + Variables
 // -----------------------------
-async function runCode(code){
-  if(!pyodide) return;
-  clearOut();
-  status.textContent = 'Running...';
+async function runCode(){
+  saveCurrentFile(); output.textContent=''; varsOut.textContent='';
   try{
-    const src = code || editor.getValue();
-    const result = await pyodide.runPythonAsync(src);
-    if(result !== undefined) appendOut(String(result));
-  } catch(err){ appendOut(err.toString(), 'output-err'); }
-  status.textContent = 'Ready';
+    await pyodide.runPythonAsync(editor.getValue());
+    const vars=await pyodide.runPythonAsync(`{k:v for k,v in globals().items() if not k.startswith('_') and k not in ['sys','appendOut','getInput','JSWriter','builtins']}`);
+    window.varsSnapshot=vars;
+  }catch(e){ output.textContent+=e+'\n'; }
 }
-
-document.getElementById('run').addEventListener('click', ()=> runCode());
-document.getElementById('runSel').addEventListener('click', ()=> {
-  const sel = editor.getSelection(); runCode(sel || editor.getValue());
-});
+window.showVars=()=>{ if(window.varsSnapshot){ varsOut.textContent=JSON.stringify(window.varsSnapshot,null,2); varInspector.style.display='flex'; } }
 
 // -----------------------------
-// Format with black (uses micropip)
+// ChatGPT Integration
 // -----------------------------
-document.getElementById('format').addEventListener('click', async ()=>{
-  if(!pyodide) return;
-  status.textContent = 'Formatting...';
+let chatApiKey = '';
+async function sendChat(){
+  if(!chatApiKey){
+    chatApiKey = prompt("Enter your OpenAI API Key (sk-...)");
+    if(!chatApiKey) return;
+  }
+  const input = document.getElementById('chatInput').value.trim();
+  if(!input) return;
+  const out = document.getElementById('chatOutput');
+  out.textContent += "> " + input + "\n";
   try{
-    await pyodide.runPythonAsync(`import micropip; await micropip.install('black')`);
-    const code = editor.getValue();
-    const formatted = await pyodide.runPythonAsync(`from black import format_str, FileMode\nformat_str('''${code.replace(/`/g,'`')}''' , mode=FileMode())`);
-    editor.setValue(formatted);
-  } catch(e){ appendOut('Formatter error: '+e, 'output-err'); }
-  status.textContent = 'Ready';
-});
-
-// -----------------------------
-// Install packages
-// -----------------------------
-document.getElementById('loadPkg').addEventListener('click', async ()=>{
-  const pkg = prompt('Enter package name to install (PyPI):');
-  if(!pkg) return;
-  status.textContent = 'Installing...';
-  try{
-    await pyodide.runPythonAsync(`import micropip; await micropip.install('${pkg}')`);
-    appendOut(`✅ Package ${pkg} installed`);
-  } catch(e){ appendOut('❌ Failed: '+e, 'output-err'); }
-  status.textContent = 'Ready';
-});
-
-// -----------------------------
-// File open / save
-// -----------------------------
-const fileInput = document.getElementById('fileInput');
-fileInput.addEventListener('change', e=>{
-  const file = e.target.files[0]; if(!file) return;
-  file.text().then(txt=> editor.setValue(txt));
-});
-
-document.getElementById('openBtn').addEventListener('click', ()=> fileInput.click());
-
-document.getElementById('saveBtn').addEventListener('click', ()=>{
-  const blob = new Blob([editor.getValue()],{type:'text/plain'});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'script.py'; a.click();
-});
-
-document.getElementById('openFileBtn').addEventListener('click', ()=> fileInput.click());
-document.getElementById('saveFileBtn').addEventListener('click', ()=> document.getElementById('saveBtn').click());
-
-// -----------------------------
-// Clear output
-// -----------------------------
-document.getElementById('clearOut').addEventListener('click', clearOut);
-
-// -----------------------------
-// Splitter (resizable panels)
-// -----------------------------
-const splitter = document.getElementById('splitter');
-const leftPanel = document.getElementById('leftPanel');
-const workspace = document.querySelector('.workspace');
-let dragging = false;
-splitter.addEventListener('mousedown', e=>{ dragging = true; document.body.style.cursor='col-resize'; });
-window.addEventListener('mouseup', ()=>{ dragging=false; document.body.style.cursor=''; });
-window.addEventListener('mousemove', e=>{
-  if(!dragging) return;
-  const rect = workspace.getBoundingClientRect();
-  const px = Math.max(240, Math.min(e.clientX - rect.left, rect.width - 200));
-  workspace.style.gridTemplateColumns = px+'px 12px 1fr';
-  editor.refresh && editor.refresh();
-});
-
-// -----------------------------
-// Header toggle (hide top) — when hidden it "goes" instead of leaving a black square
-// -----------------------------
-const header = document.getElementById('mainHeader');
-let headerHidden = false;
-document.getElementById('toggleHeader').addEventListener('click', ()=>{
-  headerHidden = !headerHidden;
-  if(headerHidden){ header.classList.add('collapsed'); document.getElementById('toggleHeader').textContent = 'Show Top'; }
-  else { header.classList.remove('collapsed'); document.getElementById('toggleHeader').textContent = 'Hide Top'; }
-});
-
-// -----------------------------
-// Accent color customizer
-// -----------------------------
-const accentPicker = document.getElementById('accentPicker');
-const accentVal = document.getElementById('accentVal');
-const customizer = document.getElementById('customizer');
-let accent = { r:160, g:80, b:255 };
-
-function hexToRgb(hex){ const v = hex.replace('#',''); return { r: parseInt(v.substring(0,2),16), g: parseInt(v.substring(2,4),16), b: parseInt(v.substring(4,6),16) }; }
-function applyAccent(){
-  const hex = accentPicker.value;
-  const rgb = hexToRgb(hex);
-  const intensity = parseInt(accentVal.value);
-  // scale by intensity / 160 (default)
-  const scale = intensity/160;
-  const r = Math.max(0, Math.min(255, Math.round(rgb.r * scale)));
-  const g = Math.max(0, Math.min(255, Math.round(rgb.g * scale)));
-  const b = Math.max(0, Math.min(255, Math.round(rgb.b * scale)));
-  document.documentElement.style.setProperty('--accent', `${r}, ${g}, ${b}`);
-  document.documentElement.style.setProperty('--accent-hex', hex);
+    const resp = await fetch("https://api.openai.com/v1/chat/completions",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer "+chatApiKey
+      },
+      body:JSON.stringify({
+        model:"gpt-3.5-turbo",
+        messages:[{role:"user", content:input}],
+        temperature:0.7
+      })
+    });
+    const data = await resp.json();
+    const msg = data.choices?.[0]?.message?.content || "[No response]";
+    out.textContent += msg + "\n\n";
+    out.scrollTop = out.scrollHeight;
+  }catch(e){
+    out.textContent += "[Error] "+e+"\n\n";
+  }
 }
-accentPicker.addEventListener('input', applyAccent);
-accentVal.addEventListener('input', applyAccent);
-
-document.getElementById('resetAccent').addEventListener('click', ()=>{ accentPicker.value = '#A050FF'; accentVal.value = 160; applyAccent(); });
-
-document.getElementById('toggleCustomizer').addEventListener('click', ()=>{ customizer.style.display = 'none'; });
-
-// -----------------------------
-// small enhancement: focus glow for panels
-// -----------------------------
-leftPanel.addEventListener('mouseenter', ()=>{ leftPanel.classList.add('focused'); rightPanel.classList.remove('focused'); });
-const rightPanel = document.getElementById('rightPanel');
-rightPanel.addEventListener('mouseenter', ()=>{ rightPanel.classList.add('focused'); leftPanel.classList.remove('focused'); });
-
-// refresh CodeMirror on panel resize
-new ResizeObserver(()=> editor.refresh && editor.refresh()).observe(leftPanel);
-
-// set initial accent
-applyAccent();
-
-// -----------------------------
-// Accessibility: keyboard shortcuts
-// -----------------------------
-window.addEventListener('keydown', e=>{
-  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){
-    e.preventDefault(); document.getElementById('saveBtn').click();
-  }
-  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='o'){
-    e.preventDefault(); fileInput.click();
-  }
-});
-
-// notify user where to change theme
-appendOut('Tip: use the color picker bottom-right to change the accent color.');
-
 </script>
 </body>
 </html>
