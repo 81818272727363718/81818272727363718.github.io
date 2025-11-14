@@ -12,14 +12,6 @@
     .panel{background:var(--panel);backdrop-filter:blur(4px);color:#e9f9ff;padding:10px 12px;border-radius:10px;pointer-events:auto}
     #leftPanel{max-width:320px}
   </style>
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js",
-        "BufferGeometryUtils": "https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/utils/BufferGeometryUtils.js"
-      }
-    }
-  </script>
 </head>
 <body>
   <div id="overlay">
@@ -32,8 +24,8 @@
   </div>
 
   <script type="module">
-    import * as THREE from 'three';
-    import { BufferGeometryUtils } from 'BufferGeometryUtils';
+    import * as THREE from './three.module.js';
+    import { mergeBufferGeometries } from './BufferGeometryUtils.js';
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x071018);
@@ -44,8 +36,7 @@
 
     const renderer = new THREE.WebGLRenderer({antialias:true});
     renderer.setSize(innerWidth, innerHeight);
-    renderer.setPixelRatio(1);
-    renderer.shadowMap.enabled = false;
+    renderer.setPixelRatio(window.devicePixelRatio);
     document.body.appendChild(renderer.domElement);
 
     const hemi = new THREE.HemisphereLight(0xbde0ff, 0x081122, 0.6);
@@ -58,10 +49,8 @@
     const groundGeo = new THREE.PlaneGeometry(200,200,10,10);
     const ground = new THREE.Mesh(groundGeo, groundMat);
     ground.rotation.x = -Math.PI/2;
-    ground.receiveShadow = true;
     scene.add(ground);
 
-    // Merge simple structures for performance
     const boxMat = new THREE.MeshStandardMaterial({color:0x4b6b7a});
     const boxes = [];
     for(let i=0;i<20;i++){
@@ -70,11 +59,10 @@
       geo.translate((Math.random()-0.5)*100,h/2,(Math.random()-0.5)*100);
       boxes.push(geo);
     }
-    const mergedGeo = BufferGeometryUtils.mergeBufferGeometries(boxes, false);
+    const mergedGeo = mergeBufferGeometries(boxes, false);
     const structures = new THREE.Mesh(mergedGeo, boxMat);
     scene.add(structures);
 
-    // Platforms
     const platformMat = new THREE.MeshStandardMaterial({color:0xffaa33});
     const platforms = new THREE.Group();
     const platformPositions = [{x:0,y:3,z:0},{x:5,y:6,z:-5},{x:-7,y:9,z:7},{x:10,y:12,z:5}];
@@ -104,7 +92,7 @@
       if(e.code==='KeyL') lookState.pitch+=0.05;
       if(e.code==='KeyI') lookState.yaw-=0.05;
       if(e.code==='KeyP') lookState.yaw+=0.05;
-      if(e.code==='KeyX' && down) {
+      if(e.code==='KeyX' && down){
         const panel = document.getElementById('leftPanel');
         panel.style.display = (panel.style.display==='none') ? 'block' : 'none';
       }
@@ -118,12 +106,20 @@
       lookState.pitch -= dy*lookSensitivity;
       lookState.pitch = Math.max(-Math.PI/2+0.05, Math.min(Math.PI/2-0.05, lookState.pitch));
     }
-    window.addEventListener('mousemove',onMouseMove);
+
+    document.getElementById('startBtn').addEventListener('click',()=>{
+      if(renderer.domElement.requestPointerLock){
+        renderer.domElement.requestPointerLock();
+      } else {
+        alert('Pointer lock API not supported in this browser.');
+      }
+      animate();
+      window.addEventListener('mousemove', onMouseMove);
+    });
 
     window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
 
     const clock = new THREE.Clock();
-
     function animate(){
       const dt = Math.min(clock.getDelta(),0.05);
       const directionVector = new THREE.Vector3();
@@ -156,11 +152,6 @@
       renderer.render(scene,camera);
       requestAnimationFrame(animate);
     }
-
-    document.getElementById('startBtn').addEventListener('click',()=>{
-      renderer.domElement.requestPointerLock();
-      animate();
-    });
   </script>
 </body>
 </html>
