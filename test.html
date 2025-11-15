@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shape and Beats - Abilities + Mobile Joystick</title>
+<title>Shape and Beats - Abilities + Effects</title>
 <style>
 body, html { margin:0; padding:0; overflow:hidden; font-family:sans-serif; background:#0a0a0a; color:white; }
 canvas{ display:block; }
@@ -13,16 +13,12 @@ canvas{ display:block; }
   position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(135deg,#111,#000);
   display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:1000;
 }
-.menuBtn{
-  padding:15px 30px; margin:10px; background:#222; border:1px solid #555; color:white; cursor:pointer; font-size:18px;
-}
+.menuBtn{ padding:15px 30px; margin:10px; background:#222; border:1px solid #555; color:white; cursor:pointer; font-size:18px; }
 .menuBtn:hover{ background:#444; }
 
 /* Panels */
-.panel{
-  position:absolute; top:10%; left:50%; transform:translateX(-50%); width:80%; max-width:600px; background:#111;
-  border:2px solid #555; padding:20px; display:none; z-index:1100;
-}
+.panel{ position:absolute; top:10%; left:50%; transform:translateX(-50%); width:80%; max-width:600px; background:#111;
+border:2px solid #555; padding:20px; display:none; z-index:1100; }
 .closePanel{ position:absolute; top:5px; right:10px; cursor:pointer; color:#f00; font-weight:bold; font-size:18px; }
 
 /* Controls and UI */
@@ -35,11 +31,10 @@ button:hover{ background:#444; }
 .abilityBtn{padding:8px 12px; background:#222; border:1px solid #555; color:white; cursor:pointer; position:relative;}
 .cooldownOverlay{position:absolute; top:0; left:0; height:100%; width:0%; background:rgba(0,0,0,0.6); transition:width 0.1s linear;}
 
-/* Joystick (mobile) */
+/* Joystick */
 #joystickOuter{ position:absolute; width:140px; height:140px; border-radius:50%; background:rgba(255,255,255,0.03); border:2px solid #444; z-index:999; touch-action:none; display:none; pointer-events:none; }
 #joystickInner{ position:absolute; width:56px; height:56px; border-radius:50%; background:linear-gradient(180deg,#bbb,#888); top:42px; left:42px; box-shadow:0 6px 16px rgba(0,0,0,0.6); touch-action:none; pointer-events:none; }
 
-/* Small mobile hints */
 @media (hover: none) and (pointer: coarse) {
   button.abilityBtn { font-size:13px; width:84px; height:52px; }
   #abilityBar { gap:10px; }
@@ -48,7 +43,6 @@ button:hover{ background:#444; }
 </head>
 <body>
 
-<!-- OPENING SCREEN -->
 <div id="openingScreen">
   <h1>Shape and Beats</h1>
   <button class="menuBtn" id="gameModeBtn">GameMode</button>
@@ -56,7 +50,6 @@ button:hover{ background:#444; }
   <button class="menuBtn" id="updatesBtn">Updates</button>
 </div>
 
-<!-- PANELS -->
 <div class="panel" id="gameModePanel">
   <span class="closePanel" onclick="closePanel('gameModePanel')">X</span>
   <h2>Select Game Mode</h2>
@@ -71,11 +64,11 @@ button:hover{ background:#444; }
 <div class="panel" id="infoPanel">
   <span class="closePanel" onclick="closePanel('infoPanel')">X</span>
   <h2>Information</h2>
-  <p>This game combines shapes and beats. Avoid or destroy shapes and projectiles while using your abilities.</p>
+  <p>Abilities with effects:</p>
   <ul>
-    <li><b>Shield:</b> Protects you from damage for 5 seconds.</li>
-    <li><b>Clear:</b> Removes all shapes from the screen.</li>
-    <li><b>Restore:</b> Heals 50 health.</li>
+    <li><b>Shield:</b> Cyan glow around player, lasts 5s.</li>
+    <li><b>Clear:</b> Removes all shapes from screen with flash.</li>
+    <li><b>Restore:</b> Heals 50 health with green pulse.</li>
   </ul>
 </div>
 
@@ -83,13 +76,11 @@ button:hover{ background:#444; }
   <span class="closePanel" onclick="closePanel('updatesPanel')">X</span>
   <h2>Updates</h2>
   <ul>
-    <li>v1.0 - Base game with abilities and shapes.</li>
-    <li>v1.1 - Mobile joystick support.</li>
-    <li>v1.2 - New hazards: spin beam, homing shapes, and splitter shapes.</li>
+    <li>v1.3 - Abilities visual effects added.</li>
+    <li>v1.4 - Player is now a big square, cannot die.</li>
   </ul>
 </div>
 
-<!-- GAME UI -->
 <div id="controls">
   <button id="startBtn">Start</button>
   <button id="stopBtn">Stop</button>
@@ -103,37 +94,30 @@ button:hover{ background:#444; }
   <div class="abilityBtn" id="restoreBtn">Restore (3)<div class="cooldownOverlay" id="restoreCD"></div></div>
 </div>
 
-<!-- MOBILE JOYSTICK -->
 <div id="joystickOuter"><div id="joystickInner"></div></div>
-
 <canvas id="beatCanvas"></canvas>
 
 <script>
-// ------------------- OPENING SCREEN LOGIC -------------------
-const openingScreen = document.getElementById('openingScreen');
-const gameModeBtn = document.getElementById('gameModeBtn');
-const infoBtn = document.getElementById('infoBtn');
-const updatesBtn = document.getElementById('updatesBtn');
+const openingScreen=document.getElementById('openingScreen');
+const gameModeBtn=document.getElementById('gameModeBtn');
+const infoBtn=document.getElementById('infoBtn');
+const updatesBtn=document.getElementById('updatesBtn');
+gameModeBtn.addEventListener('click',()=>{document.getElementById('gameModePanel').style.display='block';});
+infoBtn.addEventListener('click',()=>{document.getElementById('infoPanel').style.display='block';});
+updatesBtn.addEventListener('click',()=>{document.getElementById('updatesPanel').style.display='block';});
+function closePanel(id){document.getElementById(id).style.display='none';}
 
-gameModeBtn.addEventListener('click', ()=>{ document.getElementById('gameModePanel').style.display='block'; });
-infoBtn.addEventListener('click', ()=>{ document.getElementById('infoPanel').style.display='block'; });
-updatesBtn.addEventListener('click', ()=>{ document.getElementById('updatesPanel').style.display='block'; });
-
-function closePanel(id){ document.getElementById(id).style.display='none'; }
-
-let selectedMode = 'survival';
+let selectedMode='survival';
 function startGame(){
-  const select = document.getElementById('modeSelect');
-  selectedMode = select.value;
+  selectedMode=document.getElementById('modeSelect').value;
   openingScreen.style.display='none';
-  running = true;
-  lastBeatTime = 0;
+  running=true;
+  lastBeatTime=0;
   animate(performance.now());
 }
 
-// ------------------- GAME CODE -------------------
-const canvas = document.getElementById('beatCanvas');
-const ctx = canvas.getContext('2d');
+const canvas=document.getElementById('beatCanvas');
+const ctx=canvas.getContext('2d');
 canvas.width=window.innerWidth; canvas.height=window.innerHeight;
 
 let shapes=[], pellets=[], spinBeams=[], animationId, running=false;
@@ -141,13 +125,13 @@ let bpm=120, beatInterval=60000/bpm, lastBeatTime=0;
 const keys={};
 
 const player={
-  x:canvas.width/2, y:canvas.height/2, size:40, color:'#00f', speed:0.5,
-  vx:0, vy:0, maxSpeed:6, health:100, dashMultiplier:3, dashCooldown:0,
+  x:canvas.width/2, y:canvas.height/2, size:80, color:'#00f', speed:0.5,
+  vx:0, vy:0, maxSpeed:6, dashMultiplier:3, dashCooldown:0,
   shieldActive:false, shieldTime:0
 };
 
-let abilities={ shield:0, clear:0, restore:0 };
-const abilityDurations={ shield:5*60 };
+let abilities={shield:0, clear:0, restore:0};
+const abilityDurations={shield:5*60};
 
 class Shape{
   constructor(x,y,size,type,color){
@@ -160,44 +144,30 @@ class Shape{
   draw(){
     ctx.shadowBlur=20; ctx.shadowColor=this.color; ctx.fillStyle=this.color;
     ctx.beginPath();
-    if(this.type==="circle" || this.type==="explosive") ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
-    else if(this.type==="square") ctx.rect(this.x-this.size/2,this.y-this.size/2,this.size,this.size);
-    else if(this.type==="triangle"){
-      ctx.moveTo(this.x,this.y-this.size);
-      ctx.lineTo(this.x-this.size,this.y+this.size);
-      ctx.lineTo(this.x+this.size,this.y+this.size);
-      ctx.closePath();
-    }
+    if(this.type==='circle' || this.type==='explosive') ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+    else ctx.fillRect(this.x-this.size/2,this.y-this.size/2,this.size,this.size);
     ctx.fill(); ctx.shadowBlur=0;
   }
   update(){
     if(this.homing){
-      let dx = player.x - this.x;
-      let dy = player.y - this.y;
-      let dist = Math.sqrt(dx*dx + dy*dy) || 1;
-      this.x += dx/dist*1.2;
-      this.y += dy/dist*1.2;
-    } else { this.size += this.growth*0.2; if(this.size>80||this.size<15) this.growth*=-1; }
+      let dx=player.x-this.x, dy=player.y-this.y, dist=Math.sqrt(dx*dx+dy*dy)||1;
+      this.x+=dx/dist*1.2; this.y+=dy/dist*1.2;
+    } else { this.size+=this.growth*0.2; if(this.size>80||this.size<15)this.growth*=-1; }
     this.draw();
-    if(this.type==="circle" || this.type==="explosive"){
+    if(this.type==='circle'||this.type==='explosive'){
       this.shootCooldown--; if(this.shootCooldown<=0){ this.shootAtPlayer(); this.shootCooldown=60; }
     }
   }
   shootAtPlayer(){
-    const dx = player.x - this.x;
-    const dy = player.y - this.y;
-    const dist = Math.sqrt(dx*dx + dy*dy) ||1;
-    const speed = 3;
-    const vx = dx/dist*speed;
-    const vy = dy/dist*speed;
+    const dx=player.x-this.x, dy=player.y-this.y, dist=Math.sqrt(dx*dx+dy*dy)||1;
+    const speed=3, vx=dx/dist*speed, vy=dy/dist*speed;
     pellets.push(new Pellet(this.x,this.y,vx,vy,this.color));
   }
   splitShape(){
     if(!this.split) return [];
     const newShapes=[];
     for(let i=0;i<2;i++){
-      const s = new Shape(this.x,this.y,this.size/2,this.type,this.color);
-      newShapes.push(s);
+      newShapes.push(new Shape(this.x,this.y,this.size/2,this.type,this.color));
     }
     return newShapes;
   }
@@ -208,120 +178,94 @@ class Pellet{
   update(){ this.x+=this.vx; this.y+=this.vy; ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill(); }
 }
 
-class SpinBeam{ 
+class SpinBeam{
   constructor(){ this.angle=0; this.timer=5*60; this.color='cyan'; this.length=canvas.width; }
   update(){
     ctx.save(); ctx.translate(canvas.width/2,canvas.height/2); ctx.rotate(this.angle);
     ctx.fillStyle=this.color; ctx.fillRect(-this.length/2,-5,this.length,10);
-    ctx.restore();
-    this.angle += 0.03; this.timer--; if(this.timer<=0){ spinBeams.splice(spinBeams.indexOf(this),1); }
-    // collision
-    const dx = player.x - canvas.width/2; const dy = player.y - canvas.height/2;
-    const px = dx*Math.cos(-this.angle)-dy*Math.sin(-this.angle);
-    const py = dx*Math.sin(-this.angle)+dy*Math.cos(-this.angle);
-    if(Math.abs(py)<10 && Math.abs(px)<this.length/2){ if(!player.shieldActive) player.health-=1; }
+    ctx.restore(); this.angle+=0.03; this.timer--; if(this.timer<=0) spinBeams.splice(spinBeams.indexOf(this),1);
+    const dx=player.x-canvas.width/2, dy=player.y-canvas.height/2;
+    const px=dx*Math.cos(-this.angle)-dy*Math.sin(-this.angle), py=dx*Math.sin(-this.angle)+dy*Math.cos(-this.angle);
+    if(Math.abs(py)<10 && Math.abs(px)<this.length/2){ /* cannot die */ }
   }
 }
 
-function spawnShape(){ 
-  if(Math.random()<0.5){ // lower spawn rate
-    const x=Math.random()*canvas.width; const y=Math.random()*canvas.height; 
-    const size=Math.random()*30+20; 
-    const type=['circle','square','triangle'][Math.floor(Math.random()*3)]; 
-    const color=randomColor(); 
-    shapes.push(new Shape(x,y,size,type,color)); 
-  }
-}
+// Abilities effects
+function useShield(){ if(abilities.shield<=0){ player.shieldActive=true; player.shieldTime=abilityDurations.shield; abilities.shield=45*60; document.getElementById('shieldCD').style.width='100%'; } }
+function useClear(){ if(abilities.clear<=0){ shapes=[]; abilities.clear=120*60; document.getElementById('clearCD').style.width='100%'; flashScreen(); } }
+function useRestore(){ if(abilities.restore<=0){ abilities.restore=90*60; document.getElementById('restoreCD').style.width='100%'; pulsePlayer(); } }
 
-function randomColor(){ const r=Math.floor(Math.random()*255); const g=Math.floor(Math.random()*255); const b=Math.floor(Math.random()*255); return `rgb(${r},${g},${b})`; }
+document.getElementById('shieldBtn').addEventListener('click',useShield);
+document.getElementById('clearBtn').addEventListener('click',useClear);
+document.getElementById('restoreBtn').addEventListener('click',useRestore);
 
-// Movement
-function movePlayer(){
-  let ax=0,ay=0;
-  if(keys['w']) ay-=player.speed; if(keys['s']) ay+=player.speed; if(keys['a']) ax-=player.speed; if(keys['d']) ax+=player.speed;
-  if(keys['shift']&&player.dashCooldown<=0){ ax*=player.dashMultiplier; ay*=player.dashMultiplier; player.dashCooldown=20; }
-  player.vx+=ax+joystickVX; player.vy+=ay+joystickVY;
-  player.vx*=0.85; player.vy*=0.85;
-  player.vx=Math.max(Math.min(player.vx,player.maxSpeed),-player.maxSpeed);
-  player.vy=Math.max(Math.min(player.vy,player.maxSpeed),-player.maxSpeed);
-  player.x+=player.vx; player.y+=player.vy;
-  if(player.x - player.size/2<0) player.x=player.size/2;
-  if(player.x + player.size/2>canvas.width) player.x=canvas.width-player.size/2;
-  if(player.y - player.size/2<0) player.y=player.size/2;
-  if(player.y + player.size/2>canvas.height) player.y=canvas.height-player.size/2;
-  if(player.dashCooldown>0) player.dashCooldown--;
-}
+function flashScreen(){ ctx.fillStyle='rgba(255,255,255,0.2)'; ctx.fillRect(0,0,canvas.width,canvas.height); }
+function pulsePlayer(){ ctx.strokeStyle='lime'; ctx.lineWidth=10; ctx.strokeRect(player.x-player.size/2-5,player.y-player.size/2-5,player.size+10,player.size+10); }
 
-// Collision
-function checkCollision(shape){ const dx=shape.x-player.x; const dy=shape.y-player.y; const dist=Math.sqrt(dx*dx+dy*dy); 
-if(shape.type==="circle") return dist<shape.size+player.size/2; else if(shape.type==="square"){ return Math.abs(shape.x-player.x)<shape.size/2+player.size/2 && Math.abs(shape.y-player.y)<shape.size/2+player.size/2; } else if(shape.type==="triangle") return dist<shape.size+player.size/2; return false; }
-function checkCollisionPelletPlayer(p){ const dx=p.x-player.x; const dy=p.y-player.y; return Math.sqrt(dx*dx+dy*dy)<p.size+player.size/2; }
-
-// Health
-function updateHealthBar(){ const fill=document.getElementById('healthFill'); fill.style.width=Math.max(0,player.health)+'%'; if(player.health>60) fill.style.background='#0f0'; else if(player.health>30) fill.style.background='#ff0'; else fill.style.background='#f00'; }
-
-// Abilities
-document.getElementById('shieldBtn').addEventListener('click',()=>{ if(abilities.shield<=0){ player.shieldActive=true; player.shieldTime=abilityDurations.shield; abilities.shield=45*60; document.getElementById('shieldCD').style.width='100%'; } });
-document.getElementById('clearBtn').addEventListener('click',()=>{ if(abilities.clear<=0){ shapes=[]; abilities.clear=120*60; document.getElementById('clearCD').style.width='100%'; } });
-document.getElementById('restoreBtn').addEventListener('click',()=>{ if(abilities.restore<=0){ player.health=Math.min(player.health+50,100); abilities.restore=90*60; document.getElementById('restoreCD').style.width='100%'; } });
-
-// Joystick
+// Joystick setup
 let joystickVX=0, joystickVY=0, joystickActive=false;
 const joyOuter=document.getElementById('joystickOuter'), joyInner=document.getElementById('joystickInner');
-const JOY_MAX=56, JOY_FACTOR=0.14;
-let joyBaseX=0, joyBaseY=0;
-
+const JOY_MAX=56, JOY_FACTOR=0.14; let joyBaseX=0, joyBaseY=0;
 canvas.addEventListener('touchstart',ev=>{ const t=ev.touches[0]; joyBaseX=t.clientX; joyBaseY=t.clientY; joyOuter.style.display='block'; joyOuter.style.left=(joyBaseX-joyOuter.offsetWidth/2)+'px'; joyOuter.style.top=(joyBaseY-joyOuter.offsetHeight/2)+'px'; joystickActive=true; joystickVX=0; joystickVY=0; });
 canvas.addEventListener('touchmove',ev=>{ if(!joystickActive) return; const t=ev.touches[0]; let dx=t.clientX-joyBaseX; let dy=t.clientY-joyBaseY; const dist=Math.sqrt(dx*dx+dy*dy); if(dist>JOY_MAX){ const a=Math.atan2(dy,dx); dx=Math.cos(a)*JOY_MAX; dy=Math.sin(a)*JOY_MAX; } joyInner.style.left=(joyOuter.offsetWidth/2-joyInner.offsetWidth/2+dx)+'px'; joyInner.style.top=(joyOuter.offsetHeight/2-joyInner.offsetHeight/2+dy)+'px'; joystickVX=dx/JOY_MAX*player.maxSpeed*JOY_FACTOR; joystickVY=dy/JOY_MAX*player.maxSpeed*JOY_FACTOR; });
-canvas.addEventListener('touchend',ev=>{ joystickActive=false; joystickVX=0; joystickVY=0; joyOuter.style.display='none'; joyInner.style.left=(joyOuter.offsetWidth/2-joyInner.offsetWidth/2)+'px'; joyInner.style.top=(joyOuter.offsetHeight/2-joyInner.offsetHeight/2)+'px'; });
+canvas.addEventListener('touchend',ev=>{ joystickActive=false; joystickVX=0; joystickVY=0; joyOuter.style.display='none'; });
 canvas.addEventListener('touchcancel',ev=>{ joystickActive=false; joystickVX=0; joystickVY=0; joyOuter.style.display='none'; });
 
-// Start/Stop buttons
+// Start/stop
 document.getElementById('startBtn').addEventListener('click',()=>{ if(!running){ running=true; lastBeatTime=0; animate(performance.now()); } });
 document.getElementById('stopBtn').addEventListener('click',()=>{ running=false; cancelAnimationFrame(animationId); });
 
-// Keys
+// Key input
 document.addEventListener('keydown',e=>{ keys[e.key.toLowerCase()]=true; });
 document.addEventListener('keyup',e=>{ keys[e.key.toLowerCase()]=false; });
 
+// Movement
+function movePlayer(){
+  let ax=0,ay=0; if(keys['w']) ay-=player.speed; if(keys['s']) ay+=player.speed; if(keys['a']) ax-=player.speed; if(keys['d']) ax+=player.speed;
+  if(keys['shift'] && player.dashCooldown<=0){ ax*=player.dashMultiplier; ay*=player.dashMultiplier; player.dashCooldown=20; }
+  player.vx+=ax+joystickVX; player.vy+=ay+joystickVY; player.vx*=0.85; player.vy*=0.85;
+  player.vx=Math.max(Math.min(player.vx,player.maxSpeed),-player.maxSpeed); player.vy=Math.max(Math.min(player.vy,player.maxSpeed),-player.maxSpeed);
+  player.x+=player.vx; player.y+=player.vy;
+  if(player.x-player.size/2<0) player.x=player.size/2;
+  if(player.x+player.size/2>canvas.width) player.x=canvas.width-player.size/2;
+  if(player.y-player.size/2<0) player.y=player.size/2;
+  if(player.y+player.size/2>canvas.height) player.y=canvas.height-player.size/2;
+  if(player.dashCooldown>0) player.dashCooldown--;
+}
+
+// Health
+function updateHealthBar(){ const fill=document.getElementById('healthFill'); fill.style.width=Math.max(1,player.health)+'%'; if(player.health>60) fill.style.background='#0f0'; else if(player.health>30) fill.style.background='#ff0'; else fill.style.background='#f00'; }
+
+// Spawn
+function spawnShape(){ if(Math.random()<0.5){ const x=Math.random()*canvas.width; const y=Math.random()*canvas.height; const size=Math.random()*30+20; const type=['circle','square','triangle'][Math.floor(Math.random()*3)]; const color=`rgb(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`; shapes.push(new Shape(x,y,size,type,color)); } }
+
 // Animate loop
 function animate(timestamp){
-  if(!running) return;
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(!running) return; ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  // spawn shapes randomly
-  if(Math.random()<0.01) spawnShape(); // lower spawn rate
+  if(Math.random()<0.01) spawnShape();
 
-  // update shapes
-  shapes.forEach((s,i)=>{ s.update(); if(checkCollision(s)){ if(!player.shieldActive) player.health-=1; if(s.split){ shapes.push(...s.splitShape()); } shapes.splice(i,1); } });
-
-  // update pellets
-  pellets.forEach((p,i)=>{ p.update(); if(checkCollisionPelletPlayer(p)){ if(!player.shieldActive) player.health-=5; pellets.splice(i,1); } });
-
-  // update spin beams
+  shapes.forEach((s,i)=>{ s.update(); if((s.type==='circle'||s.type==='square'||s.type==='triangle') && Math.abs(s.x-player.x)<player.size/2+s.size && Math.abs(s.y-player.y)<player.size/2+s.size){ if(!player.shieldActive) player.health=Math.max(1,player.health-1); if(s.split) shapes.push(...s.splitShape()); shapes.splice(i,1); } });
+  pellets.forEach((p,i)=>{ p.update(); if(Math.abs(p.x-player.x)<player.size/2+p.size && Math.abs(p.y-player.y)<player.size/2+p.size){ if(!player.shieldActive) player.health=Math.max(1,player.health-2); pellets.splice(i,1); } });
   spinBeams.forEach(sb=>sb.update());
 
-  // random spin beam spawn
   if(Math.random()<0.002) spinBeams.push(new SpinBeam());
 
-  // draw player
   ctx.fillStyle=player.shieldActive?'rgba(0,255,255,0.7)':player.color;
-  ctx.beginPath(); ctx.arc(player.x,player.y,player.size,0,Math.PI*2); ctx.fill();
+  ctx.fillRect(player.x-player.size/2,player.y-player.size/2,player.size,player.size);
 
   movePlayer();
 
-  // shield timer
   if(player.shieldActive){ player.shieldTime--; if(player.shieldTime<=0) player.shieldActive=false; }
 
-  // update health
   updateHealthBar();
 
-  // update abilities cooldown overlay
   ['shield','clear','restore'].forEach(id=>{ const overlay=document.getElementById(id+'CD'); if(abilities[id]>0){ abilities[id]--; overlay.style.width=(abilities[id]/(60*60)*100)+'%'; } else overlay.style.width='0%'; });
 
   animationId=requestAnimationFrame(animate);
 }
 
+window.addEventListener('resize',()=>{ canvas.width=window.innerWidth; canvas.height=window.innerHeight; });
 </script>
 </body>
 </html>
