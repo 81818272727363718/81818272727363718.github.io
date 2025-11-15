@@ -3,360 +3,982 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shape & Beats – Modern Glass UI</title>
-
+<title>Shape & Beats - Modern</title>
 <style>
-/* -----------------------------
-   GLOBAL
------------------------------- */
-html,body{
-  margin:0;
-  padding:0;
-  overflow:hidden;
-  font-family: "Segoe UI", Roboto, Helvetica, sans-serif;
-  background:#0b0b0f;
-  color:white;
-}
+  :root {
+    --glass-bg: rgba(15,15,25,0.75);
+    --glass-border: rgba(255,255,255,0.18);
+    --accent: #4f8cff;
+    --accent-soft: rgba(79,140,255,0.45);
+    --danger: #ff4f7b;
+    --text-main: #f8f8ff;
+    --text-muted: #a3a6c7;
+    --radius-lg: 18px;
+    --radius-md: 12px;
+  }
 
-/* -----------------------------
-   MODERN GLASS UI
------------------------------- */
-.glass-btn{
-  padding:14px 26px;
-  margin:10px;
-  border-radius:14px;
-  font-size:20px;
-  border:1px solid rgba(255,255,255,0.2);
-  background:rgba(255,255,255,0.08);
-  backdrop-filter:blur(10px);
-  cursor:pointer;
-  color:white;
-  transition:0.2s;
-}
-.glass-btn:hover{
-  background:rgba(255,255,255,0.18);
-}
+  * { box-sizing: border-box; }
 
-/* Opening Screen */
-#openingScreen{
-  position:absolute;
-  width:100vw;
-  height:100vh;
-  top:0; left:0;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  gap:15px;
-  background:linear-gradient(135deg,#0e0e12,#1a1a22);
-  z-index:999;
-}
+  html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: radial-gradient(circle at top, #1b1b3a 0, #050509 52%, #000 100%);
+    color: var(--text-main);
+  }
 
-/* Panels */
-.panel{
-  position:absolute;
-  top:10%;
-  left:50%;
-  transform:translateX(-50%);
-  width:80%;
-  max-width:600px;
+  canvas { display: block; }
 
-  background:rgba(255,255,255,0.08);
-  border:1px solid rgba(255,255,255,0.2);
-  border-radius:16px;
-  backdrop-filter:blur(14px);
-  padding:20px;
-  display:none;
-  z-index:1000;
-}
-.closePanel{
-  position:absolute;
-  right:14px;
-  top:10px;
-  font-size:22px;
-  cursor:pointer;
-  color:#ff4d4d;
-}
+  body::before {
+    content: "";
+    position: fixed;
+    inset: -20%;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(79,140,255,0.35), transparent 55%),
+      radial-gradient(circle at 80% 80%, rgba(255,79,123,0.35), transparent 55%);
+    filter: blur(15px);
+    opacity: 0.8;
+    pointer-events: none;
+    z-index: -1;
+    animation: bgFloat 18s ease-in-out infinite alternate;
+  }
 
-/* Health Bar */
-#healthBar{
-  position:absolute;
-  top:20px; right:20px;
-  width:220px;
-  height:28px;
-  border-radius:10px;
-  overflow:hidden;
+  @keyframes bgFloat {
+    0% { transform: translate3d(0,0,0) scale(1); }
+    100% { transform: translate3d(-20px,10px,0) scale(1.05); }
+  }
 
-  background:rgba(255,255,255,0.08);
-  border:1px solid rgba(255,255,255,0.22);
-  backdrop-filter:blur(6px);
-}
-#healthFill{
-  width:100%;
-  height:100%;
-  background:linear-gradient(90deg,#00ff8c,#1affff);
-}
+  .glass-panel {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(18px) saturate(170%);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.75);
+  }
 
-/* Ability Bar */
-#abilityBar{
-  position:absolute;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-  display:flex;
-  gap:20px;
-}
+  .glass-button {
+    background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(0,0,0,0.5));
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.25);
+    padding: 10px 22px;
+    color: var(--text-main);
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+  }
+  .glass-button:hover {
+    transform: translateY(-1px) scale(1.02);
+    border-color: rgba(255,255,255,0.45);
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(0,0,0,0.6));
+  }
+  .glass-button:active {
+    transform: translateY(1px) scale(0.98);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.7);
+  }
 
-.abilityBtn{
-  padding:12px 18px;
-  border-radius:12px;
-  color:white;
-  background:rgba(255,255,255,0.1);
-  border:1px solid rgba(255,255,255,0.25);
-  backdrop-filter:blur(8px);
-  cursor:pointer;
-  position:relative;
-}
+  /* Opening Screen */
+  #openingScreen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  #openingInner {
+    width: 90%;
+    max-width: 520px;
+    padding: 24px 22px 20px;
+  }
+  #openingTitle {
+    font-size: 28px;
+    letter-spacing: 0.18em;
+    text-align: center;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  #openingSubtitle {
+    font-size: 12px;
+    text-align: center;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+  #modeGrid {
+    display: grid;
+    gap: 10px;
+  }
+  @media (min-width: 600px) {
+    #modeGrid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  .mode-card {
+    border-radius: var(--radius-md);
+    padding: 10px 10px 12px;
+    background: radial-gradient(circle at top, rgba(255,255,255,0.18), rgba(0,0,0,0.6));
+    border: 1px solid rgba(255,255,255,0.25);
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+  }
+  .mode-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.8);
+    border-color: rgba(255,255,255,0.55);
+  }
+  .mode-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .mode-tag {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
 
-.cooldownOverlay{
-  position:absolute;
-  top:0;
-  left:0;
-  width:0%;
-  height:100%;
-  background:rgba(0,0,0,0.6);
-}
+  /* Info / Updates Panel */
+  .panel {
+    position: absolute;
+    top: 12%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 520px;
+    padding: 18px 18px 14px;
+    display: none;
+    z-index: 1100;
+  }
+  .panel h2 {
+    margin: 0 0 6px;
+    font-size: 18px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .panel p,
+  .panel ul {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .panel ul {
+    padding-left: 20px;
+    margin: 4px 0 0;
+  }
+  .closePanel {
+    position: absolute;
+    top: 6px;
+    right: 10px;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 18px;
+    font-weight: 700;
+    transition: color 0.15s ease, transform 0.15s ease;
+  }
+  .closePanel:hover {
+    color: #fff;
+    transform: scale(1.08);
+  }
 
-/* Joystick */
-#joystickOuter{
-  position:absolute;
-  width:140px; height:140px;
-  border-radius:50%;
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.2);
-  backdrop-filter:blur(8px);
-  display:none;
-  z-index:50;
-}
-#joystickInner{
-  width:60px; height:60px;
-  border-radius:50%;
-  position:absolute;
-  background:rgba(255,255,255,0.25);
-  backdrop-filter:blur(10px);
-  left:40px; top:40px;
-}
+  /* Top Controls + Mode label */
+  #topBar {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+  }
+  #modeLabel {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.25);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    z-index: 10;
+  }
+
+  /* Health Bar */
+  #healthBar {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 220px;
+    height: 26px;
+    border-radius: 999px;
+    padding: 2px;
+    background: rgba(10,10,20,0.8);
+    border: 1px solid rgba(255,255,255,0.3);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.75);
+    z-index: 10;
+  }
+  #healthTrack {
+    width: 100%;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(255,255,255,0.06));
+    position: relative;
+    overflow: hidden;
+  }
+  #healthFill {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg,#1fff8f,#a7ff4a);
+    transition: width 0.15s ease-out, background 0.15s ease-out;
+  }
+
+  /* Ability Bar */
+  #abilityBar {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+  }
+  .abilityBtn {
+    position: relative;
+    min-width: 92px;
+    padding: 9px 10px 8px;
+    font-size: 12px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(0,0,0,0.7));
+    border: 1px solid rgba(255,255,255,0.3);
+    cursor: pointer;
+    text-align: left;
+    overflow: hidden;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.75);
+  }
+  .abilityBtn span {
+    display: block;
+  }
+  .abilityName {
+    font-weight: 600;
+    font-size: 11px;
+  }
+  .abilityHint {
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+  .cooldownOverlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    pointer-events: none;
+    transition: width 0.1s linear;
+  }
+
+  /* Joystick */
+  #joystickOuter {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.25);
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.18), rgba(5,5,15,0.9));
+    box-shadow: 0 18px 40px rgba(0,0,0,0.85);
+    backdrop-filter: blur(16px);
+    display: none;
+    touch-action: none;
+    z-index: 999;
+  }
+  #joystickInner {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 20%, #ffffff, #a9b7ff);
+    box-shadow: 0 14px 30px rgba(0,0,0,0.9);
+    top: 45px;
+    left: 45px;
+    touch-action: none;
+  }
+
+  @media (hover: none) and (pointer: coarse) {
+    .abilityBtn { font-size: 11px; min-width: 86px; padding: 8px 8px; }
+    .abilityName { font-size: 10px; }
+  }
 </style>
 </head>
-
 <body>
 
 <!-- Opening Screen -->
 <div id="openingScreen">
-  <h1 style="font-size:48px;margin-bottom:10px;">Shape & Beats</h1>
-  <button class="glass-btn" id="gameModeBtn">Game Mode</button>
-  <button class="glass-btn" id="infoBtn">Information</button>
-  <button class="glass-btn" id="updatesBtn">Updates</button>
+  <div id="openingInner" class="glass-panel">
+    <div id="openingTitle">SHAPE &amp; BEATS</div>
+    <div id="openingSubtitle">Select a mode, then survive the patterns with your abilities.</div>
+    <div id="modeGrid">
+      <div class="mode-card" data-mode="chill">
+        <div class="mode-name">Chill</div>
+        <div class="mode-tag">Low spawn, low damage. Warm-up mode.</div>
+      </div>
+      <div class="mode-card" data-mode="normal">
+        <div class="mode-name">Normal</div>
+        <div class="mode-tag">Balanced spawn + hazards.</div>
+      </div>
+      <div class="mode-card" data-mode="chaos">
+        <div class="mode-name">Chaos</div>
+        <div class="mode-tag">Fast spawn, more beams, more damage.</div>
+      </div>
+    </div>
+    <div style="margin-top:12px; display:flex; gap:8px; justify-content:center;">
+      <button class="glass-button" id="infoBtn">Info</button>
+      <button class="glass-button" id="updatesBtn">Updates</button>
+    </div>
+  </div>
 </div>
 
-<!-- Game Mode Panel -->
-<div class="panel" id="gameModePanel">
-  <span class="closePanel" onclick="closePanel('gameModePanel')">×</span>
-  <h2>Select Game Mode</h2>
-  <select id="modeSelect" style="width:100%;padding:14px;margin-top:10px;font-size:18px;border-radius:10px;">
-    <option value="survival">Survival</option>
-    <option value="challenge">Challenge</option>
-    <option value="rhythm">Rhythm</option>
-  </select>
-  <button class="glass-btn" onclick="startGame()" style="width:100%;margin-top:20px;">Start</button>
-</div>
-
-<!-- Info Panel -->
-<div class="panel" id="infoPanel">
-  <span class="closePanel" onclick="closePanel('infoPanel')">×</span>
-  <h2>Game Information</h2>
-  <p>Your abilities:</p>
+<!-- Info / Updates Panels -->
+<div class="panel glass-panel" id="infoPanel">
+  <span class="closePanel" onclick="closePanel('infoPanel')">✕</span>
+  <h2>Information</h2>
+  <p>Controls:</p>
   <ul>
-    <li><b>Shield:</b> Cyan barrier that protects you.</li>
-    <li><b>Clear:</b> Screen flash removes enemies.</li>
-    <li><b>Restore:</b> Heals you 50%.</li>
+    <li>Move: <b>WASD</b> or mobile joystick</li>
+    <li>Abilities: <b>1 = Shield</b>, <b>2 = Time Slow</b>, <b>3 = Shockwave</b></li>
+  </ul>
+  <p>Abilities:</p>
+  <ul>
+    <li><b>Shield:</b> Temporary invulnerability with a cyan aura.</li>
+    <li><b>Time Slow:</b> Slows shapes and bullets for a few seconds.</li>
+    <li><b>Shockwave:</b> Radial blast that clears nearby bullets and damages nearby shapes.</li>
   </ul>
 </div>
 
-<!-- Updates Panel -->
-<div class="panel" id="updatesPanel">
-  <span class="closePanel" onclick="closePanel('updatesPanel')">×</span>
+<div class="panel glass-panel" id="updatesPanel">
+  <span class="closePanel" onclick="closePanel('updatesPanel')">✕</span>
   <h2>Updates</h2>
   <ul>
-    <li>Modern glass UI added</li>
-    <li>Health system fixed</li>
-    <li>Player can now die</li>
+    <li>Brand new glass UI + mode cards.</li>
+    <li>Floating mobile joystick restored and fixed.</li>
+    <li>Three unique abilities with cooldowns & VFX.</li>
+    <li>Three functional modes: Chill / Normal / Chaos.</li>
   </ul>
 </div>
 
-<!-- UI -->
-<div id="healthBar"><div id="healthFill"></div></div>
+<!-- Top Bar & Health -->
+<div id="topBar">
+  <button class="glass-button" id="restartBtn">Restart</button>
+</div>
+<div id="modeLabel">MODE: ---</div>
 
+<div id="healthBar">
+  <div id="healthTrack">
+    <div id="healthFill"></div>
+  </div>
+</div>
+
+<!-- Ability Bar -->
 <div id="abilityBar">
-  <div class="abilityBtn" id="shieldBtn">Shield<div class="cooldownOverlay" id="shieldCD"></div></div>
-  <div class="abilityBtn" id="clearBtn">Clear<div class="cooldownOverlay" id="clearCD"></div></div>
-  <div class="abilityBtn" id="restoreBtn">Restore<div class="cooldownOverlay" id="restoreCD"></div></div>
+  <div class="abilityBtn" id="shieldBtn">
+    <span class="abilityName">Shield</span>
+    <span class="abilityHint">Key 1</span>
+    <div class="cooldownOverlay" id="shieldCD"></div>
+  </div>
+  <div class="abilityBtn" id="slowBtn">
+    <span class="abilityName">Time Slow</span>
+    <span class="abilityHint">Key 2</span>
+    <div class="cooldownOverlay" id="slowCD"></div>
+  </div>
+  <div class="abilityBtn" id="shockwaveBtn">
+    <span class="abilityName">Shockwave</span>
+    <span class="abilityHint">Key 3</span>
+    <div class="cooldownOverlay" id="shockwaveCD"></div>
+  </div>
 </div>
 
 <!-- Joystick -->
 <div id="joystickOuter"><div id="joystickInner"></div></div>
 
+<!-- Game Canvas -->
 <canvas id="beatCanvas"></canvas>
 
 <script>
-/* PANEL LOGIC */
-function closePanel(p){ document.getElementById(p).style.display='none'; }
+/* --------- Mode selection & panels --------- */
+const openingScreen = document.getElementById('openingScreen');
+const infoBtn = document.getElementById('infoBtn');
+const updatesBtn = document.getElementById('updatesBtn');
+const modeLabel = document.getElementById('modeLabel');
 
-document.getElementById("gameModeBtn").onclick=()=>{ document.getElementById("gameModePanel").style.display="block"; };
-document.getElementById("infoBtn").onclick=()=>{ document.getElementById("infoPanel").style.display="block"; };
-document.getElementById("updatesBtn").onclick=()=>{ document.getElementById("updatesPanel").style.display="block"; };
+infoBtn.addEventListener('click', () => {
+  document.getElementById('infoPanel').style.display = 'block';
+});
+updatesBtn.addEventListener('click', () => {
+  document.getElementById('updatesPanel').style.display = 'block';
+});
+function closePanel(id){ document.getElementById(id).style.display = 'none'; }
 
-/* GAME START */
-let selectedMode="survival";
-function startGame(){
-  selectedMode=document.getElementById("modeSelect").value;
-  document.getElementById("openingScreen").style.display="none";
-  running=true;
-  lastBeatTime=0;
-  animate();
-}
-
-/* CANVAS SETUP */
-const canvas=document.getElementById("beatCanvas");
-const ctx=canvas.getContext("2d");
-canvas.width=innerWidth;
-canvas.height=innerHeight;
-
-/* GAME VARIABLES */
-let running=false;
-let shapes=[], pellets=[], spinBeams=[];
-const keys={};
-
-const player={
-  x:canvas.width/2,
-  y:canvas.height/2,
-  size:50,
-  vx:0, vy:0,
-  speed:0.5,
-  maxSpeed:6,
-  health:100,
-  shield:false
+const MODES = {
+  chill: {
+    name: 'CHILL',
+    spawnInterval: 80,
+    pelletSpeed: 3,
+    shapeSpeed: 1.0,
+    damageMultiplier: 0.6,
+    beamChance: 0.03
+  },
+  normal: {
+    name: 'NORMAL',
+    spawnInterval: 55,
+    pelletSpeed: 3.8,
+    shapeSpeed: 1.3,
+    damageMultiplier: 1.0,
+    beamChance: 0.06
+  },
+  chaos: {
+    name: 'CHAOS',
+    spawnInterval: 35,
+    pelletSpeed: 4.8,
+    shapeSpeed: 1.7,
+    damageMultiplier: 1.4,
+    beamChance: 0.1
+  }
 };
 
-let abilities={shield:0, clear:0, restore:0};
+let selectedMode = null;
+let modeConfig = MODES.normal;
 
-/* ------------------------------
-   SHAPES
------------------------------- */
-class Shape{
-  constructor(x,y,size,type,color){
-    this.x=x; this.y=y;
-    this.size=size;
-    this.type=type;
-    this.color=color;
+document.querySelectorAll('.mode-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const modeKey = card.getAttribute('data-mode');
+    selectedMode = modeKey;
+    modeConfig = MODES[modeKey];
+    modeLabel.textContent = 'MODE: ' + modeConfig.name;
+    startGame();
+  });
+});
+
+/* --------- Canvas & game state --------- */
+const canvas = document.getElementById('beatCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let running = false;
+let shapes = [];
+let pellets = [];
+let spinBeams = [];
+let spawnTimer = 0;
+let animationId = null;
+
+const keys = {};
+
+const player = {
+  x: canvas.width/2,
+  y: canvas.height/2,
+  size: 40,
+  color: '#4f8cff',
+  vx: 0, vy: 0,
+  speed: 0.5,
+  maxSpeed: 6,
+  dashCooldown: 0,
+  health: 100,
+  shieldActive: false,
+  shieldTime: 0,
+  slowTime: 0,
+  shockwaveTime: 0,
+  shockwaveRadius: 0,
+  restoreAlpha: 0
+};
+
+/* Ability states */
+const abilities = {
+  shield: 0,
+  slow: 0,
+  shockwave: 0
+};
+const abilityMax = {
+  shield: 45*60,      // 45 seconds
+  slow: 35*60,        // 35 seconds
+  shockwave: 25*60    // 25 seconds
+};
+
+/* --------- Entities --------- */
+class Shape {
+  constructor(x,y,size,kind,color){
+    this.x = x;
+    this.y = y;
+    this.size = size;
+    this.kind = kind; // 'normal' | 'homing'
+    this.color = color;
+    this.angle = Math.random()*Math.PI*2;
+    this.orbitRadius = 30 + Math.random()*60;
   }
-  draw(){
-    ctx.fillStyle=this.color;
-    if(this.type==="square")
-      ctx.fillRect(this.x-this.size/2,this.y-this.size/2,this.size,this.size);
-    else{
-      ctx.beginPath();
-      ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
-      ctx.fill();
+  update(speedScale){
+    if (this.kind === 'homing'){
+      const dx = player.x - this.x;
+      const dy = player.y - this.y;
+      const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+      const step = modeConfig.shapeSpeed * 1.2 * speedScale;
+      this.x += dx/dist * step;
+      this.y += dy/dist * step;
+    } else {
+      // subtle orbit style drift
+      this.angle += 0.02 * speedScale;
+      this.x += Math.cos(this.angle)*0.6*speedScale;
+      this.y += Math.sin(this.angle)*0.6*speedScale;
     }
-  }
-  update(){
+
     this.draw();
   }
-}
-
-/* ------------------------------
-   DAMAGE FIX (NO MORE IMMORTALITY)
------------------------------- */
-function damagePlayer(amount){
-  if(player.shield) return;
-  player.health -= amount;
-  updateHealthBar();
-  if(player.health <= 0){
-    running=false;
-    alert("GAME OVER");
+  draw(){
+    ctx.shadowBlur = 16;
+    ctx.shadowColor = this.color;
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
   }
 }
 
-/* HEALTH BAR FIX */
-function updateHealthBar(){
-  const fill=document.getElementById("healthFill");
-  fill.style.width = player.health+"%";
-}
-
-/* ------------------------------
-   ANIMATION LOOP
------------------------------- */
-function animate(){
-  if(!running) return;
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  // Draw shapes
-  shapes.forEach((s,i)=>{
-    s.update();
-    if(collision(s)){
-      damagePlayer(1);
-      shapes.splice(i,1);
-    }
-  });
-
-  // Draw pellets
-  pellets.forEach((p,i)=>{
-    p.x+=p.vx; p.y+=p.vy;
-    ctx.fillStyle=p.color;
+class Pellet {
+  constructor(x,y,vx,vy,color){
+    this.x = x;
+    this.y = y;
+    this.vx = vx;
+    this.vy = vy;
+    this.color = color;
+    this.size = 5;
+  }
+  update(speedScale){
+    this.x += this.vx * speedScale;
+    this.y += this.vy * speedScale;
+    ctx.fillStyle = this.color;
     ctx.beginPath();
-    ctx.arc(p.x,p.y,6,0,Math.PI*2);
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
     ctx.fill();
-    if(collision(p)){
-      damagePlayer(2);
-      pellets.splice(i,1);
-    }
-  });
-
-  // Draw player
-  ctx.fillStyle="cyan";
-  ctx.fillRect(player.x-player.size/2,player.y-player.size/2,player.size,player.size);
-
-  movePlayer();
-
-  requestAnimationFrame(animate);
+  }
 }
 
-/* MOVEMENT */
-function movePlayer(){
-  if(keys["w"]) player.vy -= player.speed;
-  if(keys["s"]) player.vy += player.speed;
-  if(keys["a"]) player.vx -= player.speed;
-  if(keys["d"]) player.vx += player.speed;
+class SpinBeam {
+  constructor(){
+    this.angle = Math.random()*Math.PI*2;
+    this.timer = 4*60; // frames
+    this.length = Math.max(canvas.width, canvas.height)*1.4;
+  }
+  update(speedScale){
+    ctx.save();
+    ctx.translate(canvas.width/2, canvas.height/2);
+    ctx.rotate(this.angle);
+    const grad = ctx.createLinearGradient(-this.length/2, 0, this.length/2, 0);
+    grad.addColorStop(0, 'rgba(79,140,255,0)');
+    grad.addColorStop(0.5,'rgba(79,140,255,0.9)');
+    grad.addColorStop(1,'rgba(79,140,255,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(-this.length/2, -7, this.length, 14);
+    ctx.restore();
 
-  player.vx *= 0.88;
-  player.vy *= 0.88;
+    this.angle += 0.035 * speedScale;
+    this.timer--;
+  }
+}
+
+/* --------- Spawn functions --------- */
+function randomColor(){
+  const r = Math.floor(Math.random()*200+55);
+  const g = Math.floor(Math.random()*200+55);
+  const b = Math.floor(Math.random()*200+55);
+  return `rgb(${r},${g},${b})`;
+}
+
+function spawnShape(){
+  const edge = Math.floor(Math.random()*4);
+  let x, y;
+  if(edge === 0){ x = Math.random()*canvas.width; y = -30; }
+  else if(edge === 1){ x = canvas.width+30; y = Math.random()*canvas.height; }
+  else if(edge === 2){ x = Math.random()*canvas.width; y = canvas.height+30; }
+  else { x = -30; y = Math.random()*canvas.height; }
+
+  const size = 10 + Math.random()*18;
+  const kind = Math.random()<0.35 ? 'homing' : 'normal';
+  shapes.push(new Shape(x,y,size,kind,randomColor()));
+}
+
+function spawnPelletsFrom(shape){
+  const dx = player.x - shape.x;
+  const dy = player.y - shape.y;
+  const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+  const speed = modeConfig.pelletSpeed;
+  const vx = dx/dist*speed;
+  const vy = dy/dist*speed;
+  pellets.push(new Pellet(shape.x, shape.y, vx, vy, shape.color));
+}
+
+/* --------- Abilities ---------- */
+function useShield(){
+  if(abilities.shield <= 0){
+    player.shieldActive = true;
+    player.shieldTime = 5*60; // 5 seconds
+    abilities.shield = abilityMax.shield;
+    document.getElementById('shieldCD').style.width = '100%';
+  }
+}
+function useSlow(){
+  if(abilities.slow <= 0){
+    player.slowTime = 4*60; // 4 seconds
+    abilities.slow = abilityMax.slow;
+    document.getElementById('slowCD').style.width = '100%';
+  }
+}
+function useShockwave(){
+  if(abilities.shockwave <= 0){
+    player.shockwaveTime = 20; // frames of visual wave
+    player.shockwaveRadius = 30;
+    abilities.shockwave = abilityMax.shockwave;
+    document.getElementById('shockwaveCD').style.width = '100%';
+
+    // Immediate clear of bullets in radius
+    const r = 140;
+    pellets = pellets.filter(p => {
+      const dx = p.x - player.x;
+      const dy = p.y - player.y;
+      return dx*dx + dy*dy > r*r;
+    });
+    // Damage shapes near
+    shapes = shapes.filter(s => {
+      const dx = s.x - player.x;
+      const dy = s.y - player.y;
+      const dist2 = dx*dx + dy*dy;
+      if(dist2 < r*r) return false;
+      return true;
+    });
+  }
+}
+
+/* UI clicks */
+document.getElementById('shieldBtn').addEventListener('click',useShield);
+document.getElementById('slowBtn').addEventListener('click',useSlow);
+document.getElementById('shockwaveBtn').addEventListener('click',useShockwave);
+
+/* Keyboard abilities & movement */
+document.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  keys[k] = true;
+  if(k === '1') useShield();
+  if(k === '2') useSlow();
+  if(k === '3') useShockwave();
+});
+document.addEventListener('keyup', e => {
+  keys[e.key.toLowerCase()] = false;
+});
+
+/* --------- Joystick --------- */
+let joystickActive = false;
+let joystickVX = 0;
+let joystickVY = 0;
+const joyOuter = document.getElementById('joystickOuter');
+const joyInner = document.getElementById('joystickInner');
+const JOY_MAX = 56;
+const JOY_FACTOR = 0.14;
+let joyBaseX = 0;
+let joyBaseY = 0;
+
+canvas.addEventListener('touchstart', ev => {
+  ev.preventDefault();
+  const t = ev.touches[0];
+  joyBaseX = t.clientX;
+  joyBaseY = t.clientY;
+  joyOuter.style.display = 'block';
+  joyOuter.style.left = (joyBaseX - joyOuter.offsetWidth/2) + 'px';
+  joyOuter.style.top  = (joyBaseY - joyOuter.offsetHeight/2) + 'px';
+  joystickActive = true;
+  joystickVX = 0;
+  joystickVY = 0;
+});
+
+canvas.addEventListener('touchmove', ev => {
+  ev.preventDefault();
+  if(!joystickActive) return;
+  const t = ev.touches[0];
+  let dx = t.clientX - joyBaseX;
+  let dy = t.clientY - joyBaseY;
+  const dist = Math.sqrt(dx*dx + dy*dy);
+  if(dist > JOY_MAX){
+    const a = Math.atan2(dy,dx);
+    dx = Math.cos(a)*JOY_MAX;
+    dy = Math.sin(a)*JOY_MAX;
+  }
+  joyInner.style.left = (joyOuter.offsetWidth/2 - joyInner.offsetWidth/2 + dx) + 'px';
+  joyInner.style.top  = (joyOuter.offsetHeight/2 - joyInner.offsetHeight/2 + dy) + 'px';
+
+  joystickVX = (dx / JOY_MAX) * player.maxSpeed * JOY_FACTOR;
+  joystickVY = (dy / JOY_MAX) * player.maxSpeed * JOY_FACTOR;
+});
+
+function endJoystick(){
+  joystickActive = false;
+  joystickVX = 0;
+  joystickVY = 0;
+  joyOuter.style.display = 'none';
+  joyInner.style.left = (joyOuter.offsetWidth/2 - joyInner.offsetWidth/2) + 'px';
+  joyInner.style.top  = (joyOuter.offsetHeight/2 - joyInner.offsetHeight/2) + 'px';
+}
+canvas.addEventListener('touchend', ev => { ev.preventDefault(); endJoystick(); });
+canvas.addEventListener('touchcancel', ev => { ev.preventDefault(); endJoystick(); });
+
+/* --------- Movement & health --------- */
+function movePlayer(){
+  let ax=0, ay=0;
+  if(keys['w']) ay -= player.speed;
+  if(keys['s']) ay += player.speed;
+  if(keys['a']) ax -= player.speed;
+  if(keys['d']) ax += player.speed;
+
+  player.vx += ax + joystickVX;
+  player.vy += ay + joystickVY;
+  player.vx *= 0.86;
+  player.vy *= 0.86;
+  player.vx = Math.max(Math.min(player.vx, player.maxSpeed), -player.maxSpeed);
+  player.vy = Math.max(Math.min(player.vy, player.maxSpeed), -player.maxSpeed);
 
   player.x += player.vx;
   player.y += player.vy;
+
+  if(player.x - player.size/2 < 0) player.x = player.size/2;
+  if(player.x + player.size/2 > canvas.width) player.x = canvas.width - player.size/2;
+  if(player.y - player.size/2 < 0) player.y = player.size/2;
+  if(player.y + player.size/2 > canvas.height) player.y = canvas.height - player.size/2;
 }
 
-/* COLLISION */
-function collision(obj){
-  return (
-    Math.abs(obj.x - player.x) < obj.size + player.size/2 &&
-    Math.abs(obj.y - player.y) < obj.size + player.size/2
-  );
+function applyDamage(base){
+  if(player.shieldActive) return;
+  const dmg = base * modeConfig.damageMultiplier;
+  player.health -= dmg;
+  if(player.health <= 0){
+    player.health = 0;
+    updateHealthBar();
+    gameOver();
+    return;
+  }
+  updateHealthBar();
 }
 
-/* INPUT */
-document.addEventListener("keydown",e=>keys[e.key.toLowerCase()]=1);
-document.addEventListener("keyup",e=>keys[e.key.toLowerCase()]=0);
+function updateHealthBar(){
+  const fill = document.getElementById('healthFill');
+  fill.style.width = Math.max(0, player.health) + '%';
+  if(player.health > 60){
+    fill.style.background = 'linear-gradient(90deg,#1fff8f,#a7ff4a)';
+  } else if(player.health > 30){
+    fill.style.background = 'linear-gradient(90deg,#ffe35a,#ffb84a)';
+  } else{
+    fill.style.background = 'linear-gradient(90deg,#ff4f7b,#ff9966)';
+  }
+}
+
+/* --------- Game Over & Restart --------- */
+function gameOver(){
+  running = false;
+  cancelAnimationFrame(animationId);
+  // simple overlay via alert (you can fancy this up later)
+  setTimeout(() => {
+    alert('Game Over! Click Restart to play again.');
+  }, 50);
+}
+
+document.getElementById('restartBtn').addEventListener('click', () => {
+  resetGame();
+  openingScreen.style.display = 'flex'; // back to mode select
+});
+
+function resetGame(){
+  shapes = [];
+  pellets = [];
+  spinBeams = [];
+  player.x = canvas.width/2;
+  player.y = canvas.height/2;
+  player.vx = player.vy = 0;
+  player.health = 100;
+  player.shieldActive = false;
+  player.slowTime = 0;
+  player.shockwaveTime = 0;
+  player.shockwaveRadius = 0;
+  updateHealthBar();
+  for(let k in abilities) abilities[k] = 0;
+  document.getElementById('shieldCD').style.width='0%';
+  document.getElementById('slowCD').style.width='0%';
+  document.getElementById('shockwaveCD').style.width='0%';
+  spawnTimer = 0;
+}
+
+/* --------- Main loop --------- */
+function getSpeedScale(){
+  return player.slowTime > 0 ? 0.35 : 1.0;
+}
+
+function animate(){
+  if(!running) return;
+  const speedScale = getSpeedScale();
+
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // background glow around player
+  const g = ctx.createRadialGradient(player.x,player.y,0,player.x,player.y,400);
+  g.addColorStop(0,'rgba(79,140,255,0.26)');
+  g.addColorStop(1,'rgba(0,0,0,0.05)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  // spawn logic
+  spawnTimer--;
+  if(spawnTimer <= 0){
+    spawnShape();
+    // random chance for pellets from some shapes
+    if(Math.random()<0.35 && shapes.length>0){
+      const s = shapes[Math.floor(Math.random()*shapes.length)];
+      spawnPelletsFrom(s);
+    }
+    // spin beam chance depends on mode
+    if(Math.random() < modeConfig.beamChance){
+      spinBeams.push(new SpinBeam());
+    }
+    spawnTimer = modeConfig.spawnInterval;
+  }
+
+  // shapes
+  for(let i=shapes.length-1;i>=0;i--){
+    const s = shapes[i];
+    s.update(speedScale);
+    // collision with player
+    const dx = s.x - player.x;
+    const dy = s.y - player.y;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if(dist < s.size + player.size/2){
+      applyDamage(4);
+      shapes.splice(i,1);
+      continue;
+    }
+    // out of bounds cleanup
+    if(s.x<-100||s.x>canvas.width+100||s.y<-100||s.y>canvas.height+100){
+      shapes.splice(i,1);
+    }
+  }
+
+  // pellets
+  for(let i=pellets.length-1;i>=0;i--){
+    const p = pellets[i];
+    p.update(speedScale);
+    const dx = p.x - player.x;
+    const dy = p.y - player.y;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if(dist < p.size + player.size/2){
+      applyDamage(6);
+      pellets.splice(i,1);
+      continue;
+    }
+    if(p.x<-40||p.x>canvas.width+40||p.y<-40||p.y>canvas.height+40){
+      pellets.splice(i,1);
+    }
+  }
+
+  // spin beams
+  for(let i=spinBeams.length-1;i>=0;i--){
+    const b = spinBeams[i];
+    b.update(speedScale);
+    if(b.timer <= 0){
+      spinBeams.splice(i,1);
+      continue;
+    }
+    // collision check: transform player into beam space
+    const dx = player.x - canvas.width/2;
+    const dy = player.y - canvas.height/2;
+    const ca = Math.cos(-b.angle);
+    const sa = Math.sin(-b.angle);
+    const px = dx*ca - dy*sa;
+    const py = dx*sa + dy*ca;
+    if(Math.abs(py) < 14 && Math.abs(px) < b.length/2){
+      applyDamage(3);
+    }
+  }
+
+  // abilities timers
+  if(player.shieldActive){
+    player.shieldTime--;
+    if(player.shieldTime <= 0) player.shieldActive = false;
+  }
+  if(player.slowTime > 0){
+    player.slowTime--;
+  }
+  if(player.shockwaveTime > 0){
+    player.shockwaveTime--;
+    player.shockwaveRadius += 18;
+    // draw shockwave ring
+    ctx.strokeStyle = `rgba(255,255,255,${player.shockwaveTime/20})`;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, player.shockwaveRadius, 0, Math.PI*2);
+    ctx.stroke();
+  }
+
+  // cooldown overlays
+  for(let ab in abilities){
+    if(abilities[ab] > 0){
+      abilities[ab]--;
+      const max = abilityMax[ab];
+      const percent = (abilities[ab]/max)*100;
+      const el = document.getElementById(ab+'CD');
+      if(el) el.style.width = percent+'%';
+    } else {
+      const el = document.getElementById(ab+'CD');
+      if(el) el.style.width = '0%';
+    }
+  }
+
+  // shield visual
+  if(player.shieldActive){
+    const t = performance.now()/220;
+    const pulse = (Math.sin(t)+1)/2;
+    const alpha = 0.3 + 0.4*pulse;
+    ctx.strokeStyle = `rgba(79,180,255,${alpha})`;
+    ctx.lineWidth = 10;
+    ctx.strokeRect(
+      player.x - player.size/2 - 6,
+      player.y - player.size/2 - 6,
+      player.size + 12,
+      player.size + 12
+    );
+  }
+
+  // player
+  ctx.fillStyle = player.color;
+  ctx.fillRect(player.x - player.size/2, player.y - player.size/2, player.size, player.size);
+
+  movePlayer();
+
+  animationId = requestAnimationFrame(animate);
+}
+
+/* --------- Start game from mode --------- */
+function startGame(){
+  resetGame();
+  openingScreen.style.display = 'none';
+  running = true;
+  animate();
+}
+
+/* --------- Resize --------- */
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
 </script>
 </body>
 </html>
