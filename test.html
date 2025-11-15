@@ -3,13 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shape and Beats - Enhanced Abilities + Hazards</title>
+<title>Shape and Beats - Abilities + Mobile Joystick</title>
 <style>
-  body, html { margin:0; padding:0; overflow:hidden;
-    background: linear-gradient(135deg,#0a0a0a,#111);
-    font-family:sans-serif; color:white;
-  }
+  body, html { margin:0; padding:0; overflow:hidden; font-family:sans-serif; background:#0a0a0a; color:white; }
   canvas{ display:block; }
+
+  /* Opening screen */
+  #openingScreen{
+    position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(135deg,#111,#000); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:1000;
+  }
+  .menuBtn{
+    padding:15px 30px; margin:10px; background:#222; border:1px solid #555; color:white; cursor:pointer; font-size:18px;
+  }
+  .menuBtn:hover{ background:#444; }
+
+  /* Panels */
+  .panel{
+    position:absolute; top:10%; left:50%; transform:translateX(-50%); width:80%; max-width:600px; background:#111; border:2px solid #555; padding:20px; display:none; z-index:1100;
+  }
+  .closePanel{ position:absolute; top:5px; right:10px; cursor:pointer; color:#f00; font-weight:bold; font-size:18px; }
 
   /* Controls and UI */
   #controls{ position:absolute; top:10px; left:10px; display:flex; gap:10px; z-index:10; }
@@ -22,17 +34,10 @@
   .cooldownOverlay{position:absolute; top:0; left:0; height:100%; width:0%; background:rgba(0,0,0,0.6); transition:width 0.1s linear;}
 
   /* Joystick (mobile) */
-  #joystickOuter{
-    position:absolute; width:140px; height:140px;
-    border-radius:50%; background:rgba(255,255,255,0.03); border:2px solid #444; z-index:999;
-    touch-action:none; display:none; pointer-events:none;
-  }
-  #joystickInner{
-    position:absolute; width:56px; height:56px; border-radius:50%;
-    background:linear-gradient(180deg,#bbb,#888); top:42px; left:42px;
-    box-shadow:0 6px 16px rgba(0,0,0,0.6); touch-action:none; pointer-events:none;
-  }
+  #joystickOuter{ position:absolute; width:140px; height:140px; border-radius:50%; background:rgba(255,255,255,0.03); border:2px solid #444; z-index:999; touch-action:none; display:none; pointer-events:none; }
+  #joystickInner{ position:absolute; width:56px; height:56px; border-radius:50%; background:linear-gradient(180deg,#bbb,#888); top:42px; left:42px; box-shadow:0 6px 16px rgba(0,0,0,0.6); touch-action:none; pointer-events:none; }
 
+  /* Small mobile hints */
   @media (hover: none) and (pointer: coarse) {
     button.abilityBtn { font-size:13px; width:84px; height:52px; }
     #abilityBar { gap:10px; }
@@ -40,61 +45,118 @@
 </style>
 </head>
 <body>
-  <div id="controls">
-    <button id="startBtn">Start</button>
-    <button id="stopBtn">Stop</button>
-  </div>
 
-  <div id="healthBar"><div id="healthFill"></div></div>
+<!-- OPENING SCREEN -->
+<div id="openingScreen">
+  <h1>Shape and Beats</h1>
+  <button class="menuBtn" id="gameModeBtn">GameMode</button>
+  <button class="menuBtn" id="infoBtn">Information</button>
+  <button class="menuBtn" id="updatesBtn">Updates</button>
+</div>
 
-  <div id="abilityBar">
-    <div class="abilityBtn" id="shieldBtn">Shield (1)<div class="cooldownOverlay" id="shieldCD"></div></div>
-    <div class="abilityBtn" id="clearBtn">Clear (2)<div class="cooldownOverlay" id="clearCD"></div></div>
-    <div class="abilityBtn" id="restoreBtn">Restore (3)<div class="cooldownOverlay" id="restoreCD"></div></div>
-  </div>
+<!-- PANELS -->
+<div class="panel" id="gameModePanel">
+  <span class="closePanel" onclick="closePanel('gameModePanel')">X</span>
+  <h2>Select Game Mode</h2>
+  <select id="modeSelect" style="width:100%; padding:10px; font-size:16px;">
+    <option value="survival">Survival</option>
+    <option value="challenge">Challenge</option>
+    <option value="rhythm">Rhythm</option>
+  </select>
+  <button style="margin-top:15px; width:100%;" onclick="startGame()">Start</button>
+</div>
 
-  <div id="joystickOuter" aria-hidden="true"><div id="joystickInner"></div></div>
+<div class="panel" id="infoPanel">
+  <span class="closePanel" onclick="closePanel('infoPanel')">X</span>
+  <h2>Information</h2>
+  <p>This game combines shapes and beats. Avoid or destroy shapes and projectiles while using your abilities.</p>
+  <ul>
+    <li><b>Shield:</b> Protects you from damage for 5 seconds.</li>
+    <li><b>Clear:</b> Removes all shapes from the screen.</li>
+    <li><b>Restore:</b> Heals 50 health.</li>
+  </ul>
+</div>
 
-  <canvas id="beatCanvas"></canvas>
+<div class="panel" id="updatesPanel">
+  <span class="closePanel" onclick="closePanel('updatesPanel')">X</span>
+  <h2>Updates</h2>
+  <ul>
+    <li>v1.0 - Base game with abilities and shapes.</li>
+    <li>v1.1 - Mobile joystick support.</li>
+    <li>v1.2 - New hazards: spin beam, homing shapes, and splitter shapes.</li>
+  </ul>
+</div>
+
+<!-- GAME UI -->
+<div id="controls">
+  <button id="startBtn">Start</button>
+  <button id="stopBtn">Stop</button>
+</div>
+
+<div id="healthBar"><div id="healthFill"></div></div>
+
+<div id="abilityBar">
+  <div class="abilityBtn" id="shieldBtn">Shield (1)<div class="cooldownOverlay" id="shieldCD"></div></div>
+  <div class="abilityBtn" id="clearBtn">Clear (2)<div class="cooldownOverlay" id="clearCD"></div></div>
+  <div class="abilityBtn" id="restoreBtn">Restore (3)<div class="cooldownOverlay" id="restoreCD"></div></div>
+</div>
+
+<!-- MOBILE JOYSTICK -->
+<div id="joystickOuter"><div id="joystickInner"></div></div>
+
+<canvas id="beatCanvas"></canvas>
 
 <script>
-const canvas=document.getElementById('beatCanvas');
-const ctx=canvas.getContext('2d');
+// ------------------- OPENING SCREEN LOGIC -------------------
+const openingScreen = document.getElementById('openingScreen');
+const gameModeBtn = document.getElementById('gameModeBtn');
+const infoBtn = document.getElementById('infoBtn');
+const updatesBtn = document.getElementById('updatesBtn');
+
+gameModeBtn.addEventListener('click', ()=>{ document.getElementById('gameModePanel').style.display='block'; });
+infoBtn.addEventListener('click', ()=>{ document.getElementById('infoPanel').style.display='block'; });
+updatesBtn.addEventListener('click', ()=>{ document.getElementById('updatesPanel').style.display='block'; });
+
+function closePanel(id){ document.getElementById(id).style.display='none'; }
+
+let selectedMode = 'survival';
+function startGame(){
+  const select = document.getElementById('modeSelect');
+  selectedMode = select.value;
+  openingScreen.style.display='none';
+  running = true;
+  lastBeatTime = 0;
+  animate(performance.now());
+}
+
+// ------------------- GAME CODE -------------------
+const canvas = document.getElementById('beatCanvas');
+const ctx = canvas.getContext('2d');
 canvas.width=window.innerWidth; canvas.height=window.innerHeight;
 
-let shapes=[], pellets=[], hazards=[], animationId, running=false;
-let bpm=120; let beatInterval=60000/bpm; let lastBeatTime=0;
+let shapes=[], pellets=[], spinBeams=[], animationId, running=false;
+let bpm=120, beatInterval=60000/bpm, lastBeatTime=0;
 const keys={};
 
 const player={
-  x:canvas.width/2,
-  y:canvas.height/2,
-  size:40,
-  color:'#00f',
-  speed:0.5,
-  vx:0,
-  vy:0,
-  maxSpeed:6,
-  health:100,
-  dashMultiplier:3,
-  dashCooldown:0,
-  shieldActive:false,
-  shieldTime:0
+  x:canvas.width/2, y:canvas.height/2, size:40, color:'#00f', speed:0.5,
+  vx:0, vy:0, maxSpeed:6, health:100, dashMultiplier:3, dashCooldown:0,
+  shieldActive:false, shieldTime:0
 };
 
 let abilities={ shield:0, clear:0, restore:0 };
 const abilityDurations={ shield:5*60 };
 
-// Shape class
 class Shape{
   constructor(x,y,size,type,color){
     this.x=x; this.y=y; this.size=size; this.type=type; this.color=color;
-    this.growth=Math.random()*2+1;
-    this.shootCooldown=Math.floor(Math.random()*60);
+    this.growth=Math.random()*2+1; this.shootCooldown=Math.floor(Math.random()*60);
+    this.homing=false; this.split=false;
+    if(Math.random()<0.2) this.homing=true;
+    if(Math.random()<0.2) this.split=true;
   }
   draw(){
-    ctx.shadowBlur=20; ctx.shadowColor=this.color;
-    ctx.fillStyle=this.color;
+    ctx.shadowBlur=20; ctx.shadowColor=this.color; ctx.fillStyle=this.color;
     ctx.beginPath();
     if(this.type==="circle" || this.type==="explosive") ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
     else if(this.type==="square") ctx.rect(this.x-this.size/2,this.y-this.size/2,this.size,this.size);
@@ -104,206 +166,109 @@ class Shape{
       ctx.lineTo(this.x+this.size,this.y+this.size);
       ctx.closePath();
     }
-    ctx.fill();
-    ctx.shadowBlur=0;
+    ctx.fill(); ctx.shadowBlur=0;
   }
   update(){
-    this.size += this.growth*0.2;
-    if(this.size>80 || this.size<15) this.growth *= -1;
+    if(this.homing){
+      let dx = player.x - this.x;
+      let dy = player.y - this.y;
+      let dist = Math.sqrt(dx*dx + dy*dy) || 1;
+      this.x += dx/dist*1.2;
+      this.y += dy/dist*1.2;
+    } else { this.size += this.growth*0.2; if(this.size>80||this.size<15) this.growth*=-1; }
     this.draw();
     if(this.type==="circle" || this.type==="explosive"){
-      this.shootCooldown--;
-      if(this.shootCooldown<=0){
-        this.shootAtPlayer();
-        this.shootCooldown = 60;
-      }
+      this.shootCooldown--; if(this.shootCooldown<=0){ this.shootAtPlayer(); this.shootCooldown=60; }
     }
   }
   shootAtPlayer(){
     const dx = player.x - this.x;
     const dy = player.y - this.y;
-    const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+    const dist = Math.sqrt(dx*dx + dy*dy) ||1;
     const speed = 3;
-    const vx = dx/dist * speed;
-    const vy = dy/dist * speed;
-    pellets.push(new Pellet(this.x, this.y, vx, vy, this.color));
+    const vx = dx/dist*speed;
+    const vy = dy/dist*speed;
+    pellets.push(new Pellet(this.x,this.y,vx,vy,this.color));
+  }
+  splitShape(){
+    if(!this.split) return [];
+    const newShapes=[];
+    for(let i=0;i<2;i++){
+      const s = new Shape(this.x,this.y,this.size/2,this.type,this.color);
+      newShapes.push(s);
+    }
+    return newShapes;
   }
 }
 
-// Pellet class
-class Pellet{
-  constructor(x,y,vx,vy,color){ this.x=x; this.y=y; this.vx=vx; this.vy=vy; this.color=color; this.size=6; }
+class Pellet{ constructor(x,y,vx,vy,color){ this.x=x; this.y=y; this.vx=vx; this.vy=vy; this.color=color; this.size=6; } 
   update(){ this.x+=this.vx; this.y+=this.vy; ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill(); }
 }
 
-// Hazard class (environmental obstacles)
-class Hazard{
-  constructor(x,y,w,h,vx,vy,color){
-    this.x=x; this.y=y; this.w=w; this.h=h; this.vx=vx; this.vy=vy; this.color=color;
-  }
+class SpinBeam{ constructor(){ this.angle=0; this.timer=5*60; this.color='cyan'; this.length=canvas.width; }
   update(){
-    this.x += this.vx; this.y += this.vy;
-    // Bounce on edges
-    if(this.x<0 || this.x+this.w>canvas.width) this.vx*=-1;
-    if(this.y<0 || this.y+this.h>canvas.height) this.vy*=-1;
-    ctx.fillStyle=this.color; ctx.fillRect(this.x,this.y,this.w,this.h);
-    // Damage player on contact
-    if(player.x+player.size/2>this.x && player.x-player.size/2<this.x+this.w &&
-       player.y+player.size/2>this.y && player.y-player.size/2<this.y+this.h){
-      if(!player.shieldActive) player.health -= 0.5;
-    }
+    ctx.save(); ctx.translate(canvas.width/2,canvas.height/2); ctx.rotate(this.angle);
+    ctx.fillStyle=this.color; ctx.fillRect(-this.length/2,-5,this.length,10);
+    ctx.restore();
+    this.angle += 0.03; this.timer--; if(this.timer<=0){ spinBeams.splice(spinBeams.indexOf(this),1); }
+    // collision
+    const dx = player.x - canvas.width/2; const dy = player.y - canvas.height/2;
+    const px = dx*Math.cos(-this.angle)-dy*Math.sin(-this.angle);
+    const py = dx*Math.sin(-this.angle)+dy*Math.cos(-this.angle);
+    if(Math.abs(py)<10 && Math.abs(px)<this.length/2){ if(!player.shieldActive) player.health-=1; }
   }
 }
 
-// Utilities
+function spawnShape(){ const x=Math.random()*canvas.width; const y=Math.random()*canvas.height; const size=Math.random()*30+20; const type=['circle','square','triangle'][Math.floor(Math.random()*3)]; const color=randomColor(); shapes.push(new Shape(x,y,size,type,color)); }
+
 function randomColor(){ const r=Math.floor(Math.random()*255); const g=Math.floor(Math.random()*255); const b=Math.floor(Math.random()*255); return `rgb(${r},${g},${b})`; }
-function randomShapeType(){ const types=["circle","square","triangle","explosive"]; return types[Math.floor(Math.random()*types.length)]; }
-function spawnShape(){ 
-  const x=Math.random()*canvas.width; 
-  const y=Math.random()*canvas.height; 
-  const size=Math.random()*30+20; 
-  const type=randomShapeType(); 
-  const color=randomColor(); 
-  shapes.push(new Shape(x,y,size,type,color));
-}
-function spawnHazard(){
-  const w=Math.random()*60+30, h=Math.random()*20+20;
-  const x=Math.random()*(canvas.width-w);
-  const y=Math.random()*(canvas.height-h);
-  const vx=(Math.random()-0.5)*2;
-  const vy=(Math.random()-0.5)*2;
-  hazards.push(new Hazard(x,y,w,h,vx,vy,'rgba(255,0,0,0.5)'));
-}
 
 // Movement
 function movePlayer(){
-  let ax=0, ay=0;
-  if(keys['w']) ay -= player.speed;
-  if(keys['s']) ay += player.speed;
-  if(keys['a']) ax -= player.speed;
-  if(keys['d']) ax += player.speed;
-  if(keys['shift'] && player.dashCooldown<=0){
-    ax *= player.dashMultiplier;
-    ay *= player.dashMultiplier;
-    player.dashCooldown = 20;
-  }
-  player.vx += ax+joystickVX;
-  player.vy += ay+joystickVY;
+  let ax=0,ay=0;
+  if(keys['w']) ay-=player.speed; if(keys['s']) ay+=player.speed; if(keys['a']) ax-=player.speed; if(keys['d']) ax+=player.speed;
+  if(keys['shift']&&player.dashCooldown<=0){ ax*=player.dashMultiplier; ay*=player.dashMultiplier; player.dashCooldown=20; }
+  player.vx+=ax; player.vy+=ay;
   player.vx*=0.85; player.vy*=0.85;
   player.vx=Math.max(Math.min(player.vx,player.maxSpeed),-player.maxSpeed);
   player.vy=Math.max(Math.min(player.vy,player.maxSpeed),-player.maxSpeed);
-  player.x += player.vx; player.y += player.vy;
-  player.x=Math.max(Math.min(player.x,canvas.width-player.size/2),player.size/2);
-  player.y=Math.max(Math.min(player.y,canvas.height-player.size/2),player.size/2);
+  player.x+=player.vx; player.y+=player.vy;
+  if(player.x - player.size/2<0) player.x=player.size/2;
+  if(player.x + player.size/2>canvas.width) player.x=canvas.width-player.size/2;
+  if(player.y - player.size/2<0) player.y=player.size/2;
+  if(player.y + player.size/2>canvas.height) player.y=canvas.height-player.size/2;
   if(player.dashCooldown>0) player.dashCooldown--;
 }
 
 // Collision
-function checkCollision(shape){
-  const dx = shape.x - player.x; const dy = shape.y - player.y;
-  const distance = Math.sqrt(dx*dx + dy*dy);
-  if(shape.type==="circle") return distance < shape.size + player.size/2;
-  else if(shape.type==="square") return Math.abs(shape.x-player.x)<shape.size/2+player.size/2 && Math.abs(shape.y-player.y)<shape.size/2+player.size/2;
-  else if(shape.type==="triangle" || shape.type==="explosive") return distance<shape.size+player.size/2;
-  return false;
-}
-function checkCollisionPelletPlayer(p){
-  const dx = p.x - player.x; const dy = p.y - player.y;
-  return Math.sqrt(dx*dx + dy*dy) < p.size + player.size/2;
-}
+function checkCollision(shape){ const dx=shape.x-player.x; const dy=shape.y-player.y; const dist=Math.sqrt(dx*dx+dy*dy); 
+if(shape.type==="circle") return dist<shape.size+player.size/2; else if(shape.type==="square"){ return Math.abs(shape.x-player.x)<shape.size/2+player.size/2 && Math.abs(shape.y-player.y)<shape.size/2+player.size/2; } else if(shape.type==="triangle") return dist<shape.size+player.size/2; return false; }
+function checkCollisionPelletPlayer(p){ const dx=p.x-player.x; const dy=p.y-player.y; return Math.sqrt(dx*dx+dy*dy)<p.size+player.size/2; }
 
-// Health bar
-function updateHealthBar(){
-  const fill = document.getElementById('healthFill');
-  fill.style.width = Math.max(0, player.health) + '%';
-  fill.style.background = player.health>60 ? '#0f0' : (player.health>30 ? '#ff0' : '#f00');
-}
+// Health
+function updateHealthBar(){ const fill=document.getElementById('healthFill'); fill.style.width=Math.max(0,player.health)+'%'; if(player.health>60) fill.style.background='#0f0'; else if(player.health>30) fill.style.background='#ff0'; else fill.style.background='#f00'; }
 
 // Abilities
-function useShield(){ if(abilities.shield<=0){ player.shieldActive = true; player.shieldTime = abilityDurations.shield; abilities.shield = 45*60; document.getElementById('shieldCD').style.width='100%'; } }
-function useClear(){ if(abilities.clear<=0){ shapes = []; abilities.clear = 120*60; document.getElementById('clearCD').style.width='100%'; } }
-function useRestore(){ if(abilities.restore<=0){ player.health = Math.min(player.health + 50, 100); abilities.restore = 90*60; document.getElementById('restoreCD').style.width='100%'; } }
-document.getElementById('shieldBtn').addEventListener('click', useShield);
-document.getElementById('clearBtn').addEventListener('click', useClear);
-document.getElementById('restoreBtn').addEventListener('click', useRestore);
+function useShield(){ if(abilities.shield<=0){ player.shieldActive=true; player.shieldTime=abilityDurations.shield; abilities.shield=45*60; document.getElementById('shieldCD').style.width='100%'; } }
+function useClear(){ if(abilities.clear<=0){ shapes=[]; abilities.clear=120*60; document.getElementById('clearCD').style.width='100%'; } }
+function useRestore(){ if(abilities.restore<=0){ player.health=Math.min(player.health+50,100); abilities.restore=90*60; document.getElementById('restoreCD').style.width='100%'; } }
+
+document.getElementById('shieldBtn').addEventListener('click',useShield);
+document.getElementById('clearBtn').addEventListener('click',useClear);
+document.getElementById('restoreBtn').addEventListener('click',useRestore);
 
 // Joystick
-let joystickActive = false, joystickVX = 0, joystickVY = 0;
-const joyOuter = document.getElementById('joystickOuter'), joyInner = document.getElementById('joystickInner');
+let joystickActive=false, joystickVX=0, joystickVY=0;
+const joyOuter=document.getElementById('joystickOuter'), joyInner=document.getElementById('joystickInner');
 const JOY_MAX=56, JOY_FACTOR=0.14;
-let joyBaseX=0, joyBaseY=0;
+let joyBaseX=0,joyBaseY=0;
 
-canvas.addEventListener('touchstart', e=>{ e.preventDefault(); const t=e.touches[0]; joyBaseX=t.clientX; joyBaseY=t.clientY; joyOuter.style.display='block'; joyOuter.style.left=(joyBaseX-joyOuter.offsetWidth/2)+'px'; joyOuter.style.top=(joyBaseY-joyOuter.offsetHeight/2)+'px'; joyInner.style.left=(joyOuter.offsetWidth/2 - joyInner.offsetWidth/2)+'px'; joyInner.style.top=(joyOuter.offsetHeight/2 - joyInner.offsetHeight/2)+'px'; joystickActive=true; joystickVX=0; joystickVY=0; });
-canvas.addEventListener('touchmove', e=>{ e.preventDefault(); if(!joystickActive) return; const t=e.touches[0]; let dx=t.clientX-joyBaseX; let dy=t.clientY-joyBaseY; const dist=Math.sqrt(dx*dx+dy*dy); if(dist>JOY_MAX){ const a=Math.atan2(dy,dx); dx=Math.cos(a)*JOY_MAX; dy=Math.sin(a)*JOY_MAX; } joyInner.style.left=(joyOuter.offsetWidth/2 - joyInner.offsetWidth/2)+dx+'px'; joyInner.style.top=(joyOuter.offsetHeight/2 - joyInner.offsetHeight/2)+dy+'px'; joystickVX=dx/JOY_MAX*player.maxSpeed*JOY_FACTOR; joystickVY=dy/JOY_MAX*player.maxSpeed*JOY_FACTOR; });
-canvas.addEventListener('touchend', e=>{ e.preventDefault(); joystickActive=false; joystickVX=0; joystickVY=0; joyOuter.style.display='none'; joyInner.style.left=(joyOuter.offsetWidth/2 - joyInner.offsetWidth/2)+'px'; joyInner.style.top=(joyOuter.offsetHeight/2 - joyInner.offsetHeight/2)+'px'; });
-canvas.addEventListener('touchcancel', e=>{ e.preventDefault(); joystickActive=false; joystickVX=0; joystickVY=0; joyOuter.style.display='none'; });
+canvas.addEventListener('touchstart',ev=>{ const t=ev.touches[0]; joyBaseX=t.clientX; joyBaseY=t.clientY; joyOuter.style.display='block'; joyOuter.style.left=(joyBaseX-joyOuter.offsetWidth/2)+'px'; joyOuter.style.top=(joyBaseY-joyOuter.offsetHeight/2)+'px'; joystickActive=true; joystickVX=0; joystickVY=0; });
+canvas.addEventListener('touchmove',ev=>{ if(!joystickActive) return; const t=ev.touches[0]; let dx=t.clientX-joyBaseX; let dy=t.clientY-joyBaseY; const dist=Math.sqrt(dx*dx+dy*dy); if(dist>JOY_MAX){ const a=Math.atan2(dy,dx); dx=Math.cos(a)*JOY_MAX; dy=Math.sin(a)*JOY_MAX; } joyInner.style.left=(joyOuter.offsetWidth/2-joyInner.offsetWidth/2+dx)+'px'; joyInner.style.top=(joyOuter.offsetHeight/2-joyInner.offsetHeight/2+dy)+'px'; joystickVX=dx/JOY_MAX*player.maxSpeed*JOY_FACTOR; joystickVY=dy/JOY_MAX*player.maxSpeed*JOY_FACTOR; });
+canvas.addEventListener('touchend',ev=>{ joystickActive=false; joystickVX=0; joystickVY=0; joyOuter.style.display='none'; joyInner.style.left=(joyOuter.offsetWidth/2-joyInner.offsetWidth/2)+'px'; joyInner.style.top=(joyOuter.offsetHeight/2-joyInner.offsetHeight/2)+'px'; });
+canvas.addEventListener('touchcancel',ev=>{ joystickActive=false; joystickVX=0; joystickVY=0; joyOuter.style.display='none'; });
 
 // Animate
 function animate(timestamp){
   ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  // background glow
-  const gradient = ctx.createRadialGradient(player.x,player.y,0,player.x,player.y,500);
-  gradient.addColorStop(0,'rgba(0,0,255,0.12)');
-  gradient.addColorStop(1,'rgba(0,0,0,0.05)');
-  ctx.fillStyle=gradient;
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-
-  if(!lastBeatTime || timestamp - lastBeatTime > beatInterval){
-    spawnShape();
-    // 50% chance to spawn a hazard
-    if(Math.random()<0.5) spawnHazard();
-    lastBeatTime = timestamp;
-  }
-
-  movePlayer();
-
-  // draw player with shield effect
-  if(player.shieldActive){
-    ctx.beginPath();
-    ctx.arc(player.x, player.y, player.size+10, 0, Math.PI*2);
-    ctx.fillStyle='rgba(0,150,255,0.3)';
-    ctx.fill();
-  }
-  ctx.shadowBlur=20; ctx.shadowColor=player.color;
-  ctx.fillStyle=player.color;
-  ctx.fillRect(player.x-player.size/2,player.y-player.size/2,player.size,player.size);
-  ctx.shadowBlur=0;
-
-  // update shapes
-  shapes.forEach((s,i)=>{ s.update(); if(checkCollision(s)){ if(!player.shieldActive) player.health-=1; shapes.splice(i,1); } });
-  // update pellets
-  pellets.forEach((p,i)=>{ p.update(); if(checkCollisionPelletPlayer(p)){ if(!player.shieldActive) player.health-=2; pellets.splice(i,1); } if(p.x<0||p.x>canvas.width||p.y<0||p.y>canvas.height) pellets.splice(i,1); });
-  // update hazards
-  hazards.forEach(h=>h.update());
-
-  // update shield
-  if(player.shieldActive){ player.shieldTime--; if(player.shieldTime<=0) player.shieldActive=false; }
-
-  // ability cooldowns
-  for(let ab in abilities){ if(abilities[ab]>0){ abilities[ab]--; let perc=abilities[ab]/getAbilityMaxFrames(ab)*100; document.getElementById(ab+'CD').style.width=perc+'%'; } }
-
-  updateHealthBar();
-  if(player.health<=0){ running=false; alert("Game Over!"); }
-
-  if(running) animationId=requestAnimationFrame(animate);
-}
-
-function getAbilityMaxFrames(ab){ if(ab==='shield') return 45*60; if(ab==='clear') return 120*60; if(ab==='restore') return 90*60; return 60; }
-
-// Keyboard
-document.addEventListener('keydown', e=>{ keys[e.key.toLowerCase()]=true; if(e.key==='1') useShield(); if(e.key==='2') useClear(); if(e.key==='3') useRestore(); });
-document.addEventListener('keyup', e=>keys[e.key.toLowerCase()]=false);
-
-// Start/Stop
-document.getElementById('startBtn').addEventListener('click', ()=>{ if(!running){ running=true; lastBeatTime=0; animate(performance.now()); } });
-document.getElementById('stopBtn').addEventListener('click', ()=>{ running=false; cancelAnimationFrame(animationId); });
-
-// Spawn loop (slower spawn)
-function spawnPeriodic(){ spawnShape(); if(Math.random()<0.3) spawnHazard(); setTimeout(spawnPeriodic,1800); }
-spawnPeriodic();
-
-window.addEventListener('resize',()=>{ canvas.width=window.innerWidth; canvas.height=window.innerHeight; });
-</script>
-</body>
-</html>
+  ctx.fillStyle='rgba(0,0,0,0.05
