@@ -95,7 +95,7 @@
   }
   #openingInner {
     width: 90%;
-    max-width: 520px;
+    max-width: 620px;
     padding: 24px 22px 20px;
   }
   #openingTitle {
@@ -143,15 +143,15 @@
     color: var(--text-muted);
   }
 
-  /* Info / Updates Panel */
+  /* Info / Updates Panel / Loadout Panel */
   .panel {
     position: absolute;
-    top: 12%;
+    top: 10%;
     left: 50%;
     transform: translateX(-50%);
     width: 90%;
-    max-width: 520px;
-    padding: 18px 18px 14px;
+    max-width: 620px;
+    padding: 18px 18px 16px;
     display: none;
     z-index: 1100;
   }
@@ -183,6 +183,49 @@
   .closePanel:hover {
     color: #fff;
     transform: scale(1.08);
+  }
+
+  /* Loadout grid */
+  #loadoutGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .abilityCard {
+    border-radius: var(--radius-md);
+    padding: 8px 9px 9px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(0,0,0,0.8));
+    border: 1px solid rgba(255,255,255,0.25);
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease, background 0.15s ease;
+    font-size: 12px;
+  }
+  .abilityCardTitle {
+    font-weight: 600;
+    margin-bottom: 3px;
+    font-size: 12px;
+  }
+  .abilityCardDesc {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .abilityCard.selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 18px rgba(79,140,255,0.7);
+    transform: translateY(-1px);
+    background: linear-gradient(145deg, rgba(79,140,255,0.22), rgba(0,0,0,0.9));
+  }
+  #loadoutFooter {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  #loadoutStatus {
+    font-size: 12px;
+    color: var(--text-muted);
   }
 
   /* Top Controls + Mode label */
@@ -241,14 +284,14 @@
     transition: width 0.15s ease-out, background 0.15s ease-out;
   }
 
-  /* Ability Bar - scrollable strip */
+  /* Ability Bar - fixed 4 slots */
   #abilityBarWrapper {
     position: absolute;
     bottom: 12px;
     left: 50%;
     transform: translateX(-50%);
     max-width: 92vw;
-    padding: 4px 4px;
+    padding: 4px 6px;
     border-radius: 16px;
     background: rgba(0,0,0,0.4);
     border: 1px solid rgba(255,255,255,0.18);
@@ -258,11 +301,7 @@
   #abilityBar {
     display: flex;
     gap: 10px;
-    overflow-x: auto;
-    padding: 4px 4px 2px;
-    scrollbar-width: none;
   }
-  #abilityBar::-webkit-scrollbar { display:none; }
 
   .abilityBtn {
     position: relative;
@@ -337,7 +376,7 @@
 <div id="openingScreen">
   <div id="openingInner" class="glass-panel">
     <div id="openingTitle">SHAPE &amp; BEATS</div>
-    <div id="openingSubtitle">Select a mode, then survive the patterns with your abilities.</div>
+    <div id="openingSubtitle">1) Pick a mode, 2) Pick 4 abilities, 3) Survive.</div>
     <div id="modeGrid">
       <div class="mode-card" data-mode="chill">
         <div class="mode-name">Chill</div>
@@ -371,43 +410,52 @@
   </div>
 </div>
 
-<!-- Info / Updates Panels -->
+<!-- Info Panel -->
 <div class="panel glass-panel" id="infoPanel">
   <span class="closePanel" onclick="closePanel('infoPanel')">✕</span>
   <h2>Information</h2>
   <p>Controls:</p>
   <ul>
     <li>Move: <b>WASD</b> or mobile joystick (touch anywhere to spawn joystick).</li>
-    <li>Abilities:</li>
-    <ul>
-      <li><b>1</b> – Shield</li>
-      <li><b>2</b> – Time Slow</li>
-      <li><b>3</b> – Shockwave</li>
-      <li><b>4</b> – Freeze Field</li>
-      <li><b>5</b> – Clone Decoy</li>
-      <li><b>6</b> – Heal Over Time</li>
-    </ul>
+    <li>Abilities: choose 4 in the loadout screen, then press <b>1–4</b> in game.</li>
   </ul>
-  <p>Abilities:</p>
+  <p>Abilities pool (you pick 4):</p>
   <ul>
-    <li><b>Shield:</b> Temporary invulnerability with a cyan aura.</li>
-    <li><b>Time Slow:</b> Slows shapes and bullets for a few seconds.</li>
-    <li><b>Shockwave:</b> Radial blast that clears nearby bullets and damages nearby shapes.</li>
-    <li><b>Freeze Field:</b> Freezes all enemy movement briefly.</li>
-    <li><b>Clone Decoy:</b> Spawns a glowing clone that attracts pellets and homing shapes.</li>
-    <li><b>Heal Over Time:</b> Regenerates HP slowly over time.</li>
+    <li>Shield – Temporary invulnerability.</li>
+    <li>Time Slow – Slows shapes and bullets.</li>
+    <li>Shockwave – Blast that clears nearby threats.</li>
+    <li>Freeze Field – Freezes enemies briefly.</li>
+    <li>Clone Decoy – Fake clone that attracts enemies.</li>
+    <li>Heal Over Time – Gradual HP regen.</li>
+    <li>Dash – Quick movement burst.</li>
+    <li>Mega Heal – Big instant heal.</li>
+    <li>Barrier – Reduces damage taken for a short time.</li>
+    <li>Speed Boost – Temporary movement speed increase.</li>
+    <li>Cleanse – Clears all bullets on screen.</li>
   </ul>
 </div>
 
+<!-- Updates Panel -->
 <div class="panel glass-panel" id="updatesPanel">
   <span class="closePanel" onclick="closePanel('updatesPanel')">✕</span>
   <h2>Updates</h2>
   <ul>
-    <li>Brand new glass UI + extended mode grid.</li>
-    <li>Scrollable ability card bar with six abilities.</li>
-    <li>New abilities: Freeze Field, Clone Decoy, Heal Over Time.</li>
-    <li>New modes: Bullet Hell, Sniper, Boss Rush.</li>
+    <li>Ability loadouts: pick 4 abilities before each run.</li>
+    <li>New abilities: Dash, Mega Heal, Barrier, Speed Boost, Cleanse.</li>
+    <li>Modes extended: Bullet Hell, Sniper, Boss Rush.</li>
   </ul>
+</div>
+
+<!-- Loadout Panel -->
+<div class="panel glass-panel" id="loadoutPanel">
+  <span class="closePanel" onclick="closePanel('loadoutPanel')">✕</span>
+  <h2>Choose Loadout</h2>
+  <p>Select <b>exactly 4</b> abilities to bring into this run:</p>
+  <div id="loadoutGrid"></div>
+  <div id="loadoutFooter">
+    <div id="loadoutStatus">Selected: 0 / 4</div>
+    <button class="glass-button" id="confirmLoadoutBtn" disabled>Start Game</button>
+  </div>
 </div>
 
 <!-- Top Bar & Health -->
@@ -422,38 +470,28 @@
   </div>
 </div>
 
-<!-- Ability Bar Wrapper + scroll area -->
+<!-- Ability Bar with 4 slots -->
 <div id="abilityBarWrapper">
   <div id="abilityBar">
-    <div class="abilityBtn" id="shieldBtn">
-      <span class="abilityName">Shield</span>
-      <span class="abilityHint">Key 1</span>
-      <div class="cooldownOverlay" id="shieldCD"></div>
+    <div class="abilityBtn" data-slot="0">
+      <span class="abilityName" id="slot0Name">Slot 1</span>
+      <span class="abilityHint" id="slot0Hint">Key 1</span>
+      <div class="cooldownOverlay" id="slot0CD"></div>
     </div>
-    <div class="abilityBtn" id="slowBtn">
-      <span class="abilityName">Time Slow</span>
-      <span class="abilityHint">Key 2</span>
-      <div class="cooldownOverlay" id="slowCD"></div>
+    <div class="abilityBtn" data-slot="1">
+      <span class="abilityName" id="slot1Name">Slot 2</span>
+      <span class="abilityHint" id="slot1Hint">Key 2</span>
+      <div class="cooldownOverlay" id="slot1CD"></div>
     </div>
-    <div class="abilityBtn" id="shockwaveBtn">
-      <span class="abilityName">Shockwave</span>
-      <span class="abilityHint">Key 3</span>
-      <div class="cooldownOverlay" id="shockwaveCD"></div>
+    <div class="abilityBtn" data-slot="2">
+      <span class="abilityName" id="slot2Name">Slot 3</span>
+      <span class="abilityHint" id="slot2Hint">Key 3</span>
+      <div class="cooldownOverlay" id="slot2CD"></div>
     </div>
-    <div class="abilityBtn" id="freezeBtn">
-      <span class="abilityName">Freeze Field</span>
-      <span class="abilityHint">Key 4</span>
-      <div class="cooldownOverlay" id="freezeCD"></div>
-    </div>
-    <div class="abilityBtn" id="decoyBtn">
-      <span class="abilityName">Clone Decoy</span>
-      <span class="abilityHint">Key 5</span>
-      <div class="cooldownOverlay" id="decoyCD"></div>
-    </div>
-    <div class="abilityBtn" id="regenBtn">
-      <span class="abilityName">Heal Over Time</span>
-      <span class="abilityHint">Key 6</span>
-      <div class="cooldownOverlay" id="regenCD"></div>
+    <div class="abilityBtn" data-slot="3">
+      <span class="abilityName" id="slot3Name">Slot 4</span>
+      <span class="abilityHint" id="slot3Hint">Key 4</span>
+      <div class="cooldownOverlay" id="slot3CD"></div>
     </div>
   </div>
 </div>
@@ -470,6 +508,10 @@ const openingScreen = document.getElementById('openingScreen');
 const infoBtn = document.getElementById('infoBtn');
 const updatesBtn = document.getElementById('updatesBtn');
 const modeLabel = document.getElementById('modeLabel');
+const loadoutPanel = document.getElementById('loadoutPanel');
+const loadoutGrid = document.getElementById('loadoutGrid');
+const loadoutStatus = document.getElementById('loadoutStatus');
+const confirmLoadoutBtn = document.getElementById('confirmLoadoutBtn');
 
 infoBtn.addEventListener('click', () => {
   document.getElementById('infoPanel').style.display = 'block';
@@ -539,15 +581,111 @@ const MODES = {
 let selectedMode = null;
 let modeConfig = MODES.normal;
 
+/* --------- Ability definitions & loadout --------- */
+const ALL_ABILITIES = {
+  shield:   { name:'Shield',      desc:'Temporary invulnerability.' },
+  slow:     { name:'Time Slow',   desc:'Slows enemies and bullets.' },
+  shockwave:{ name:'Shockwave',   desc:'Blast clearing nearby threats.' },
+  freeze:   { name:'Freeze Field',desc:'Freezes enemies briefly.' },
+  decoy:    { name:'Clone Decoy', desc:'Fake clone attracts enemies.' },
+  regen:    { name:'Heal Over Time', desc:'Regenerates health slowly.' },
+  dash:     { name:'Dash',        desc:'Quick burst of movement.' },
+  megaHeal: { name:'Mega Heal',   desc:'Instantly restore a chunk of HP.' },
+  barrier:  { name:'Barrier',     desc:'Temporary damage reduction.' },
+  speed:    { name:'Speed Boost', desc:'Move faster for a bit.' },
+  cleanse:  { name:'Cleanse',     desc:'Clears all bullets on screen.' }
+};
+
+const abilities = {
+  shield:0, slow:0, shockwave:0, freeze:0, decoy:0, regen:0,
+  dash:0, megaHeal:0, barrier:0, speed:0, cleanse:0
+};
+const abilityMax = {
+  shield:   45*60,
+  slow:     35*60,
+  shockwave:25*60,
+  freeze:   35*60,
+  decoy:    40*60,
+  regen:    30*60,
+  dash:     12*60,
+  megaHeal: 25*60,
+  barrier:  25*60,
+  speed:    18*60,
+  cleanse:  20*60
+};
+
+let selectedAbilityIds = [];
+let activeAbilities = []; // 4 ability IDs in order (slots 0..3)
+const abilityCardEls = {};
+
+/* build loadout grid */
+for (const [id, data] of Object.entries(ALL_ABILITIES)) {
+  const card = document.createElement('div');
+  card.className = 'abilityCard';
+  card.dataset.abilityId = id;
+  card.innerHTML = `
+    <div class="abilityCardTitle">${data.name}</div>
+    <div class="abilityCardDesc">${data.desc}</div>
+  `;
+  card.addEventListener('click', () => toggleAbility(id, card));
+  abilityCardEls[id] = card;
+  loadoutGrid.appendChild(card);
+}
+
+function toggleAbility(id, el){
+  const idx = selectedAbilityIds.indexOf(id);
+  if(idx === -1){
+    if(selectedAbilityIds.length >= 4) return;
+    selectedAbilityIds.push(id);
+    el.classList.add('selected');
+  } else {
+    selectedAbilityIds.splice(idx,1);
+    el.classList.remove('selected');
+  }
+  updateLoadoutStatus();
+}
+
+function updateLoadoutStatus(){
+  loadoutStatus.textContent = `Selected: ${selectedAbilityIds.length} / 4`;
+  confirmLoadoutBtn.disabled = selectedAbilityIds.length !== 4;
+}
+
+/* when a mode is chosen, open loadout panel */
 document.querySelectorAll('.mode-card').forEach(card => {
   card.addEventListener('click', () => {
     const modeKey = card.getAttribute('data-mode');
     selectedMode = modeKey;
     modeConfig = MODES[modeKey];
     modeLabel.textContent = 'MODE: ' + modeConfig.name;
-    startGame();
+
+    // reset loadout selection
+    selectedAbilityIds = [];
+    for(const id in abilityCardEls){
+      abilityCardEls[id].classList.remove('selected');
+    }
+    updateLoadoutStatus();
+    loadoutPanel.style.display = 'block';
   });
 });
+
+/* confirm loadout and start game */
+confirmLoadoutBtn.addEventListener('click', () => {
+  if(selectedAbilityIds.length !== 4) return;
+  activeAbilities = selectedAbilityIds.slice();
+  configureAbilitySlots();
+  loadoutPanel.style.display = 'none';
+  openingScreen.style.display = 'none';
+  startGame();
+});
+
+/* configure bottom ability UI from activeAbilities */
+function configureAbilitySlots(){
+  activeAbilities.forEach((id, idx) => {
+    const data = ALL_ABILITIES[id];
+    document.getElementById(`slot${idx}Name`).textContent = data ? data.name : `Slot ${idx+1}`;
+    document.getElementById(`slot${idx}Hint`).textContent = `Key ${idx+1}`;
+  });
+}
 
 /* --------- Canvas & game state --------- */
 const canvas = document.getElementById('beatCanvas');
@@ -572,7 +710,6 @@ const player = {
   vx: 0, vy: 0,
   speed: 0.5,
   maxSpeed: 6,
-  dashCooldown: 0,
   health: 100,
   shieldActive: false,
   shieldTime: 0,
@@ -580,7 +717,9 @@ const player = {
   freezeTime: 0,
   shockwaveTime: 0,
   shockwaveRadius: 0,
-  regenTime: 0
+  regenTime: 0,
+  barrierTime: 0,
+  speedBoostTime: 0
 };
 
 const decoy = {
@@ -590,23 +729,8 @@ const decoy = {
   timer: 0
 };
 
-/* Ability states */
-const abilities = {
-  shield: 0,
-  slow: 0,
-  shockwave: 0,
-  freeze: 0,
-  decoy: 0,
-  regen: 0
-};
-const abilityMax = {
-  shield: 45*60,      // 45 seconds
-  slow: 35*60,        // 35 seconds
-  shockwave: 25*60,   // 25 seconds
-  freeze: 35*60,      // 35 seconds
-  decoy: 40*60,       // 40 seconds
-  regen: 30*60        // 30 seconds
-};
+let lastMoveDirX = 1;
+let lastMoveDirY = 0;
 
 /* --------- Entities --------- */
 class Shape {
@@ -727,87 +851,133 @@ function spawnPelletsFrom(shape){
   pellets.push(new Pellet(shape.x, shape.y, vx, vy, shape.color));
 }
 
-/* --------- Abilities ---------- */
+/* --------- Abilities logic ---------- */
 function useShield(){
-  if(abilities.shield <= 0){
-    player.shieldActive = true;
-    player.shieldTime = 5*60; // 5 seconds
-    abilities.shield = abilityMax.shield;
-    document.getElementById('shieldCD').style.width = '100%';
-  }
+  if(abilities.shield > 0) return;
+  player.shieldActive = true;
+  player.shieldTime = 5*60; // 5 seconds
+  abilities.shield = abilityMax.shield;
 }
 function useSlow(){
-  if(abilities.slow <= 0){
-    player.slowTime = 4*60; // 4 seconds
-    abilities.slow = abilityMax.slow;
-    document.getElementById('slowCD').style.width = '100%';
-  }
+  if(abilities.slow > 0) return;
+  player.slowTime = 4*60; // 4 seconds
+  abilities.slow = abilityMax.slow;
 }
 function useShockwave(){
-  if(abilities.shockwave <= 0){
-    player.shockwaveTime = 20; // frames of visual wave
-    player.shockwaveRadius = 30;
-    abilities.shockwave = abilityMax.shockwave;
-    document.getElementById('shockwaveCD').style.width = '100%';
+  if(abilities.shockwave > 0) return;
+  player.shockwaveTime = 20; // frames of visual wave
+  player.shockwaveRadius = 30;
+  abilities.shockwave = abilityMax.shockwave;
 
-    const r = 140;
-    // Clear nearby bullets
-    pellets = pellets.filter(p => {
-      const dx = p.x - player.x;
-      const dy = p.y - player.y;
-      return dx*dx + dy*dy > r*r;
-    });
-    // Damage shapes near
-    shapes = shapes.filter(s => {
-      const dx = s.x - player.x;
-      const dy = s.y - player.y;
-      return dx*dx + dy*dy > r*r;
-    });
-  }
+  const r = 140;
+  // Clear nearby bullets
+  pellets = pellets.filter(p => {
+    const dx = p.x - player.x;
+    const dy = p.y - player.y;
+    return dx*dx + dy*dy > r*r;
+  });
+  // Damage shapes near
+  shapes = shapes.filter(s => {
+    const dx = s.x - player.x;
+    const dy = s.y - player.y;
+    return dx*dx + dy*dy > r*r;
+  });
 }
 function useFreeze(){
-  if(abilities.freeze <= 0){
-    player.freezeTime = 3*60; // 3 seconds
-    abilities.freeze = abilityMax.freeze;
-    document.getElementById('freezeCD').style.width = '100%';
-  }
+  if(abilities.freeze > 0) return;
+  player.freezeTime = 3*60; // 3 seconds
+  abilities.freeze = abilityMax.freeze;
 }
 function useDecoy(){
-  if(abilities.decoy <= 0){
-    decoy.active = true;
-    decoy.x = player.x;
-    decoy.y = player.y;
-    decoy.timer = 6*60;
-    abilities.decoy = abilityMax.decoy;
-    document.getElementById('decoyCD').style.width = '100%';
-  }
+  if(abilities.decoy > 0) return;
+  decoy.active = true;
+  decoy.x = player.x;
+  decoy.y = player.y;
+  decoy.timer = 6*60;
+  abilities.decoy = abilityMax.decoy;
 }
 function useRegen(){
-  if(abilities.regen <= 0){
-    player.regenTime = 5*60; // 5 seconds regen
-    abilities.regen = abilityMax.regen;
-    document.getElementById('regenCD').style.width = '100%';
+  if(abilities.regen > 0) return;
+  player.regenTime = 5*60; // 5 seconds regen
+  abilities.regen = abilityMax.regen;
+}
+function useDash(){
+  if(abilities.dash > 0) return;
+  const dashDist = 150;
+  const mag = Math.sqrt(lastMoveDirX*lastMoveDirX + lastMoveDirY*lastMoveDirY);
+  if(mag > 0){
+    const nx = lastMoveDirX / mag;
+    const ny = lastMoveDirY / mag;
+    player.x += nx * dashDist;
+    player.y += ny * dashDist;
+    // clamp
+    if(player.x - player.size/2 < 0) player.x = player.size/2;
+    if(player.x + player.size/2 > canvas.width) player.x = canvas.width - player.size/2;
+    if(player.y - player.size/2 < 0) player.y = player.size/2;
+    if(player.y + player.size/2 > canvas.height) player.y = canvas.height - player.size/2;
+  }
+  abilities.dash = abilityMax.dash;
+}
+function useMegaHeal(){
+  if(abilities.megaHeal > 0) return;
+  player.health = Math.min(100, player.health + 30);
+  updateHealthBar();
+  abilities.megaHeal = abilityMax.megaHeal;
+}
+function useBarrier(){
+  if(abilities.barrier > 0) return;
+  player.barrierTime = 4*60; // 4 seconds damage reduction
+  abilities.barrier = abilityMax.barrier;
+}
+function useSpeedBoost(){
+  if(abilities.speed > 0) return;
+  player.speedBoostTime = 4*60;
+  abilities.speed = abilityMax.speed;
+}
+function useCleanse(){
+  if(abilities.cleanse > 0) return;
+  pellets = [];
+  abilities.cleanse = abilityMax.cleanse;
+}
+
+function activateAbility(id){
+  if(!id) return;
+  if(abilities[id] > 0) return;
+  switch(id){
+    case 'shield':    useShield(); break;
+    case 'slow':      useSlow(); break;
+    case 'shockwave': useShockwave(); break;
+    case 'freeze':    useFreeze(); break;
+    case 'decoy':     useDecoy(); break;
+    case 'regen':     useRegen(); break;
+    case 'dash':      useDash(); break;
+    case 'megaHeal':  useMegaHeal(); break;
+    case 'barrier':   useBarrier(); break;
+    case 'speed':     useSpeedBoost(); break;
+    case 'cleanse':   useCleanse(); break;
   }
 }
 
-/* UI clicks */
-document.getElementById('shieldBtn').addEventListener('click',useShield);
-document.getElementById('slowBtn').addEventListener('click',useSlow);
-document.getElementById('shockwaveBtn').addEventListener('click',useShockwave);
-document.getElementById('freezeBtn').addEventListener('click',useFreeze);
-document.getElementById('decoyBtn').addEventListener('click',useDecoy);
-document.getElementById('regenBtn').addEventListener('click',useRegen);
+/* UI clicks for slots (slots map to activeAbilities) */
+document.querySelectorAll('.abilityBtn').forEach(btn => {
+  const slot = parseInt(btn.dataset.slot, 10);
+  btn.addEventListener('click', () => useAbilitySlot(slot));
+});
+
+function useAbilitySlot(slot){
+  const id = activeAbilities[slot];
+  if(!id) return;
+  activateAbility(id);
+}
 
 /* Keyboard abilities & movement */
 document.addEventListener('keydown', e => {
   const k = e.key.toLowerCase();
   keys[k] = true;
-  if(k === '1') useShield();
-  if(k === '2') useSlow();
-  if(k === '3') useShockwave();
-  if(k === '4') useFreeze();
-  if(k === '5') useDecoy();
-  if(k === '6') useRegen();
+  if(k === '1') useAbilitySlot(0);
+  if(k === '2') useAbilitySlot(1);
+  if(k === '3') useAbilitySlot(2);
+  if(k === '4') useAbilitySlot(3);
 });
 document.addEventListener('keyup', e => {
   keys[e.key.toLowerCase()] = false;
@@ -870,13 +1040,26 @@ canvas.addEventListener('touchcancel', ev => { ev.preventDefault(); endJoystick(
 /* --------- Movement & health --------- */
 function movePlayer(){
   let ax=0, ay=0;
-  if(keys['w']) ay -= player.speed;
-  if(keys['s']) ay += player.speed;
-  if(keys['a']) ax -= player.speed;
-  if(keys['d']) ax += player.speed;
+  if(keys['w']) ay -= 1;
+  if(keys['s']) ay += 1;
+  if(keys['a']) ax -= 1;
+  if(keys['d']) ax += 1;
 
-  player.vx += ax + joystickVX;
-  player.vy += ay + joystickVY;
+  const moveVecX = ax + joystickVX*10;
+  const moveVecY = ay + joystickVY*10;
+  if(moveVecX !== 0 || moveVecY !== 0){
+    const mag = Math.sqrt(moveVecX*moveVecX + moveVecY*moveVecY);
+    if(mag > 0){
+      lastMoveDirX = moveVecX / mag;
+      lastMoveDirY = moveVecY / mag;
+    }
+  }
+
+  let speed = player.speed;
+  if(player.speedBoostTime > 0) speed *= 1.8;
+
+  player.vx += ax * speed + joystickVX;
+  player.vy += ay * speed + joystickVY;
   player.vx *= 0.86;
   player.vy *= 0.86;
   player.vx = Math.max(Math.min(player.vx, player.maxSpeed), -player.maxSpeed);
@@ -893,7 +1076,8 @@ function movePlayer(){
 
 function applyDamage(base){
   if(player.shieldActive) return;
-  const dmg = base * modeConfig.damageMultiplier;
+  let dmg = base * modeConfig.damageMultiplier;
+  if(player.barrierTime > 0) dmg *= 0.5;
   player.health -= dmg;
   if(player.health <= 0){
     player.health = 0;
@@ -944,14 +1128,16 @@ function resetGame(){
   player.shockwaveTime = 0;
   player.shockwaveRadius = 0;
   player.regenTime = 0;
+  player.barrierTime = 0;
+  player.speedBoostTime = 0;
   decoy.active = false;
   decoy.timer = 0;
   updateHealthBar();
   for(let k in abilities) abilities[k] = 0;
-  ['shield','slow','shockwave','freeze','decoy','regen'].forEach(id=>{
-    const el = document.getElementById(id+'CD');
-    if(el) el.style.width='0%';
-  });
+  for(let i=0;i<4;i++){
+    const el = document.getElementById('slot'+i+'CD');
+    if(el) el.style.width = '0%';
+  }
   spawnTimer = 0;
 }
 
@@ -1093,6 +1279,12 @@ function animate(){
       updateHealthBar();
     }
   }
+  if(player.barrierTime > 0){
+    player.barrierTime--;
+  }
+  if(player.speedBoostTime > 0){
+    player.speedBoostTime--;
+  }
 
   // decoy timer + draw
   if(decoy.active){
@@ -1107,17 +1299,18 @@ function animate(){
     }
   }
 
-  // cooldown overlays
-  for(let ab in abilities){
-    if(abilities[ab] > 0){
-      abilities[ab]--;
-      const max = abilityMax[ab];
-      const percent = (abilities[ab]/max)*100;
-      const el = document.getElementById(ab+'CD');
-      if(el) el.style.width = percent+'%';
+  // cooldown overlays for active ability slots
+  for(let i=0;i<activeAbilities.length;i++){
+    const id = activeAbilities[i];
+    const cdEl = document.getElementById('slot'+i+'CD');
+    if(!id || !cdEl) continue;
+    if(abilities[id] > 0){
+      abilities[id]--;
+      const max = abilityMax[id] || 60;
+      const percent = (abilities[id]/max)*100;
+      cdEl.style.width = percent + '%';
     } else {
-      const el = document.getElementById(ab+'CD');
-      if(el) el.style.width = '0%';
+      cdEl.style.width = '0%';
     }
   }
 
@@ -1136,6 +1329,18 @@ function animate(){
     );
   }
 
+  // barrier visual
+  if(player.barrierTime > 0){
+    const t = performance.now()/260;
+    const pulse = (Math.sin(t)+1)/2;
+    const alpha = 0.25 + 0.3*pulse;
+    ctx.strokeStyle = `rgba(255,180,80,${alpha})`;
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, player.size*1.4, 0, Math.PI*2);
+    ctx.stroke();
+  }
+
   // player
   ctx.fillStyle = player.color;
   ctx.fillRect(player.x - player.size/2, player.y - player.size/2, player.size, player.size);
@@ -1145,10 +1350,9 @@ function animate(){
   animationId = requestAnimationFrame(animate);
 }
 
-/* --------- Start game from mode --------- */
+/* --------- Start game from mode+loadout --------- */
 function startGame(){
   resetGame();
-  openingScreen.style.display = 'none';
   running = true;
   animate();
 }
