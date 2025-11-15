@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shape and Beats - Abilities + Effects</title>
+<title>Shape and Beats - Abilities + Visual Effects</title>
 <style>
 body, html { margin:0; padding:0; overflow:hidden; font-family:sans-serif; background:#0a0a0a; color:white; }
 canvas{ display:block; }
@@ -66,9 +66,9 @@ button:hover{ background:#444; }
   <h2>Information</h2>
   <p>Abilities with effects:</p>
   <ul>
-    <li><b>Shield:</b> Cyan glow around player, lasts 5s.</li>
-    <li><b>Clear:</b> Removes all shapes from screen with flash.</li>
-    <li><b>Restore:</b> Heals 50 health with green pulse.</li>
+    <li><b>Shield:</b> Pulsating cyan aura around player.</li>
+    <li><b>Clear:</b> Screen flash that fades.</li>
+    <li><b>Restore:</b> Green glow pulse around player.</li>
   </ul>
 </div>
 
@@ -76,8 +76,7 @@ button:hover{ background:#444; }
   <span class="closePanel" onclick="closePanel('updatesPanel')">X</span>
   <h2>Updates</h2>
   <ul>
-    <li>v1.3 - Abilities visual effects added.</li>
-    <li>v1.4 - Player is now a big square, cannot die.</li>
+    <li>v1.5 - Player smaller & visual effects improved.</li>
   </ul>
 </div>
 
@@ -108,13 +107,7 @@ updatesBtn.addEventListener('click',()=>{document.getElementById('updatesPanel')
 function closePanel(id){document.getElementById(id).style.display='none';}
 
 let selectedMode='survival';
-function startGame(){
-  selectedMode=document.getElementById('modeSelect').value;
-  openingScreen.style.display='none';
-  running=true;
-  lastBeatTime=0;
-  animate(performance.now());
-}
+function startGame(){selectedMode=document.getElementById('modeSelect').value; openingScreen.style.display='none'; running=true; lastBeatTime=0; animate(performance.now());}
 
 const canvas=document.getElementById('beatCanvas');
 const ctx=canvas.getContext('2d');
@@ -124,146 +117,68 @@ let shapes=[], pellets=[], spinBeams=[], animationId, running=false;
 let bpm=120, beatInterval=60000/bpm, lastBeatTime=0;
 const keys={};
 
-const player={
-  x:canvas.width/2, y:canvas.height/2, size:80, color:'#00f', speed:0.5,
-  vx:0, vy:0, maxSpeed:6, dashMultiplier:3, dashCooldown:0,
-  shieldActive:false, shieldTime:0
-};
+const player={x:canvas.width/2, y:canvas.height/2, size:50, color:'#00f', speed:0.5, vx:0, vy:0, maxSpeed:6, dashMultiplier:3, dashCooldown:0, shieldActive:false, shieldTime:0, effectAlpha:0, restoreAlpha:0};
 
 let abilities={shield:0, clear:0, restore:0};
 const abilityDurations={shield:5*60};
 
-class Shape{
-  constructor(x,y,size,type,color){
-    this.x=x; this.y=y; this.size=size; this.type=type; this.color=color;
-    this.growth=Math.random()*2+1; this.shootCooldown=Math.floor(Math.random()*60);
-    this.homing=false; this.split=false;
-    if(Math.random()<0.2) this.homing=true;
-    if(Math.random()<0.2) this.split=true;
-  }
-  draw(){
-    ctx.shadowBlur=20; ctx.shadowColor=this.color; ctx.fillStyle=this.color;
-    ctx.beginPath();
-    if(this.type==='circle' || this.type==='explosive') ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
-    else ctx.fillRect(this.x-this.size/2,this.y-this.size/2,this.size,this.size);
-    ctx.fill(); ctx.shadowBlur=0;
-  }
-  update(){
-    if(this.homing){
-      let dx=player.x-this.x, dy=player.y-this.y, dist=Math.sqrt(dx*dx+dy*dy)||1;
-      this.x+=dx/dist*1.2; this.y+=dy/dist*1.2;
-    } else { this.size+=this.growth*0.2; if(this.size>80||this.size<15)this.growth*=-1; }
-    this.draw();
-    if(this.type==='circle'||this.type==='explosive'){
-      this.shootCooldown--; if(this.shootCooldown<=0){ this.shootAtPlayer(); this.shootCooldown=60; }
-    }
-  }
-  shootAtPlayer(){
-    const dx=player.x-this.x, dy=player.y-this.y, dist=Math.sqrt(dx*dx+dy*dy)||1;
-    const speed=3, vx=dx/dist*speed, vy=dy/dist*speed;
-    pellets.push(new Pellet(this.x,this.y,vx,vy,this.color));
-  }
-  splitShape(){
-    if(!this.split) return [];
-    const newShapes=[];
-    for(let i=0;i<2;i++){
-      newShapes.push(new Shape(this.x,this.y,this.size/2,this.type,this.color));
-    }
-    return newShapes;
-  }
-}
+class Shape{constructor(x,y,size,type,color){this.x=x;this.y=y;this.size=size;this.type=type;this.color=color;this.growth=Math.random()*2+1;this.shootCooldown=Math.floor(Math.random()*60);this.homing=Math.random()<0.2;this.split=Math.random()<0.2;}
+draw(){ctx.shadowBlur=20; ctx.shadowColor=this.color; ctx.fillStyle=this.color; ctx.beginPath(); if(this.type==='circle'||this.type==='explosive') ctx.arc(this.x,this.y,this.size,0,Math.PI*2); else ctx.fillRect(this.x-this.size/2,this.y-this.size/2,this.size,this.size); ctx.fill(); ctx.shadowBlur=0;}
+update(){if(this.homing){let dx=player.x-this.x, dy=player.y-this.y, dist=Math.sqrt(dx*dx+dy*dy)||1; this.x+=dx/dist*1.2; this.y+=dy/dist*1.2;}else{this.size+=this.growth*0.2;if(this.size>80||this.size<15)this.growth*=-1;} this.draw(); if((this.type==='circle'||this.type==='explosive')&&(this.shootCooldown--<=0)){this.shootAtPlayer(); this.shootCooldown=60;}}
+shootAtPlayer(){const dx=player.x-this.x, dy=player.y-this.y, dist=Math.sqrt(dx*dx+dy*dy)||1; pellets.push(new Pellet(this.x,this.y,dx/dist*3,dy/dist*3,this.color));}
+splitShape(){if(!this.split) return []; const newShapes=[];for(let i=0;i<2;i++){newShapes.push(new Shape(this.x,this.y,this.size/2,this.type,this.color));}return newShapes;}}
 
-class Pellet{ 
-  constructor(x,y,vx,vy,color){ this.x=x; this.y=y; this.vx=vx; this.vy=vy; this.color=color; this.size=6; } 
-  update(){ this.x+=this.vx; this.y+=this.vy; ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill(); }
-}
+class Pellet{constructor(x,y,vx,vy,color){this.x=x; this.y=y; this.vx=vx; this.vy=vy; this.color=color; this.size=6;}
+update(){this.x+=this.vx; this.y+=this.vy; ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill();}}
 
-class SpinBeam{
-  constructor(){ this.angle=0; this.timer=5*60; this.color='cyan'; this.length=canvas.width; }
-  update(){
-    ctx.save(); ctx.translate(canvas.width/2,canvas.height/2); ctx.rotate(this.angle);
-    ctx.fillStyle=this.color; ctx.fillRect(-this.length/2,-5,this.length,10);
-    ctx.restore(); this.angle+=0.03; this.timer--; if(this.timer<=0) spinBeams.splice(spinBeams.indexOf(this),1);
-    const dx=player.x-canvas.width/2, dy=player.y-canvas.height/2;
-    const px=dx*Math.cos(-this.angle)-dy*Math.sin(-this.angle), py=dx*Math.sin(-this.angle)+dy*Math.cos(-this.angle);
-    if(Math.abs(py)<10 && Math.abs(px)<this.length/2){ /* cannot die */ }
-  }
-}
+class SpinBeam{constructor(){this.angle=0; this.timer=5*60; this.color='cyan'; this.length=canvas.width;}
+update(){ctx.save(); ctx.translate(canvas.width/2,canvas.height/2); ctx.rotate(this.angle); ctx.fillStyle=this.color; ctx.fillRect(-this.length/2,-5,this.length,10); ctx.restore(); this.angle+=0.03; this.timer--; if(this.timer<=0) spinBeams.splice(spinBeams.indexOf(this),1);}}
 
-// Abilities effects
-function useShield(){ if(abilities.shield<=0){ player.shieldActive=true; player.shieldTime=abilityDurations.shield; abilities.shield=45*60; document.getElementById('shieldCD').style.width='100%'; } }
-function useClear(){ if(abilities.clear<=0){ shapes=[]; abilities.clear=120*60; document.getElementById('clearCD').style.width='100%'; flashScreen(); } }
-function useRestore(){ if(abilities.restore<=0){ abilities.restore=90*60; document.getElementById('restoreCD').style.width='100%'; pulsePlayer(); } }
+document.getElementById('shieldBtn').addEventListener('click',()=>{if(abilities.shield<=0){player.shieldActive=true;player.shieldTime=abilityDurations.shield;abilities.shield=45*60;document.getElementById('shieldCD').style.width='100%';}});
+document.getElementById('clearBtn').addEventListener('click',()=>{if(abilities.clear<=0){shapes=[];abilities.clear=120*60;flashScreen();}});
+document.getElementById('restoreBtn').addEventListener('click',()=>{if(abilities.restore<=0){abilities.restore=90*60;player.restoreAlpha=1;}});
 
-document.getElementById('shieldBtn').addEventListener('click',useShield);
-document.getElementById('clearBtn').addEventListener('click',useClear);
-document.getElementById('restoreBtn').addEventListener('click',useRestore);
+function flashScreen(){ctx.fillStyle='rgba(255,255,255,0.2)'; ctx.fillRect(0,0,canvas.width,canvas.height);}
+function drawPlayerEffect(){if(player.shieldActive){player.effectAlpha=Math.abs(Math.sin(performance.now()/200))*0.5+0.2; ctx.strokeStyle=`rgba(0,255,255,${player.effectAlpha})`; ctx.lineWidth=12; ctx.strokeRect(player.x-player.size/2-6,player.y-player.size/2-6,player.size+12,player.size+12);}
+if(player.restoreAlpha>0){ctx.strokeStyle=`rgba(0,255,0,${player.restoreAlpha})`; ctx.lineWidth=8; ctx.strokeRect(player.x-player.size/2-4,player.y-player.size/2-4,player.size+8,player.size+8); player.restoreAlpha-=0.02;}}
 
-function flashScreen(){ ctx.fillStyle='rgba(255,255,255,0.2)'; ctx.fillRect(0,0,canvas.width,canvas.height); }
-function pulsePlayer(){ ctx.strokeStyle='lime'; ctx.lineWidth=10; ctx.strokeRect(player.x-player.size/2-5,player.y-player.size/2-5,player.size+10,player.size+10); }
-
-// Joystick setup
 let joystickVX=0, joystickVY=0, joystickActive=false;
-const joyOuter=document.getElementById('joystickOuter'), joyInner=document.getElementById('joystickInner');
-const JOY_MAX=56, JOY_FACTOR=0.14; let joyBaseX=0, joyBaseY=0;
-canvas.addEventListener('touchstart',ev=>{ const t=ev.touches[0]; joyBaseX=t.clientX; joyBaseY=t.clientY; joyOuter.style.display='block'; joyOuter.style.left=(joyBaseX-joyOuter.offsetWidth/2)+'px'; joyOuter.style.top=(joyBaseY-joyOuter.offsetHeight/2)+'px'; joystickActive=true; joystickVX=0; joystickVY=0; });
-canvas.addEventListener('touchmove',ev=>{ if(!joystickActive) return; const t=ev.touches[0]; let dx=t.clientX-joyBaseX; let dy=t.clientY-joyBaseY; const dist=Math.sqrt(dx*dx+dy*dy); if(dist>JOY_MAX){ const a=Math.atan2(dy,dx); dx=Math.cos(a)*JOY_MAX; dy=Math.sin(a)*JOY_MAX; } joyInner.style.left=(joyOuter.offsetWidth/2-joyInner.offsetWidth/2+dx)+'px'; joyInner.style.top=(joyOuter.offsetHeight/2-joyInner.offsetHeight/2+dy)+'px'; joystickVX=dx/JOY_MAX*player.maxSpeed*JOY_FACTOR; joystickVY=dy/JOY_MAX*player.maxSpeed*JOY_FACTOR; });
-canvas.addEventListener('touchend',ev=>{ joystickActive=false; joystickVX=0; joystickVY=0; joyOuter.style.display='none'; });
-canvas.addEventListener('touchcancel',ev=>{ joystickActive=false; joystickVX=0; joystickVY=0; joyOuter.style.display='none'; });
+const joyOuter=document.getElementById('joystickOuter'), joyInner=document.getElementById('joystickInner'); const JOY_MAX=56, JOY_FACTOR=0.14; let joyBaseX=0, joyBaseY=0;
+canvas.addEventListener('touchstart',ev=>{const t=ev.touches[0];joyBaseX=t.clientX;joyBaseY=t.clientY;joyOuter.style.display='block';joyOuter.style.left=(joyBaseX-joyOuter.offsetWidth/2)+'px';joyOuter.style.top=(joyBaseY-joyOuter.offsetHeight/2)+'px'; joystickActive=true; joystickVX=0; joystickVY=0;});
+canvas.addEventListener('touchmove',ev=>{if(!joystickActive) return; const t=ev.touches[0]; let dx=t.clientX-joyBaseX; let dy=t.clientY-joyBaseY; const dist=Math.sqrt(dx*dx+dy*dy); if(dist>JOY_MAX){const a=Math.atan2(dy,dx); dx=Math.cos(a)*JOY_MAX; dy=Math.sin(a)*JOY_MAX;} joyInner.style.left=(joyOuter.offsetWidth/2-joyInner.offsetWidth/2+dx)+'px'; joyInner.style.top=(joyOuter.offsetHeight/2-joyInner.offsetHeight/2+dy)+'px'; joystickVX=dx/JOY_MAX*player.maxSpeed*JOY_FACTOR; joystickVY=dy/JOY_MAX*player.maxSpeed*JOY_FACTOR;});
+canvas.addEventListener('touchend',ev=>{joystickActive=false;joystickVX=0;joystickVY=0;joyOuter.style.display='none';});
+canvas.addEventListener('touchcancel',ev=>{joystickActive=false;joystickVX=0;joystickVY=0;joyOuter.style.display='none';});
 
-// Start/stop
-document.getElementById('startBtn').addEventListener('click',()=>{ if(!running){ running=true; lastBeatTime=0; animate(performance.now()); } });
-document.getElementById('stopBtn').addEventListener('click',()=>{ running=false; cancelAnimationFrame(animationId); });
+document.getElementById('startBtn').addEventListener('click',()=>{if(!running){running=true;lastBeatTime=0;animate(performance.now());}});
+document.getElementById('stopBtn').addEventListener('click',()=>{running=false; cancelAnimationFrame(animationId);});
 
-// Key input
-document.addEventListener('keydown',e=>{ keys[e.key.toLowerCase()]=true; });
-document.addEventListener('keyup',e=>{ keys[e.key.toLowerCase()]=false; });
+document.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;});
+document.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
 
-// Movement
-function movePlayer(){
-  let ax=0,ay=0; if(keys['w']) ay-=player.speed; if(keys['s']) ay+=player.speed; if(keys['a']) ax-=player.speed; if(keys['d']) ax+=player.speed;
-  if(keys['shift'] && player.dashCooldown<=0){ ax*=player.dashMultiplier; ay*=player.dashMultiplier; player.dashCooldown=20; }
-  player.vx+=ax+joystickVX; player.vy+=ay+joystickVY; player.vx*=0.85; player.vy*=0.85;
-  player.vx=Math.max(Math.min(player.vx,player.maxSpeed),-player.maxSpeed); player.vy=Math.max(Math.min(player.vy,player.maxSpeed),-player.maxSpeed);
-  player.x+=player.vx; player.y+=player.vy;
-  if(player.x-player.size/2<0) player.x=player.size/2;
-  if(player.x+player.size/2>canvas.width) player.x=canvas.width-player.size/2;
-  if(player.y-player.size/2<0) player.y=player.size/2;
-  if(player.y+player.size/2>canvas.height) player.y=canvas.height-player.size/2;
-  if(player.dashCooldown>0) player.dashCooldown--;
-}
+function movePlayer(){let ax=0,ay=0;if(keys['w']) ay-=player.speed;if(keys['s']) ay+=player.speed;if(keys['a']) ax-=player.speed;if(keys['d']) ax+=player.speed;if(keys['shift']&&player.dashCooldown<=0){ax*=player.dashMultiplier;ay*=player.dashMultiplier;player.dashCooldown=20;} player.vx+=ax+joystickVX; player.vy+=ay+joystickVY; player.vx*=0.85; player.vy*=0.85; player.vx=Math.max(Math.min(player.vx,player.maxSpeed),-player.maxSpeed); player.vy=Math.max(Math.min(player.vy,player.maxSpeed),-player.maxSpeed); player.x+=player.vx; player.y+=player.vy;if(player.x-player.size/2<0)player.x=player.size/2;if(player.x+player.size/2>canvas.width)player.x=canvas.width-player.size/2;if(player.y-player.size/2<0)player.y=player.size/2;if(player.y+player.size/2>canvas.height)player.y=canvas.height-player.size/2;if(player.dashCooldown>0)player.dashCooldown--;}
 
-// Health
 function updateHealthBar(){ const fill=document.getElementById('healthFill'); fill.style.width=Math.max(1,player.health)+'%'; if(player.health>60) fill.style.background='#0f0'; else if(player.health>30) fill.style.background='#ff0'; else fill.style.background='#f00'; }
 
-// Spawn
-function spawnShape(){ if(Math.random()<0.5){ const x=Math.random()*canvas.width; const y=Math.random()*canvas.height; const size=Math.random()*30+20; const type=['circle','square','triangle'][Math.floor(Math.random()*3)]; const color=`rgb(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`; shapes.push(new Shape(x,y,size,type,color)); } }
+function spawnShape(){ if(Math.random()<0.02){ const x=Math.random()*canvas.width; const y=Math.random()*canvas.height; const size=Math.random()*20+15; const type=['circle','square','triangle'][Math.floor(Math.random()*3)]; const color=`rgb(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`; shapes.push(new Shape(x,y,size,type,color));} }
 
-// Animate loop
-function animate(timestamp){
-  if(!running) return; ctx.clearRect(0,0,canvas.width,canvas.height);
+function animate(timestamp){if(!running) return; ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  if(Math.random()<0.01) spawnShape();
+shapes.forEach((s,i)=>{ s.update(); if(Math.abs(s.x-player.x)<player.size/2+s.size && Math.abs(s.y-player.y)<player.size/2+s.size){ if(!player.shieldActive) player.health=Math.max(1,player.health-1); if(s.split) shapes.push(...s.splitShape()); shapes.splice(i,1); }});
+pellets.forEach((p,i)=>{p.update(); if(Math.abs(p.x-player.x)<player.size/2+p.size && Math.abs(p.y-player.y)<player.size/2+p.size){ if(!player.shieldActive) player.health=Math.max(1,player.health-2); pellets.splice(i,1);}});
+spinBeams.forEach(sb=>sb.update());
 
-  shapes.forEach((s,i)=>{ s.update(); if((s.type==='circle'||s.type==='square'||s.type==='triangle') && Math.abs(s.x-player.x)<player.size/2+s.size && Math.abs(s.y-player.y)<player.size/2+s.size){ if(!player.shieldActive) player.health=Math.max(1,player.health-1); if(s.split) shapes.push(...s.splitShape()); shapes.splice(i,1); } });
-  pellets.forEach((p,i)=>{ p.update(); if(Math.abs(p.x-player.x)<player.size/2+p.size && Math.abs(p.y-player.y)<player.size/2+p.size){ if(!player.shieldActive) player.health=Math.max(1,player.health-2); pellets.splice(i,1); } });
-  spinBeams.forEach(sb=>sb.update());
+if(Math.random()<0.002) spinBeams.push(new SpinBeam());
 
-  if(Math.random()<0.002) spinBeams.push(new SpinBeam());
+drawPlayerEffect();
+ctx.fillStyle=player.color; ctx.fillRect(player.x-player.size/2,player.y-player.size/2,player.size,player.size);
 
-  ctx.fillStyle=player.shieldActive?'rgba(0,255,255,0.7)':player.color;
-  ctx.fillRect(player.x-player.size/2,player.y-player.size/2,player.size,player.size);
+movePlayer();
+if(player.shieldActive){player.shieldTime--; if(player.shieldTime<=0)player.shieldActive=false;}
+updateHealthBar();
 
-  movePlayer();
+['shield','clear','restore'].forEach(id=>{ const overlay=document.getElementById(id+'CD'); if(abilities[id]>0){ abilities[id]--; overlay.style.width=(abilities[id]/(60*60)*100)+'%'; } else overlay.style.width='0%'; });
 
-  if(player.shieldActive){ player.shieldTime--; if(player.shieldTime<=0) player.shieldActive=false; }
-
-  updateHealthBar();
-
-  ['shield','clear','restore'].forEach(id=>{ const overlay=document.getElementById(id+'CD'); if(abilities[id]>0){ abilities[id]--; overlay.style.width=(abilities[id]/(60*60)*100)+'%'; } else overlay.style.width='0%'; });
-
-  animationId=requestAnimationFrame(animate);
-}
+animationId=requestAnimationFrame(animate);}
 
 window.addEventListener('resize',()=>{ canvas.width=window.innerWidth; canvas.height=window.innerHeight; });
 </script>
