@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shape and Beats - Abilities + Joystick + Attacks</title>
+<title>Shape and Beats - Abilities + Joystick + Spin Beam</title>
 <style>
   body, html { margin:0; padding:0; overflow:hidden;
     background: linear-gradient(135deg,#0a0a0a,#111);
@@ -103,21 +103,16 @@ function checkCollisionPelletPlayer(p){ const dx=p.x-player.x, dy=p.y-player.y; 
 function updateHealthBar(){ const fill=document.getElementById('healthFill'); fill.style.width=Math.max(0,player.health)+'%'; fill.style.background = player.health>60?'#0f0':player.health>30?'#ff0':'#f00'; }
 
 // Abilities
-let shockwave=null;
 function useShield(){ if(abilities.shield<=0){ player.shieldActive=true; player.shieldTime=abilityDurations.shield; abilities.shield=45*60; document.getElementById('shieldCD').style.width='100%'; } }
-function useClear(){ if(abilities.clear<=0){ shapes=[]; abilities.clear=120*60; document.getElementById('clearCD').style.width='100%'; shockwave={ radius:0, alpha:1 }; } }
+function useClear(){ if(abilities.clear<=0){ shapes=[]; abilities.clear=120*60; document.getElementById('clearCD').style.width='100%'; } }
 function useRestore(){ if(abilities.restore<=0){ player.health=Math.min(player.health+50,100); abilities.restore=90*60; document.getElementById('restoreCD').style.width='100%'; player.restoreFlash=30; } }
 
 document.getElementById('shieldBtn').addEventListener('click', useShield);
 document.getElementById('clearBtn').addEventListener('click', useClear);
 document.getElementById('restoreBtn').addEventListener('click', useRestore);
 
-// Attack additions
-let stopLineActive=false, stopLineTimer=0;
+// Spin Beam attack
 let spinBeamActive=false, spinBeamTimer=0, spinBeamAngle=0;
-
-// Launch StopLine (orange vertical) periodically
-function launchStopLine(){ stopLineActive=true; stopLineTimer=180; setTimeout(()=>stopLineActive=false,3000); }
 function launchSpinBeam(){ spinBeamActive=true; spinBeamTimer=300; spinBeamAngle=0; setTimeout(()=>spinBeamActive=false,5000); }
 
 // Animate
@@ -135,44 +130,30 @@ function animate(timestamp){
 
   movePlayer();
 
-  // Shield visual
   if(player.shieldActive){ ctx.beginPath(); ctx.arc(player.x,player.y,player.size*1.6,0,Math.PI*2); ctx.fillStyle='rgba(0,150,255,0.2)'; ctx.fill(); }
 
-  // Restore flash
   ctx.fillStyle = player.restoreFlash>0?'lime':player.color;
   if(player.restoreFlash>0) player.restoreFlash--;
   ctx.shadowBlur=20; ctx.shadowColor=ctx.fillStyle;
   ctx.fillRect(player.x-player.size/2,player.y-player.size/2,player.size,player.size);
   ctx.shadowBlur=0;
 
-  // Shapes
   shapes.forEach((s,i)=>{ s.update(); if(checkCollision(s)){ if(!player.shieldActive) player.health--; shapes.splice(i,1); } });
   pellets.forEach((p,i)=>{ p.update(); if(checkCollisionPelletPlayer(p)){ if(!player.shieldActive) player.health-=2; pellets.splice(i,1); } if(p.x<0||p.x>canvas.width||p.y<0||p.y>canvas.height) pellets.splice(i,1); });
 
   if(player.shieldActive){ player.shieldTime--; if(player.shieldTime<=0) player.shieldActive=false; }
 
-  // Shockwave (from clear)
-  if(shockwave){ ctx.beginPath(); ctx.arc(player.x,player.y,shockwave.radius,0,Math.PI*2); ctx.strokeStyle=`rgba(255,255,255,${shockwave.alpha})`; ctx.lineWidth=6; ctx.stroke(); shockwave.radius+=15; shockwave.alpha-=0.03; if(shockwave.alpha<=0) shockwave=null; }
-
-  // NEW: StopLine
-  if(stopLineActive){
-    ctx.fillStyle='orange'; ctx.fillRect(0,0,8,canvas.height);
-    if(player.vx!==0 || player.vy!==0){ player.health-=0.5; } // damages if moving
-  }
-
-  // NEW: Spin Beam
+  // Spin Beam
   if(spinBeamActive){
     spinBeamAngle+=0.05;
     ctx.save(); ctx.translate(canvas.width/2,canvas.height/2); ctx.rotate(spinBeamAngle);
     ctx.fillStyle='red'; ctx.fillRect(-5,-canvas.height/2,10,canvas.height);
     ctx.restore();
-    // collision with player
     const dx=player.x-canvas.width/2, dy=player.y-canvas.height/2;
     const distance=Math.abs(Math.sin(spinBeamAngle)*dx - Math.cos(spinBeamAngle)*dy);
-    if(distance<5){ if(!player.shieldActive) player.health-=0.8; }
+    if(distance<5 && !player.shieldActive) player.health-=0.8;
   }
 
-  // Ability cooldowns
   for(let ab in abilities){ if(abilities[ab]>0){ abilities[ab]--; document.getElementById(ab+'CD').style.width=(abilities[ab]/getAbilityMaxFrames(ab))*100+'%'; } }
 
   updateHealthBar();
@@ -186,7 +167,12 @@ function getAbilityMaxFrames(ab){ if(ab==='shield') return 45*60; if(ab==='clear
 document.addEventListener('keydown', e=>{ keys[e.key.toLowerCase()]=true; if(e.key==='1') useShield(); if(e.key==='2') useClear(); if(e.key==='3') useRestore(); });
 document.addEventListener('keyup', e=>keys[e.key.toLowerCase()]=false);
 
-document.getElementById('startBtn').addEventListener('click', ()=>{ if(!running){ running=true; lastBeatTime=0; animate(performance.now()); setInterval(()=>launchStopLine(),15000); setInterval(()=>launchSpinBeam(),20000); } });
+document.getElementById('startBtn').addEventListener('click', ()=>{ 
+  if(!running){ 
+    running=true; lastBeatTime=0; animate(performance.now()); 
+    setInterval(()=>launchSpinBeam(),20000); 
+  } 
+});
 document.getElementById('stopBtn').addEventListener('click', ()=>{ running=false; cancelAnimationFrame(animationId); });
 
 window.addEventListener('resize', ()=>{ canvas.width=window.innerWidth; canvas.height=window.innerHeight; });
