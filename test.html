@@ -3,23 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shape and Beats Console</title>
+<title>Shape and Beats - Player & Health</title>
 <style>
   body, html {
     margin: 0;
     padding: 0;
     overflow: hidden;
     background-color: #111;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
     font-family: sans-serif;
     color: #fff;
   }
-
   canvas { display: block; }
-
   #controls {
     position: absolute;
     top: 10px;
@@ -28,17 +22,28 @@
     display: flex;
     gap: 10px;
   }
-
   button {
-    padding: 10px 15px;
+    padding: 8px 12px;
     background: #222;
     border: 1px solid #555;
     color: white;
     cursor: pointer;
-    font-size: 14px;
   }
-
   button:hover { background: #444; }
+  #healthBar {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 200px;
+    height: 25px;
+    background: #333;
+    border: 2px solid #555;
+  }
+  #healthFill {
+    width: 100%;
+    height: 100%;
+    background: #0f0;
+  }
 </style>
 </head>
 <body>
@@ -46,6 +51,7 @@
   <button id="startBtn">Start</button>
   <button id="stopBtn">Stop</button>
 </div>
+<div id="healthBar"><div id="healthFill"></div></div>
 <canvas id="beatCanvas"></canvas>
 
 <script>
@@ -57,10 +63,23 @@ canvas.height = window.innerHeight;
 let shapes = [];
 let animationId;
 let running = false;
-let bpm = 120; // Beats per minute
+let bpm = 120;
 let beatInterval = 60000 / bpm;
 let lastBeatTime = 0;
 
+// Player
+const player = {
+  x: canvas.width / 2,
+  y: canvas.height / 2,
+  size: 30,
+  color: '#00f',
+  speed: 5,
+  health: 100
+};
+
+const keys = {};
+
+// Shape class
 class Shape {
   constructor(x, y, size, color) {
     this.x = x;
@@ -69,14 +88,12 @@ class Shape {
     this.color = color;
     this.growth = Math.random() * 2 + 1;
   }
-
   draw() {
     ctx.fillStyle = this.color;
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
     ctx.fill();
   }
-
   update() {
     this.size += this.growth;
     if (this.size > 100 || this.size < 10) this.growth *= -1;
@@ -84,6 +101,7 @@ class Shape {
   }
 }
 
+// Utility
 function randomColor() {
   const r = Math.floor(Math.random() * 255);
   const g = Math.floor(Math.random() * 255);
@@ -99,6 +117,32 @@ function spawnShape() {
   shapes.push(new Shape(x, y, size, color));
 }
 
+// Player movement
+function movePlayer() {
+  if (keys['w'] && player.y - player.size > 0) player.y -= player.speed;
+  if (keys['s'] && player.y + player.size < canvas.height) player.y += player.speed;
+  if (keys['a'] && player.x - player.size > 0) player.x -= player.speed;
+  if (keys['d'] && player.x + player.size < canvas.width) player.x += player.speed;
+}
+
+// Collision detection
+function checkCollision(shape) {
+  const dx = shape.x - player.x;
+  const dy = shape.y - player.y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  return distance < shape.size + player.size;
+}
+
+// Update health bar
+function updateHealthBar() {
+  const fill = document.getElementById('healthFill');
+  fill.style.width = player.health + '%';
+  if (player.health > 60) fill.style.background = '#0f0';
+  else if (player.health > 30) fill.style.background = '#ff0';
+  else fill.style.background = '#f00';
+}
+
+// Animation loop
 function animate(timestamp) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -107,10 +151,33 @@ function animate(timestamp) {
     lastBeatTime = timestamp;
   }
 
-  shapes.forEach(shape => shape.update());
+  movePlayer();
+  ctx.fillStyle = player.color;
+  ctx.beginPath();
+  ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+  ctx.fill();
+
+  shapes.forEach((shape, index) => {
+    shape.update();
+    if (checkCollision(shape)) {
+      player.health -= 1;
+      shapes.splice(index, 1);
+    }
+  });
+
+  updateHealthBar();
+
+  if (player.health <= 0) {
+    running = false;
+    alert("Game Over!");
+  }
 
   if (running) animationId = requestAnimationFrame(animate);
 }
+
+// Event listeners
+document.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+document.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 
 document.getElementById('startBtn').addEventListener('click', () => {
   if (!running) {
@@ -119,7 +186,6 @@ document.getElementById('startBtn').addEventListener('click', () => {
     animate(performance.now());
   }
 });
-
 document.getElementById('stopBtn').addEventListener('click', () => {
   running = false;
   cancelAnimationFrame(animationId);
