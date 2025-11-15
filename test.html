@@ -3,50 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shape and Beats - Neon Edition</title>
+<title>Shape and Beats - Enemy Pellets</title>
 <style>
-  body, html {
-    margin:0;
-    padding:0;
-    overflow:hidden;
-    background: linear-gradient(135deg, #0a0a0a, #111);
-    font-family:sans-serif;
-    color:white;
+  body, html { margin:0; padding:0; overflow:hidden;
+    background: linear-gradient(135deg,#0a0a0a,#111);
+    font-family:sans-serif; color:white;
   }
   canvas{ display:block; }
-  #controls{
-    position:absolute;
-    top:10px; left:10px;
-    display:flex;
-    gap:10px;
-    z-index:10;
-  }
-  button{
-    padding:8px 12px;
-    background:#222;
-    border:1px solid #555;
-    color:white;
-    cursor:pointer;
-  }
+  #controls{ position:absolute; top:10px; left:10px; display:flex; gap:10px; z-index:10; }
+  button{ padding:8px 12px; background:#222; border:1px solid #555; color:white; cursor:pointer;}
   button:hover{ background:#444; }
-  #healthBar{
-    position:absolute;
-    top:10px;
-    right:10px;
-    width:200px;
-    height:25px;
-    background:#333;
-    border:2px solid #555;
-  }
-  #healthFill{
-    width:100%;
-    height:100%;
-    background:#0f0;
-  }
+  #healthBar{position:absolute; top:10px; right:10px; width:200px; height:25px; background:#333; border:2px solid #555;}
+  #healthFill{width:100%; height:100%; background:#0f0;}
 </style>
 </head>
 <body>
-
 <div id="controls">
   <button id="startBtn">Start</button>
   <button id="stopBtn">Stop</button>
@@ -72,35 +43,25 @@ const keys={};
 
 // Player
 const player={
-  x:canvas.width/2,
-  y:canvas.height/2,
-  size:40,
-  color:'#00f',
-  speed:0.5,
-  vx:0,
-  vy:0,
-  maxSpeed:6,
-  health:100,
-  dashMultiplier:3,
-  dashCooldown:0
+  x:canvas.width/2, y:canvas.height/2,
+  size:40, color:'#00f',
+  speed:0.5, vx:0, vy:0, maxSpeed:6,
+  health:100, dashMultiplier:3, dashCooldown:0
 };
 
 // Shape class
 class Shape{
   constructor(x,y,size,type,color){
-    this.x=x;
-    this.y=y;
-    this.size=size;
-    this.type=type; // "circle","square","triangle","explosive"
-    this.color=color;
+    this.x=x; this.y=y;
+    this.size=size; this.type=type; this.color=color;
     this.growth=Math.random()*2+1;
+    this.shootCooldown=Math.floor(Math.random()*60); // frames before first pellet
   }
   draw(){
-    ctx.shadowBlur=20;
-    ctx.shadowColor=this.color;
+    ctx.shadowBlur=20; ctx.shadowColor=this.color;
     ctx.fillStyle=this.color;
     ctx.beginPath();
-    if(this.type==="circle" || this.type==="explosive") ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+    if(this.type==="circle") ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
     else if(this.type==="square") ctx.rect(this.x-this.size/2,this.y-this.size/2,this.size,this.size);
     else if(this.type==="triangle"){
       ctx.moveTo(this.x,this.y-this.size);
@@ -115,14 +76,30 @@ class Shape{
     this.size+=this.growth*0.2;
     if(this.size>80 || this.size<15) this.growth*=-1;
     this.draw();
+
+    // Shoot automatically if type is "circle" or "explosive"
+    if(this.type==="circle" || this.type==="explosive"){
+      this.shootCooldown--;
+      if(this.shootCooldown<=0){
+        this.shootAtPlayer();
+        this.shootCooldown=60; // shoots every 60 frames
+      }
+    }
+  }
+  shootAtPlayer(){
+    const dx=player.x-this.x;
+    const dy=player.y-this.y;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    const speed=3;
+    const vx=dx/dist*speed;
+    const vy=dy/dist*speed;
+    pellets.push(new Pellet(this.x,this.y,vx,vy,this.color));
   }
 }
 
-// Pellets
+// Pellet class
 class Pellet{
-  constructor(x,y,vx,vy,color){
-    this.x=x; this.y=y; this.vx=vx; this.vy=vy; this.color=color; this.size=6;
-  }
+  constructor(x,y,vx,vy,color){ this.x=x; this.y=y; this.vx=vx; this.vy=vy; this.color=color; this.size=6; }
   update(){
     this.x+=this.vx;
     this.y+=this.vy;
@@ -161,16 +138,12 @@ function movePlayer(){
   if(keys['a']) ax-=player.speed;
   if(keys['d']) ax+=player.speed;
   if(keys['shift'] && player.dashCooldown<=0){
-    ax*=player.dashMultiplier;
-    ay*=player.dashMultiplier;
-    player.dashCooldown=20;
+    ax*=player.dashMultiplier; ay*=player.dashMultiplier; player.dashCooldown=20;
   }
   player.vx+=ax; player.vy+=ay;
   player.vx*=0.85; player.vy*=0.85;
-  if(player.vx>player.maxSpeed) player.vx=player.maxSpeed;
-  if(player.vx<-player.maxSpeed) player.vx=-player.maxSpeed;
-  if(player.vy>player.maxSpeed) player.vy=player.maxSpeed;
-  if(player.vy<-player.maxSpeed) player.vy=-player.maxSpeed;
+  player.vx=Math.max(-player.maxSpeed, Math.min(player.vx,player.maxSpeed));
+  player.vy=Math.max(-player.maxSpeed, Math.min(player.vy,player.maxSpeed));
   player.x+=player.vx; player.y+=player.vy;
   if(player.x-player.size/2<0) player.x=player.size/2;
   if(player.x+player.size/2>canvas.width) player.x=canvas.width-player.size/2;
@@ -179,26 +152,20 @@ function movePlayer(){
   if(player.dashCooldown>0) player.dashCooldown--;
 }
 
-// Collision
-function checkCollision(shape){
+// Collision detection
+function checkCollisionShapePlayer(shape){
   const dx=shape.x-player.x;
   const dy=shape.y-player.y;
-  const distance=Math.sqrt(dx*dx+dy*dy);
-  if(shape.type==="circle") return distance<shape.size+player.size/2;
+  const dist=Math.sqrt(dx*dx+dy*dy);
+  if(shape.type==="circle") return dist<shape.size+player.size/2;
   else if(shape.type==="square") return Math.abs(shape.x-player.x)<shape.size/2+player.size/2 && Math.abs(shape.y-player.y)<shape.size/2+player.size/2;
-  else if(shape.type==="triangle") return distance<shape.size+player.size/2;
-  else if(shape.type==="explosive") return distance<shape.size+player.size/2;
+  else if(shape.type==="triangle") return dist<shape.size+player.size/2;
+  else if(shape.type==="explosive") return dist<shape.size+player.size/2;
   return false;
 }
-
-// Explode shape into pellets
-function explode(shape){
-  const numPellets=8;
-  for(let i=0;i<numPellets;i++){
-    const angle=i*Math.PI*2/numPellets;
-    const speed=3+Math.random()*2;
-    pellets.push(new Pellet(shape.x,shape.y,Math.cos(angle)*speed,Math.sin(angle)*speed,shape.color));
-  }
+function checkCollisionPelletPlayer(p){
+  const dx=p.x-player.x; const dy=p.y-player.y;
+  return Math.sqrt(dx*dx+dy*dy)<p.size+player.size/2;
 }
 
 // Health bar
@@ -213,55 +180,38 @@ function updateHealthBar(){
 // Animate
 function animate(timestamp){
   ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  // Background glow effect
+  // Background glow
   const gradient=ctx.createRadialGradient(player.x,player.y,0,player.x,player.y,500);
   gradient.addColorStop(0,'rgba(0,0,255,0.2)');
   gradient.addColorStop(1,'rgba(0,0,0,0.1)');
   ctx.fillStyle=gradient;
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  if(!lastBeatTime || timestamp-lastBeatTime>beatInterval){
-    spawnShape();
-    lastBeatTime=timestamp;
-  }
+  if(!lastBeatTime || timestamp-lastBeatTime>beatInterval){ spawnShape(); lastBeatTime=timestamp; }
 
   movePlayer();
 
-  // Draw player square with glow
+  // Draw player square
   ctx.shadowBlur=20; ctx.shadowColor=player.color;
   ctx.fillStyle=player.color;
   ctx.fillRect(player.x-player.size/2,player.y-player.size/2,player.size,player.size);
   ctx.shadowBlur=0;
 
-  // Update shapes
+  // Shapes update
   shapes.forEach((shape,i)=>{
     shape.update();
-    if(checkCollision(shape)){
-      player.health-=1;
-      if(shape.type==="explosive") explode(shape);
-      shapes.splice(i,1);
-    }
+    if(checkCollisionShapePlayer(shape)){ player.health-=1; if(shape.type==="explosive"){} shapes.splice(i,1); }
   });
 
-  // Update pellets
+  // Pellets update
   pellets.forEach((p,i)=>{
     p.update();
-    const dx=p.x-player.x;
-    const dy=p.y-player.y;
-    if(Math.sqrt(dx*dx+dy*dy)<p.size+player.size/2){
-      player.health-=2;
-      pellets.splice(i,1);
-    }
-    if(p.x<0 || p.x>canvas.width || p.y<0 || p.y>canvas.height) pellets.splice(i,1);
+    if(checkCollisionPelletPlayer(p)){ player.health-=2; pellets.splice(i,1); }
+    if(p.x<0||p.x>canvas.width||p.y<0||p.y>canvas.height) pellets.splice(i,1);
   });
 
   updateHealthBar();
-
-  if(player.health<=0){
-    running=false;
-    alert("Game Over!");
-  }
+  if(player.health<=0){ running=false; alert("Game Over!"); }
 
   if(running) animationId=requestAnimationFrame(animate);
 }
@@ -269,10 +219,8 @@ function animate(timestamp){
 // Events
 document.addEventListener('keydown',e=>keys[e.key.toLowerCase()]=true);
 document.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
-document.getElementById('startBtn').addEventListener('click',()=>{
-  if(!running){running=true; lastBeatTime=0; animate(performance.now());}
-});
-document.getElementById('stopBtn').addEventListener('click',()=>{running=false; cancelAnimationFrame(animationId);});
+document.getElementById('startBtn').addEventListener('click',()=>{ if(!running){ running=true; lastBeatTime=0; animate(performance.now()); } });
+document.getElementById('stopBtn').addEventListener('click',()=>{ running=false; cancelAnimationFrame(animationId); });
 window.addEventListener('resize',()=>{canvas.width=window.innerWidth; canvas.height=window.innerHeight;});
 </script>
 </body>
