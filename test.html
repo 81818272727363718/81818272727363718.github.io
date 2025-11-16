@@ -16,371 +16,219 @@
     --radius-lg: 18px;
     --radius-md: 12px;
   }
-
-  * { box-sizing: border-box; }
-
-  html, body {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background: radial-gradient(circle at top, #1b1b3a 0, #050509 52%, #000 100%);
-    color: var(--text-main);
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;overflow:hidden;
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:radial-gradient(circle at top,#1b1b3a 0,#050509 52%,#000 100%);
+    color:var(--text-main);
   }
-
-  canvas { display: block; }
-
-  body::before {
-    content: "";
-    position: fixed;
-    inset: -20%;
+  canvas{display:block;}
+  body::before{
+    content:"";position:fixed;inset:-20%;
     background:
-      radial-gradient(circle at 15% 20%, rgba(79,140,255,0.35), transparent 55%),
-      radial-gradient(circle at 80% 80%, rgba(255,79,123,0.35), transparent 55%);
-    filter: blur(15px);
-    opacity: 0.8;
-    pointer-events: none;
-    z-index: -1;
-    animation: bgFloat 18s ease-in-out infinite alternate;
+      radial-gradient(circle at 15% 20%,rgba(79,140,255,0.35),transparent 55%),
+      radial-gradient(circle at 80% 80%,rgba(255,79,123,0.35),transparent 55%);
+    filter:blur(15px);opacity:.8;pointer-events:none;z-index:-1;
+    animation:bgFloat 18s ease-in-out infinite alternate;
   }
-
-  @keyframes bgFloat {
-    0% { transform: translate3d(0,0,0) scale(1); }
-    100% { transform: translate3d(-20px,10px,0) scale(1.05); }
+  @keyframes bgFloat{
+    0%{transform:translate3d(0,0,0) scale(1);}
+    100%{transform:translate3d(-20px,10px,0) scale(1.05);}
   }
-
-  .glass-panel {
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-lg);
-    backdrop-filter: blur(18px) saturate(170%);
-    box-shadow: 0 18px 40px rgba(0,0,0,0.75);
+  .glass-panel{
+    background:var(--glass-bg);
+    border:1px solid var(--glass-border);
+    border-radius:var(--radius-lg);
+    backdrop-filter:blur(18px) saturate(170%);
+    box-shadow:0 18px 40px rgba(0,0,0,0.75);
   }
-
-  .glass-button {
-    background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(0,0,0,0.5));
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.25);
-    padding: 10px 22px;
-    color: var(--text-main);
-    font-size: 15px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.7);
-    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+  .glass-button{
+    background:linear-gradient(135deg,rgba(255,255,255,0.12),rgba(0,0,0,0.5));
+    border-radius:999px;border:1px solid rgba(255,255,255,0.25);
+    padding:10px 22px;color:var(--text-main);font-size:15px;
+    letter-spacing:.04em;text-transform:uppercase;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.7);
+    transition:transform .18s ease,box-shadow .18s ease,background .18s ease,border-color .18s ease;
   }
-  .glass-button:hover {
-    transform: translateY(-1px) scale(1.02);
-    border-color: rgba(255,255,255,0.45);
-    background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(0,0,0,0.6));
+  .glass-button:hover{
+    transform:translateY(-1px) scale(1.02);
+    border-color:rgba(255,255,255,0.45);
+    background:linear-gradient(135deg,rgba(255,255,255,0.2),rgba(0,0,0,0.6));
   }
-  .glass-button:active {
-    transform: translateY(1px) scale(0.98);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.7);
+  .glass-button:active{
+    transform:translateY(1px) scale(.98);
+    box-shadow:0 6px 18px rgba(0,0,0,0.7);
   }
 
   /* Opening Screen */
-  #openingScreen {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+  #openingScreen{
+    position:absolute;inset:0;display:flex;
+    justify-content:center;align-items:center;z-index:1000;
   }
-  #openingInner {
-    width: 90%;
-    max-width: 620px;
-    padding: 24px 22px 20px;
+  #openingInner{
+    width:90%;max-width:620px;padding:24px 22px 20px;
   }
-  #openingTitle {
-    font-size: 28px;
-    letter-spacing: 0.18em;
-    text-align: center;
-    text-transform: uppercase;
-    margin-bottom: 4px;
+  #openingTitle{
+    font-size:28px;letter-spacing:.18em;text-align:center;
+    text-transform:uppercase;margin-bottom:4px;
   }
-  #openingSubtitle {
-    font-size: 12px;
-    text-align: center;
-    color: var(--text-muted);
-    margin-bottom: 16px;
+  #openingSubtitle{
+    font-size:12px;text-align:center;color:var(--text-muted);margin-bottom:16px;
   }
-  #modeGrid {
-    display: grid;
-    gap: 10px;
+  #modeGrid{display:grid;gap:10px;}
+  @media (min-width:700px){
+    #modeGrid{grid-template-columns:repeat(3,1fr);}
   }
-  @media (min-width: 700px) {
-    #modeGrid {
-      grid-template-columns: repeat(3, 1fr);
-    }
+  .mode-card{
+    border-radius:var(--radius-md);
+    padding:10px 10px 12px;
+    background:radial-gradient(circle at top,rgba(255,255,255,0.18),rgba(0,0,0,0.6));
+    border:1px solid rgba(255,255,255,0.25);
+    cursor:pointer;
+    transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease;
   }
-  .mode-card {
-    border-radius: var(--radius-md);
-    padding: 10px 10px 12px;
-    background: radial-gradient(circle at top, rgba(255,255,255,0.18), rgba(0,0,0,0.6));
-    border: 1px solid rgba(255,255,255,0.25);
-    cursor: pointer;
-    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+  .mode-card:hover{
+    transform:translateY(-2px);
+    box-shadow:0 12px 30px rgba(0,0,0,0.8);
+    border-color:rgba(255,255,255,0.55);
   }
-  .mode-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.8);
-    border-color: rgba(255,255,255,0.55);
-  }
-  .mode-name {
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
-  .mode-tag {
-    font-size: 11px;
-    color: var(--text-muted);
-  }
+  .mode-name{font-size:14px;font-weight:600;margin-bottom:4px;}
+  .mode-tag{font-size:11px;color:var(--text-muted);}
 
-  /* Info / Updates Panel / Loadout Panel */
-  .panel {
-    position: absolute;
-    top: 10%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 620px;
-    padding: 18px 18px 16px;
-    display: none;
-    z-index: 1100;
+  /* Panels */
+  .panel{
+    position:absolute;top:10%;left:50%;transform:translateX(-50%);
+    width:90%;max-width:620px;padding:18px 18px 16px;display:none;z-index:1100;
   }
-  .panel h2 {
-    margin: 0 0 6px;
-    font-size: 18px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+  .panel h2{
+    margin:0 0 6px;font-size:18px;letter-spacing:.08em;text-transform:uppercase;
   }
-  .panel p,
-  .panel ul {
-    font-size: 13px;
-    color: var(--text-muted);
+  .panel p,.panel ul{font-size:13px;color:var(--text-muted);}
+  .panel ul{padding-left:20px;margin:4px 0 0;}
+  .closePanel{
+    position:absolute;top:6px;right:10px;cursor:pointer;
+    color:var(--text-muted);font-size:18px;font-weight:700;
+    transition:color .15s ease,transform .15s ease;
   }
-  .panel ul {
-    padding-left: 20px;
-    margin: 4px 0 0;
-  }
-  .closePanel {
-    position: absolute;
-    top: 6px;
-    right: 10px;
-    cursor: pointer;
-    color: var(--text-muted);
-    font-size: 18px;
-    font-weight: 700;
-    transition: color 0.15s ease, transform 0.15s ease;
-  }
-  .closePanel:hover {
-    color: #fff;
-    transform: scale(1.08);
-  }
+  .closePanel:hover{color:#fff;transform:scale(1.08);}
 
   /* Loadout grid */
-  #loadoutGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 10px;
-    margin-top: 8px;
+  #loadoutGrid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+    gap:10px;margin-top:8px;
   }
-  .abilityCard {
-    border-radius: var(--radius-md);
-    padding: 8px 9px 9px;
-    background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(0,0,0,0.8));
-    border: 1px solid rgba(255,255,255,0.25);
-    cursor: pointer;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease, background 0.15s ease;
-    font-size: 12px;
+  .abilityCard{
+    border-radius:var(--radius-md);
+    padding:8px 9px 9px;
+    background:linear-gradient(145deg,rgba(255,255,255,0.08),rgba(0,0,0,0.8));
+    border:1px solid rgba(255,255,255,0.25);
+    cursor:pointer;
+    transition:border-color .15s ease,box-shadow .15s ease,transform .12s ease,background .15s ease;
+    font-size:12px;
   }
-  .abilityCardTitle {
-    font-weight: 600;
-    margin-bottom: 3px;
-    font-size: 12px;
+  .abilityCardTitle{font-weight:600;margin-bottom:3px;font-size:12px;}
+  .abilityCardDesc{font-size:11px;color:var(--text-muted);}
+  .abilityCard.selected{
+    border-color:var(--accent);
+    box-shadow:0 0 18px rgba(79,140,255,0.7);
+    transform:translateY(-1px);
+    background:linear-gradient(145deg,rgba(79,140,255,0.22),rgba(0,0,0,0.9));
   }
-  .abilityCardDesc {
-    font-size: 11px;
-    color: var(--text-muted);
+  #loadoutFooter{
+    margin-top:10px;display:flex;justify-content:space-between;
+    align-items:center;gap:8px;
   }
-  .abilityCard.selected {
-    border-color: var(--accent);
-    box-shadow: 0 0 18px rgba(79,140,255,0.7);
-    transform: translateY(-1px);
-    background: linear-gradient(145deg, rgba(79,140,255,0.22), rgba(0,0,0,0.9));
+  #loadoutStatus{font-size:12px;color:var(--text-muted);}
+
+  /* Top bar, mode, timer */
+  #topBar{
+    position:absolute;top:12px;left:12px;display:flex;gap:10px;z-index:10;
   }
-  #loadoutFooter {
-    margin-top: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
+  #modeLabel{
+    position:absolute;top:12px;left:50%;transform:translateX(-50%);
+    padding:6px 14px;border-radius:999px;
+    background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.25);
+    font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--text-muted);z-index:10;
   }
-  #loadoutStatus {
-    font-size: 12px;
-    color: var(--text-muted);
+  #timerLabel{
+    position:absolute;top:34px;left:50%;transform:translateX(-50%);
+    padding:4px 10px;border-radius:999px;font-size:12px;
+    background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.25);
+    color:var(--text-main);letter-spacing:.08em;z-index:10;
   }
 
-  /* Top Controls + Mode label + Timer */
-  #topBar {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    display: flex;
-    gap: 10px;
-    z-index: 10;
+  /* Health */
+  #healthBar{
+    position:absolute;top:12px;right:12px;width:220px;height:26px;
+    border-radius:999px;padding:2px;background:rgba(10,10,20,0.8);
+    border:1px solid rgba(255,255,255,0.3);
+    box-shadow:0 12px 28px rgba(0,0,0,0.75);z-index:10;
   }
-  #modeLabel {
-    position: absolute;
-    top: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 6px 14px;
-    border-radius: 999px;
-    background: rgba(0,0,0,0.6);
-    border: 1px solid rgba(255,255,255,0.25);
-    font-size: 12px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    z-index: 10;
+  #healthTrack{
+    width:100%;height:100%;border-radius:999px;
+    background:linear-gradient(135deg,rgba(0,0,0,0.7),rgba(255,255,255,0.06));
+    position:relative;overflow:hidden;
   }
-  #timerLabel {
-    position: absolute;
-    top: 34px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 12px;
-    background: rgba(0,0,0,0.55);
-    border: 1px solid rgba(255,255,255,0.25);
-    color: var(--text-main);
-    letter-spacing: 0.08em;
-    z-index: 10;
+  #healthFill{
+    position:absolute;inset:0;width:100%;border-radius:999px;
+    background:linear-gradient(90deg,#1fff8f,#a7ff4a);
+    transition:width .15s ease-out,background .15s ease-out;
   }
 
-  /* Health Bar */
-  #healthBar {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    width: 220px;
-    height: 26px;
-    border-radius: 999px;
-    padding: 2px;
-    background: rgba(10,10,20,0.8);
-    border: 1px solid rgba(255,255,255,0.3);
-    box-shadow: 0 12px 28px rgba(0,0,0,0.75);
-    z-index: 10;
+  /* Ability bar */
+  #abilityBarWrapper{
+    position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
+    max-width:92vw;padding:4px 6px;border-radius:16px;
+    background:rgba(0,0,0,0.4);
+    border:1px solid rgba(255,255,255,0.18);
+    box-shadow:0 14px 32px rgba(0,0,0,0.75);z-index:10;
   }
-  #healthTrack {
-    width: 100%;
-    height: 100%;
-    border-radius: 999px;
-    background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(255,255,255,0.06));
-    position: relative;
-    overflow: hidden;
+  #abilityBar{display:flex;gap:10px;}
+  .abilityBtn{
+    position:relative;flex:0 0 130px;padding:8px 10px 7px;
+    font-size:12px;border-radius:var(--radius-md);
+    background:linear-gradient(145deg,rgba(255,255,255,0.08),rgba(0,0,0,0.8));
+    border:1px solid rgba(255,255,255,0.3);
+    cursor:pointer;text-align:left;overflow:hidden;
+    box-shadow:0 10px 24px rgba(0,0,0,0.75);
   }
-  #healthFill {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    border-radius: 999px;
-    background: linear-gradient(90deg,#1fff8f,#a7ff4a);
-    transition: width 0.15s ease-out, background 0.15s ease-out;
+  .abilityBtn span{display:block;}
+  .abilityName{font-weight:600;font-size:11px;}
+  .abilityHint{font-size:10px;color:var(--text-muted);}
+  .cooldownOverlay{
+    position:absolute;bottom:0;left:0;width:0%;height:100%;
+    background:linear-gradient(to top,rgba(0,0,0,0.9),transparent);
+    pointer-events:none;transition:width .1s linear;
   }
 
-  /* Ability Bar with 4 slots */
-  #abilityBarWrapper {
-    position: absolute;
-    bottom: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    max-width: 92vw;
-    padding: 4px 6px;
-    border-radius: 16px;
-    background: rgba(0,0,0,0.4);
-    border: 1px solid rgba(255,255,255,0.18);
-    box-shadow: 0 14px 32px rgba(0,0,0,0.75);
-    z-index: 10;
-  }
-  #abilityBar {
-    display: flex;
-    gap: 10px;
-  }
-
-  .abilityBtn {
-    position: relative;
-    flex: 0 0 130px;
-    padding: 8px 10px 7px;
-    font-size: 12px;
-    border-radius: var(--radius-md);
-    background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(0,0,0,0.8));
-    border: 1px solid rgba(255,255,255,0.3);
-    cursor: pointer;
-    text-align: left;
-    overflow: hidden;
-    box-shadow: 0 10px 24px rgba(0,0,0,0.75);
-  }
-  .abilityBtn span {
-    display: block;
-  }
-  .abilityName {
-    font-weight: 600;
-    font-size: 11px;
-  }
-  .abilityHint {
-    font-size: 10px;
-    color: var(--text-muted);
-  }
-  .cooldownOverlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0%;
-    height: 100%;
-    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-    pointer-events: none;
-    transition: width 0.1s linear;
+  /* Dash button (mobile / optional desktop) */
+  #dashBtnMobile{
+    position:absolute;bottom:70px;right:18px;z-index:10;
+    padding:8px 16px;font-size:12px;
   }
 
   /* Joystick */
-  #joystickOuter {
-    position: absolute;
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    border: 1px solid rgba(255,255,255,0.25);
-    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.18), rgba(5,5,15,0.9));
-    box-shadow: 0 18px 40px rgba(0,0,0,0.85);
-    backdrop-filter: blur(16px);
-    display: none;
-    touch-action: none;
-    z-index: 999;
+  #joystickOuter{
+    position:absolute;width:150px;height:150px;border-radius:50%;
+    border:1px solid rgba(255,255,255,0.25);
+    background:radial-gradient(circle at 30% 30%,rgba(255,255,255,0.18),rgba(5,5,15,0.9));
+    box-shadow:0 18px 40px rgba(0,0,0,0.85);
+    backdrop-filter:blur(16px);
+    display:none;touch-action:none;z-index:999;
   }
-  #joystickInner {
-    position: absolute;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 30% 20%, #ffffff, #a9b7ff);
-    box-shadow: 0 14px 30px rgba(0,0,0,0.9);
-    top: 45px;
-    left: 45px;
-    touch-action: none;
+  #joystickInner{
+    position:absolute;width:60px;height:60px;border-radius:50%;
+    background:radial-gradient(circle at 30% 20%,#ffffff,#a9b7ff);
+    box-shadow:0 14px 30px rgba(0,0,0,0.9);
+    top:45px;left:45px;touch-action:none;
   }
-
-  @media (hover: none) and (pointer: coarse) {
-    .abilityBtn { font-size: 11px; flex: 0 0 120px; padding: 8px 8px; }
-    .abilityName { font-size: 10px; }
+  @media(hover:none) and (pointer:coarse){
+    .abilityBtn{font-size:11px;flex:0 0 120px;padding:8px 8px;}
+    .abilityName{font-size:10px;}
   }
 </style>
 </head>
@@ -416,21 +264,8 @@
         <div class="mode-name">Boss Rush</div>
         <div class="mode-tag">Heavier hits, fewer but tougher waves.</div>
       </div>
-      <!-- NEW MODES -->
-      <div class="mode-card" data-mode="toxic">
-        <div class="mode-name">Toxic Storm</div>
-        <div class="mode-tag">Poison zones & corrupted shapes.</div>
-      </div>
-      <div class="mode-card" data-mode="glitched">
-        <div class="mode-name">Glitched</div>
-        <div class="mode-tag">Visual glitches & unpredictable chaos.</div>
-      </div>
-      <div class="mode-card" data-mode="rapidfire">
-        <div class="mode-name">Rapidfire</div>
-        <div class="mode-tag">Relentless bullet spam.</div>
-      </div>
     </div>
-    <div style="margin-top:12px; display:flex; gap:8px; justify-content:center;">
+    <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;">
       <button class="glass-button" id="infoBtn">Info</button>
       <button class="glass-button" id="updatesBtn">Updates</button>
     </div>
@@ -443,8 +278,9 @@
   <h2>Information</h2>
   <p>Controls:</p>
   <ul>
-    <li>Move: <b>WASD</b> or <b>Arrow keys</b>, or mobile joystick (touch anywhere to spawn joystick).</li>
+    <li>Move: <b>WASD</b> / <b>Arrow keys</b> or mobile joystick (touch anywhere to spawn joystick).</li>
     <li>Abilities: choose 4 in the loadout screen, then press <b>1–4</b> in game.</li>
+    <li>Dash: press <b>B</b> on keyboard or tap the <b>Dash</b> button on mobile.</li>
   </ul>
   <p>Abilities pool (you pick 4):</p>
   <ul>
@@ -454,14 +290,10 @@
     <li>Freeze Field – Freezes enemies briefly.</li>
     <li>Clone Decoy – Fake clone attracts enemies.</li>
     <li>Heal Over Time – Gradual HP regen.</li>
-    <li>Dash – Quick burst of movement.</li>
     <li>Mega Heal – Big instant heal.</li>
     <li>Barrier – Reduces damage taken for a short time.</li>
     <li>Speed Boost – Temporary movement speed increase.</li>
     <li>Cleanse – Clears all bullets on screen.</li>
-    <li>Laser Beam – Powerful beam in your move direction.</li>
-    <li>Reflect – Reflects bullets back at enemies.</li>
-    <li>Overclock – Speeds up cooldowns & movement.</li>
   </ul>
 </div>
 
@@ -471,11 +303,10 @@
   <h2>Updates</h2>
   <ul>
     <li>Ability loadouts: pick 4 abilities before each run.</li>
-    <li>New abilities: Dash, Mega Heal, Barrier, Speed Boost, Cleanse, <b>Laser Beam, Reflect, Overclock</b>.</li>
-    <li>New modes: <b>Toxic Storm, Glitched, Rapidfire</b>.</li>
-    <li>Visual effects added for all abilities.</li>
+    <li>New abilities: Mega Heal, Barrier, Speed Boost, Cleanse.</li>
+    <li>Dash is now a core action (B key / Dash button).</li>
+    <li>New enemies: Circle Trap & Multi-Pellet Burst. Spin beam slowed.</li>
     <li>Stopwatch timer to show survival time.</li>
-    <li>Arrow key movement support.</li>
   </ul>
 </div>
 
@@ -530,6 +361,9 @@
   </div>
 </div>
 
+<!-- Dash Button -->
+<button id="dashBtnMobile" class="glass-button">Dash</button>
+
 <!-- Joystick -->
 <div id="joystickOuter"><div id="joystickInner"></div></div>
 
@@ -537,1268 +371,778 @@
 <canvas id="beatCanvas"></canvas>
 
 <script>
-/* --------- Mode selection & panels --------- */
-const openingScreen = document.getElementById('openingScreen');
-const infoBtn = document.getElementById('infoBtn');
-const updatesBtn = document.getElementById('updatesBtn');
-const modeLabel = document.getElementById('modeLabel');
-const timerLabel = document.getElementById('timerLabel');
-const loadoutPanel = document.getElementById('loadoutPanel');
-const loadoutGrid = document.getElementById('loadoutGrid');
-const loadoutStatus = document.getElementById('loadoutStatus');
-const confirmLoadoutBtn = document.getElementById('confirmLoadoutBtn');
+const openingScreen=document.getElementById('openingScreen');
+const infoBtn=document.getElementById('infoBtn');
+const updatesBtn=document.getElementById('updatesBtn');
+const modeLabel=document.getElementById('modeLabel');
+const timerLabel=document.getElementById('timerLabel');
+const loadoutPanel=document.getElementById('loadoutPanel');
+const loadoutGrid=document.getElementById('loadoutGrid');
+const loadoutStatus=document.getElementById('loadoutStatus');
+const confirmLoadoutBtn=document.getElementById('confirmLoadoutBtn');
 
-infoBtn.addEventListener('click', () => {
-  document.getElementById('infoPanel').style.display = 'block';
-});
-updatesBtn.addEventListener('click', () => {
-  document.getElementById('updatesPanel').style.display = 'block';
-});
-function closePanel(id){ document.getElementById(id).style.display = 'none'; }
+infoBtn.addEventListener('click',()=>{document.getElementById('infoPanel').style.display='block';});
+updatesBtn.addEventListener('click',()=>{document.getElementById('updatesPanel').style.display='block';});
+function closePanel(id){document.getElementById(id).style.display='none';}
 
-const MODES = {
-  chill: {
-    name: 'CHILL',
-    spawnInterval: 80,
-    pelletSpeed: 3,
-    shapeSpeed: 1.0,
-    damageMultiplier: 0.6,
-    beamChance: 0.03,
-    pelletChance: 0.25
-  },
-  normal: {
-    name: 'NORMAL',
-    spawnInterval: 55,
-    pelletSpeed: 3.8,
-    shapeSpeed: 1.3,
-    damageMultiplier: 1.0,
-    beamChance: 0.06,
-    pelletChance: 0.35
-  },
-  chaos: {
-    name: 'CHAOS',
-    spawnInterval: 35,
-    pelletSpeed: 4.8,
-    shapeSpeed: 1.7,
-    damageMultiplier: 1.4,
-    beamChance: 0.1,
-    pelletChance: 0.45
-  },
-  bulletHell: {
-    name: 'BULLET HELL',
-    spawnInterval: 60,
-    pelletSpeed: 5.5,
-    shapeSpeed: 1.2,
-    damageMultiplier: 1.2,
-    beamChance: 0.08,
-    pelletChance: 0.8
-  },
-  sniper: {
-    name: 'SNIPER',
-    spawnInterval: 70,
-    pelletSpeed: 7,
-    shapeSpeed: 1.0,
-    damageMultiplier: 1.5,
-    beamChance: 0.05,
-    pelletChance: 0.5
-  },
-  bossRush: {
-    name: 'BOSS RUSH',
-    spawnInterval: 110,
-    pelletSpeed: 4,
-    shapeSpeed: 1.1,
-    damageMultiplier: 1.7,
-    beamChance: 0.12,
-    pelletChance: 0.3
-  },
-  // NEW MODES
-  toxic: {
-    name: 'TOXIC STORM',
-    spawnInterval: 50,
-    pelletSpeed: 3.5,
-    shapeSpeed: 1.2,
-    damageMultiplier: 1.1,
-    beamChance: 0.05,
-    pelletChance: 0.35
-  },
-  glitched: {
-    name: 'GLITCHED',
-    spawnInterval: 45,
-    pelletSpeed: 4.2,
-    shapeSpeed: 1.5,
-    damageMultiplier: 1.3,
-    beamChance: 0.09,
-    pelletChance: 0.4
-  },
-  rapidfire: {
-    name: 'RAPIDFIRE',
-    spawnInterval: 55,
-    pelletSpeed: 6.5,
-    shapeSpeed: 1.1,
-    damageMultiplier: 1.2,
-    beamChance: 0.04,
-    pelletChance: 0.85
-  }
+const MODES={
+  chill:{name:'CHILL',spawnInterval:80,pelletSpeed:3,shapeSpeed:1.0,damageMultiplier:0.6,beamChance:0.03,pelletChance:0.25},
+  normal:{name:'NORMAL',spawnInterval:55,pelletSpeed:3.8,shapeSpeed:1.3,damageMultiplier:1.0,beamChance:0.06,pelletChance:0.35},
+  chaos:{name:'CHAOS',spawnInterval:35,pelletSpeed:4.8,shapeSpeed:1.7,damageMultiplier:1.4,beamChance:0.1,pelletChance:0.45},
+  bulletHell:{name:'BULLET HELL',spawnInterval:60,pelletSpeed:5.5,shapeSpeed:1.2,damageMultiplier:1.2,beamChance:0.08,pelletChance:0.8},
+  sniper:{name:'SNIPER',spawnInterval:70,pelletSpeed:7,shapeSpeed:1.0,damageMultiplier:1.5,beamChance:0.05,pelletChance:0.5},
+  bossRush:{name:'BOSS RUSH',spawnInterval:110,pelletSpeed:4,shapeSpeed:1.1,damageMultiplier:1.7,beamChance:0.12,pelletChance:0.3}
 };
 
-let selectedMode = null;
-let modeConfig = MODES.normal;
+let selectedMode=null;
+let modeConfig=MODES.normal;
 
-/* --------- Ability definitions & loadout --------- */
-const ALL_ABILITIES = {
-  shield:   { name:'Shield',        desc:'Temporary invulnerability.' },
-  slow:     { name:'Time Slow',     desc:'Slows enemies and bullets.' },
-  shockwave:{ name:'Shockwave',     desc:'Blast clearing nearby threats.' },
-  freeze:   { name:'Freeze Field',  desc:'Freezes enemies briefly.' },
-  decoy:    { name:'Clone Decoy',   desc:'Fake clone attracts enemies.' },
-  regen:    { name:'Heal Over Time',desc:'Regenerates health slowly.' },
-  dash:     { name:'Dash',          desc:'Quick burst of movement.' },
-  megaHeal: { name:'Mega Heal',     desc:'Instantly restore a chunk of HP.' },
-  barrier:  { name:'Barrier',       desc:'Temporary damage reduction.' },
-  speed:    { name:'Speed Boost',   desc:'Move faster for a bit.' },
-  cleanse:  { name:'Cleanse',       desc:'Clears all bullets on screen.' },
-  // NEW ABILITIES
-  laser:    { name:'Laser Beam',    desc:'Fires a piercing beam forward.' },
-  reflect:  { name:'Reflect',       desc:'Reflects bullets back at enemies.' },
-  overclock:{ name:'Overclock',     desc:'Cooldowns tick faster; move quicker.' }
+/* Ability definitions (Dash removed from pool) */
+const ALL_ABILITIES={
+  shield:{name:'Shield',desc:'Temporary invulnerability.'},
+  slow:{name:'Time Slow',desc:'Slows enemies and bullets.'},
+  shockwave:{name:'Shockwave',desc:'Blast clearing nearby threats.'},
+  freeze:{name:'Freeze Field',desc:'Freezes enemies briefly.'},
+  decoy:{name:'Clone Decoy',desc:'Fake clone attracts enemies.'},
+  regen:{name:'Heal Over Time',desc:'Regenerates health slowly.'},
+  megaHeal:{name:'Mega Heal',desc:'Instantly restore a chunk of HP.'},
+  barrier:{name:'Barrier',desc:'Temporary damage reduction.'},
+  speed:{name:'Speed Boost',desc:'Move faster for a bit.'},
+  cleanse:{name:'Cleanse',desc:'Clears all bullets on screen.'}
 };
 
-const abilities = {
-  shield:0, slow:0, shockwave:0, freeze:0, decoy:0, regen:0,
-  dash:0, megaHeal:0, barrier:0, speed:0, cleanse:0,
-  laser:0, reflect:0, overclock:0
-};
-const abilityMax = {
-  shield:    45*60,
-  slow:      35*60,
-  shockwave: 25*60,
-  freeze:    35*60,
-  decoy:     40*60,
-  regen:     30*60,
-  dash:      12*60,
-  megaHeal:  25*60,
-  barrier:   25*60,
-  speed:     18*60,
-  cleanse:   20*60,
-  laser:     30*60,
-  reflect:   35*60,
-  overclock: 40*60
+const abilities={shield:0,slow:0,shockwave:0,freeze:0,decoy:0,regen:0,megaHeal:0,barrier:0,speed:0,cleanse:0};
+const abilityMax={
+  shield:45*60,
+  slow:35*60,
+  shockwave:25*60,
+  freeze:35*60,
+  decoy:40*60,
+  regen:30*60,
+  megaHeal:25*60,
+  barrier:25*60,
+  speed:18*60,
+  cleanse:20*60
 };
 
-let selectedAbilityIds = [];
-let activeAbilities = []; // 4 ability IDs in order (slots 0..3)
-const abilityCardEls = {};
+let selectedAbilityIds=[];
+let activeAbilities=[];
+const abilityCardEls={};
 
-/* build loadout grid */
-for (const [id, data] of Object.entries(ALL_ABILITIES)) {
-  const card = document.createElement('div');
-  card.className = 'abilityCard';
-  card.dataset.abilityId = id;
-  card.innerHTML = `
-    <div class="abilityCardTitle">${data.name}</div>
-    <div class="abilityCardDesc">${data.desc}</div>
-  `;
-  card.addEventListener('click', () => toggleAbility(id, card));
-  abilityCardEls[id] = card;
+/* Build loadout grid */
+for(const [id,data] of Object.entries(ALL_ABILITIES)){
+  const card=document.createElement('div');
+  card.className='abilityCard';
+  card.dataset.abilityId=id;
+  card.innerHTML=`<div class="abilityCardTitle">${data.name}</div><div class="abilityCardDesc">${data.desc}</div>`;
+  card.addEventListener('click',()=>toggleAbility(id,card));
+  abilityCardEls[id]=card;
   loadoutGrid.appendChild(card);
 }
-
-function toggleAbility(id, el){
-  const idx = selectedAbilityIds.indexOf(id);
-  if(idx === -1){
-    if(selectedAbilityIds.length >= 4) return;
+function toggleAbility(id,el){
+  const idx=selectedAbilityIds.indexOf(id);
+  if(idx===-1){
+    if(selectedAbilityIds.length>=4)return;
     selectedAbilityIds.push(id);
     el.classList.add('selected');
-  } else {
+  }else{
     selectedAbilityIds.splice(idx,1);
     el.classList.remove('selected');
   }
   updateLoadoutStatus();
 }
-
 function updateLoadoutStatus(){
-  loadoutStatus.textContent = `Selected: ${selectedAbilityIds.length} / 4`;
-  confirmLoadoutBtn.disabled = (selectedAbilityIds.length !== 4);
+  loadoutStatus.textContent=`Selected: ${selectedAbilityIds.length} / 4`;
+  confirmLoadoutBtn.disabled=(selectedAbilityIds.length!==4);
 }
 
-/* when a mode is chosen, open loadout panel */
-document.querySelectorAll('.mode-card').forEach(card => {
-  card.addEventListener('click', () => {
-    const modeKey = card.getAttribute('data-mode');
-    selectedMode = modeKey;
-    modeConfig = MODES[modeKey];
-    modeLabel.textContent = 'MODE: ' + modeConfig.name;
-
-    // reset loadout selection
-    selectedAbilityIds = [];
-    for(const id in abilityCardEls){
-      abilityCardEls[id].classList.remove('selected');
-    }
+/* Mode click -> open loadout */
+document.querySelectorAll('.mode-card').forEach(card=>{
+  card.addEventListener('click',()=>{
+    const modeKey=card.getAttribute('data-mode');
+    selectedMode=modeKey;
+    modeConfig=MODES[modeKey];
+    modeLabel.textContent='MODE: '+modeConfig.name;
+    selectedAbilityIds=[];
+    for(const id in abilityCardEls)abilityCardEls[id].classList.remove('selected');
     updateLoadoutStatus();
-    loadoutPanel.style.display = 'block';
+    loadoutPanel.style.display='block';
   });
 });
 
-/* confirm loadout and start game */
-confirmLoadoutBtn.addEventListener('click', () => {
-  if(selectedAbilityIds.length !== 4) return;
-  activeAbilities = selectedAbilityIds.slice();
+/* Confirm loadout */
+confirmLoadoutBtn.addEventListener('click',()=>{
+  if(selectedAbilityIds.length!==4)return;
+  activeAbilities=selectedAbilityIds.slice();
   configureAbilitySlots();
-  loadoutPanel.style.display = 'none';
-  openingScreen.style.display = 'none';
+  loadoutPanel.style.display='none';
+  openingScreen.style.display='none';
   startGame();
 });
-
-/* configure bottom ability UI from activeAbilities */
 function configureAbilitySlots(){
-  activeAbilities.forEach((id, idx) => {
-    const data = ALL_ABILITIES[id];
-    document.getElementById(`slot${idx}Name`).textContent = data ? data.name : `Slot ${idx+1}`;
-    document.getElementById(`slot${idx}Hint`).textContent = `Key ${idx+1}`;
+  activeAbilities.forEach((id,idx)=>{
+    const data=ALL_ABILITIES[id];
+    document.getElementById(`slot${idx}Name`).textContent=data?data.name:`Slot ${idx+1}`;
+    document.getElementById(`slot${idx}Hint`).textContent=`Key ${idx+1}`;
   });
 }
 
-/* --------- Canvas & game state --------- */
-const canvas = document.getElementById('beatCanvas');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+/* Canvas & game state */
+const canvas=document.getElementById('beatCanvas');
+const ctx=canvas.getContext('2d');
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
 
-let running = false;
-let shapes = [];
-let pellets = [];
-let spinBeams = [];
-let poisonZones = []; // for Toxic Storm
-let spawnTimer = 0;
-let animationId = null;
+let running=false;
+let shapes=[];
+let pellets=[];
+let spinBeams=[];
+let circleTraps=[];
+let multiBursts=[];
+let spawnTimer=0;
+let animationId=null;
+const keys={};
 
-const keys = {};
-
-const player = {
-  x: canvas.width/2,
-  y: canvas.height/2,
-  size: 40,
-  color: '#4f8cff',
-  vx: 0, vy: 0,
-  speed: 0.5,
-  maxSpeed: 6,
-  health: 100,
-  shieldActive: false,
-  shieldTime: 0,
-  slowTime: 0,
-  freezeTime: 0,
-  shockwaveTime: 0,
-  shockwaveRadius: 0,
-  regenTime: 0,
-  barrierTime: 0,
-  speedBoostTime: 0,
-  reflectTime: 0,
-  overclockTime: 0,
-  laserTime: 0
+const player={
+  x:canvas.width/2,y:canvas.height/2,size:40,color:'#4f8cff',
+  vx:0,vy:0,speed:0.5,maxSpeed:6,health:100,
+  shieldActive:false,shieldTime:0,
+  slowTime:0,freezeTime:0,
+  shockwaveTime:0,shockwaveRadius:0,
+  regenTime:0,barrierTime:0,speedBoostTime:0
 };
+const decoy={active:false,x:0,y:0,timer:0};
+let lastMoveDirX=1,lastMoveDirY=0;
 
-const decoy = {
-  active: false,
-  x: 0,
-  y: 0,
-  timer: 0
-};
+let elapsedMs=0,lastFrameTime=null;
+let dashFlashTime=0,megaHealFlashTime=0,cleanseWaveTime=0,cleanseWaveRadius=0;
+let dashCount=0;
 
-let lastMoveDirX = 1;
-let lastMoveDirY = 0;
-
-/* timer state */
-let elapsedMs = 0;
-let lastFrameTime = null;
-
-/* extra FX timers */
-let dashFlashTime = 0;
-let megaHealFlashTime = 0;
-let cleanseWaveTime = 0;
-let cleanseWaveRadius = 0;
-
-/* --------- Entities --------- */
-class Shape {
+/* Entities */
+class Shape{
   constructor(x,y,size,kind,color){
-    this.x = x;
-    this.y = y;
-    this.size = size;
-    this.kind = kind; // 'normal' | 'homing'
-    this.color = color;
-    this.angle = Math.random()*Math.PI*2;
+    this.x=x;this.y=y;this.size=size;this.kind=kind;this.color=color;
+    this.angle=Math.random()*Math.PI*2;
   }
   update(speedScale){
-    if (this.kind === 'homing'){
-      const targetX = decoy.active ? decoy.x : player.x;
-      const targetY = decoy.active ? decoy.y : player.y;
-      const dx = targetX - this.x;
-      const dy = targetY - this.y;
-      const dist = Math.sqrt(dx*dx + dy*dy) || 1;
-      const step = modeConfig.shapeSpeed * 1.2 * speedScale;
-      this.x += dx/dist * step;
-      this.y += dy/dist * step;
-    } else {
-      this.angle += 0.02 * speedScale;
-      this.x += Math.cos(this.angle)*0.6*speedScale;
-      this.y += Math.sin(this.angle)*0.6*speedScale;
+    if(this.kind==='homing'){
+      const target=decoy.active?decoy:player;
+      const dx=target.x-this.x,dy=target.y-this.y;
+      const dist=Math.sqrt(dx*dx+dy*dy)||1;
+      const step=modeConfig.shapeSpeed*1.2*speedScale;
+      this.x+=dx/dist*step;this.y+=dy/dist*step;
+    }else{
+      this.angle+=0.02*speedScale;
+      this.x+=Math.cos(this.angle)*0.6*speedScale;
+      this.y+=Math.sin(this.angle)*0.6*speedScale;
     }
-
-    this.draw();
-  }
-  draw(){
-    ctx.shadowBlur = 16;
-    ctx.shadowColor = this.color;
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
-    ctx.fill();
-    ctx.shadowBlur = 0;
+    ctx.shadowBlur=16;ctx.shadowColor=this.color;
+    ctx.fillStyle=this.color;ctx.beginPath();
+    ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+    ctx.fill();ctx.shadowBlur=0;
   }
 }
-
-class Pellet {
+class Pellet{
   constructor(x,y,vx,vy,color){
-    this.x = x;
-    this.y = y;
-    this.vx = vx;
-    this.vy = vy;
-    this.color = color;
-    this.size = 5;
-    this.reflected = false;
+    this.x=x;this.y=y;this.vx=vx;this.vy=vy;this.color=color;this.size=5;
   }
   update(speedScale){
-    this.x += this.vx * speedScale;
-    this.y += this.vy * speedScale;
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
-    ctx.fill();
+    this.x+=this.vx*speedScale;this.y+=this.vy*speedScale;
+    ctx.fillStyle=this.color;ctx.beginPath();
+    ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fill();
   }
 }
-
-class SpinBeam {
+class SpinBeam{
   constructor(){
-    this.angle = Math.random()*Math.PI*2;
-    this.timer = 4*60; // frames
-    this.length = Math.max(canvas.width, canvas.height)*1.4;
+    this.angle=Math.random()*Math.PI*2;
+    this.timer=4*60;
+    this.length=Math.max(canvas.width,canvas.height)*1.4;
   }
   update(speedScale){
     ctx.save();
-    ctx.translate(canvas.width/2, canvas.height/2);
+    ctx.translate(canvas.width/2,canvas.height/2);
     ctx.rotate(this.angle);
-    const grad = ctx.createLinearGradient(-this.length/2, 0, this.length/2, 0);
-    grad.addColorStop(0, 'rgba(79,140,255,0)');
-    grad.addColorStop(0.5,'rgba(79,140,255,0.9)');
+    const grad=ctx.createLinearGradient(-this.length/2,0,this.length/2,0);
+    grad.addColorStop(0,'rgba(79,140,255,0)');
+    grad.addColorStop(0.5,'rgba(79,140,255,0.8)');
     grad.addColorStop(1,'rgba(79,140,255,0)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(-this.length/2, -7, this.length, 14);
+    ctx.fillStyle=grad;
+    ctx.fillRect(-this.length/2,-7,this.length,14);
     ctx.restore();
-
-    this.angle += 0.035 * speedScale;
+    this.angle+=0.018*speedScale; /* nerfed speed */
     this.timer--;
   }
 }
-
-/* Toxic Storm poison zones */
-function spawnPoisonZone(){
-  const r = 80 + Math.random()*120;
-  const x = Math.random()*canvas.width;
-  const y = Math.random()*canvas.height;
-  const life = 8*60;
-  poisonZones.push({x,y,r,life});
+class CircleTrap{
+  constructor(x,y){
+    this.x=x;this.y=y;
+    this.radius=120;
+    this.life=120;
+    this.dashStart=dashCount;
+  }
+  update(){
+    this.life--;
+    if(this.radius>40)this.radius-=0.5;
+    const alpha=0.2+0.3*(1-this.life/120);
+    ctx.save();
+    ctx.strokeStyle=`rgba(255,200,120,${alpha})`;
+    ctx.lineWidth=4;
+    ctx.setLineDash([10,12]);
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+}
+class MultiBurst{
+  constructor(x,y,color){
+    this.x=x;this.y=y;this.color=color;
+    this.size=10;
+    this.timer=5*60;
+    this.exploded=false;
+  }
+  update(speedScale){
+    this.timer--;
+    const pulse=(Math.sin(this.timer*0.25)+1)/2;
+    const r=this.size+4*pulse;
+    ctx.save();
+    ctx.shadowBlur=12;ctx.shadowColor=this.color;
+    ctx.fillStyle=this.color;ctx.beginPath();
+    ctx.arc(this.x,this.y,r,0,Math.PI*2);
+    ctx.fill();ctx.shadowBlur=0;ctx.restore();
+    if(this.timer<=0 && !this.exploded){
+      this.exploded=true;
+      const base=Math.random()*Math.PI*2;
+      for(let i=0;i<5;i++){
+        const ang=base+i*(Math.PI*2/5);
+        const vx=Math.cos(ang)*modeConfig.pelletSpeed;
+        const vy=Math.sin(ang)*modeConfig.pelletSpeed;
+        pellets.push(new Pellet(this.x,this.y,vx,vy,this.color));
+      }
+    }
+  }
 }
 
-/* --------- Spawn functions --------- */
+/* Spawns */
 function randomColor(){
-  const r = Math.floor(Math.random()*200+55);
-  const g = Math.floor(Math.random()*200+55);
-  const b = Math.floor(Math.random()*200+55);
+  const r=Math.floor(Math.random()*200+55);
+  const g=Math.floor(Math.random()*200+55);
+  const b=Math.floor(Math.random()*200+55);
   return `rgb(${r},${g},${b})`;
 }
-
 function spawnShape(){
-  const edge = Math.floor(Math.random()*4);
-  let x, y;
-  if(edge === 0){ x = Math.random()*canvas.width; y = -30; }
-  else if(edge === 1){ x = canvas.width+30; y = Math.random()*canvas.height; }
-  else if(edge === 2){ x = Math.random()*canvas.width; y = canvas.height+30; }
-  else { x = -30; y = Math.random()*canvas.height; }
-
-  let size = 10 + Math.random()*18;
-  const kind = Math.random()<0.35 ? 'homing' : 'normal';
-
-  // BossRush: occasionally bigger shapes
-  if(selectedMode === 'bossRush' && Math.random() < 0.3){
-    size *= 1.8;
-  }
-
+  const edge=Math.floor(Math.random()*4);
+  let x,y;
+  if(edge===0){x=Math.random()*canvas.width;y=-30;}
+  else if(edge===1){x=canvas.width+30;y=Math.random()*canvas.height;}
+  else if(edge===2){x=Math.random()*canvas.width;y=canvas.height+30;}
+  else{x=-30;y=Math.random()*canvas.height;}
+  let size=10+Math.random()*18;
+  const kind=Math.random()<0.35?'homing':'normal';
+  if(selectedMode==='bossRush' && Math.random()<0.3)size*=1.8;
   shapes.push(new Shape(x,y,size,kind,randomColor()));
 }
-
 function spawnPelletsFrom(shape){
-  const target = decoy.active ? decoy : player;
-  const dx = target.x - shape.x;
-  const dy = target.y - shape.y;
-  const dist = Math.sqrt(dx*dx + dy*dy) || 1;
-  const speed = modeConfig.pelletSpeed;
-  const vx = dx/dist*speed;
-  const vy = dy/dist*speed;
-  // Rapidfire mode: shapes can fire 2 pellets in slight angles
-  const count = selectedMode === 'rapidfire' ? 2 : 1;
-  for(let i=0;i<count;i++){
-    let angleOffset = 0;
-    if(count === 2){
-      angleOffset = (i === 0 ? -0.18 : 0.18);
-    }
-    const baseAngle = Math.atan2(vy, vx) + angleOffset;
-    const svx = Math.cos(baseAngle)*speed;
-    const svy = Math.sin(baseAngle)*speed;
-    pellets.push(new Pellet(shape.x, shape.y, svx, svy, shape.color));
-  }
+  const target=decoy.active?decoy:player;
+  const dx=target.x-shape.x,dy=target.y-shape.y;
+  const dist=Math.sqrt(dx*dx+dy*dy)||1;
+  const speed=modeConfig.pelletSpeed;
+  const vx=dx/dist*speed,vy=dy/dist*speed;
+  pellets.push(new Pellet(shape.x,shape.y,vx,vy,shape.color));
 }
 
-/* --------- Utility for laser hits ---------- */
-function pointSegmentDistance(px,py, x1,y1,x2,y2){
-  const vx = x2 - x1;
-  const vy = y2 - y1;
-  const wx = px - x1;
-  const wy = py - y1;
-  const len2 = vx*vx + vy*vy || 1;
-  let t = (wx*vx + wy*vy) / len2;
-  if(t < 0) t = 0;
-  if(t > 1) t = 1;
-  const projx = x1 + t*vx;
-  const projy = y1 + t*vy;
-  const dx = px - projx;
-  const dy = py - projy;
-  return Math.sqrt(dx*dx + dy*dy);
-}
-
-/* --------- Abilities logic ---------- */
+/* Abilities logic */
 function useShield(){
-  if(abilities.shield > 0) return;
-  player.shieldActive = true;
-  player.shieldTime = 5*60; // 5 seconds
-  abilities.shield = abilityMax.shield;
+  if(abilities.shield>0)return;
+  player.shieldActive=true;
+  player.shieldTime=5*60;
+  abilities.shield=abilityMax.shield;
 }
 function useSlow(){
-  if(abilities.slow > 0) return;
-  player.slowTime = 4*60; // 4 seconds
-  abilities.slow = abilityMax.slow;
+  if(abilities.slow>0)return;
+  player.slowTime=4*60;
+  abilities.slow=abilityMax.slow;
 }
 function useShockwave(){
-  if(abilities.shockwave > 0) return;
-  player.shockwaveTime = 20; // frames of visual wave
-  player.shockwaveRadius = 30;
-  abilities.shockwave = abilityMax.shockwave;
-
-  const r = 140;
-  pellets = pellets.filter(p => {
-    const dx = p.x - player.x;
-    const dy = p.y - player.y;
-    return dx*dx + dy*dy > r*r;
+  if(abilities.shockwave>0)return;
+  player.shockwaveTime=20;
+  player.shockwaveRadius=30;
+  abilities.shockwave=abilityMax.shockwave;
+  const r=140;
+  pellets=pellets.filter(p=>{
+    const dx=p.x-player.x,dy=p.y-player.y;
+    return dx*dx+dy*dy>r*r;
   });
-  shapes = shapes.filter(s => {
-    const dx = s.x - player.x;
-    const dy = s.y - player.y;
-    return dx*dx + dy*dy > r*r;
+  shapes=shapes.filter(s=>{
+    const dx=s.x-player.x,dy=s.y-player.y;
+    return dx*dx+dy*dy>r*r;
   });
 }
 function useFreeze(){
-  if(abilities.freeze > 0) return;
-  player.freezeTime = 3*60; // 3 seconds
-  abilities.freeze = abilityMax.freeze;
+  if(abilities.freeze>0)return;
+  player.freezeTime=3*60;
+  abilities.freeze=abilityMax.freeze;
 }
 function useDecoy(){
-  if(abilities.decoy > 0) return;
-  decoy.active = true;
-  decoy.x = player.x;
-  decoy.y = player.y;
-  decoy.timer = 6*60;
-  abilities.decoy = abilityMax.decoy;
+  if(abilities.decoy>0)return;
+  decoy.active=true;
+  decoy.x=player.x;decoy.y=player.y;
+  decoy.timer=6*60;
+  abilities.decoy=abilityMax.decoy;
 }
 function useRegen(){
-  if(abilities.regen > 0) return;
-  player.regenTime = 5*60; // 5 seconds regen
-  abilities.regen = abilityMax.regen;
-}
-function useDash(){
-  if(abilities.dash > 0) return;
-  const dashDist = 150;
-  const mag = Math.sqrt(lastMoveDirX*lastMoveDirX + lastMoveDirY*lastMoveDirY);
-  if(mag > 0){
-    const nx = lastMoveDirX / mag;
-    const ny = lastMoveDirY / mag;
-    player.x += nx * dashDist;
-    player.y += ny * dashDist;
-    // clamp
-    if(player.x - player.size/2 < 0) player.x = player.size/2;
-    if(player.x + player.size/2 > canvas.width) player.x = canvas.width - player.size/2;
-    if(player.y - player.size/2 < 0) player.y = player.size/2;
-    if(player.y + player.size/2 > canvas.height) player.y = canvas.height - player.size/2;
-  }
-  dashFlashTime = 8;
-  abilities.dash = abilityMax.dash;
+  if(abilities.regen>0)return;
+  player.regenTime=5*60;
+  abilities.regen=abilityMax.regen;
 }
 function useMegaHeal(){
-  if(abilities.megaHeal > 0) return;
-  player.health = Math.min(100, player.health + 30);
+  if(abilities.megaHeal>0)return;
+  player.health=Math.min(100,player.health+30);
   updateHealthBar();
-  megaHealFlashTime = 15;
-  abilities.megaHeal = abilityMax.megaHeal;
+  megaHealFlashTime=15;
+  abilities.megaHeal=abilityMax.megaHeal;
 }
 function useBarrier(){
-  if(abilities.barrier > 0) return;
-  player.barrierTime = 4*60; // 4 seconds damage reduction
-  abilities.barrier = abilityMax.barrier;
+  if(abilities.barrier>0)return;
+  player.barrierTime=4*60;
+  abilities.barrier=abilityMax.barrier;
 }
 function useSpeedBoost(){
-  if(abilities.speed > 0) return;
-  player.speedBoostTime = 4*60;
-  abilities.speed = abilityMax.speed;
+  if(abilities.speed>0)return;
+  player.speedBoostTime=4*60;
+  abilities.speed=abilityMax.speed;
 }
 function useCleanse(){
-  if(abilities.cleanse > 0) return;
-  pellets = [];
-  cleanseWaveTime = 18;
-  cleanseWaveRadius = 30;
-  abilities.cleanse = abilityMax.cleanse;
+  if(abilities.cleanse>0)return;
+  pellets=[];
+  cleanseWaveTime=18;
+  cleanseWaveRadius=30;
+  abilities.cleanse=abilityMax.cleanse;
 }
-function useLaser(){
-  if(abilities.laser > 0) return;
-  player.laserTime = 35; // ~0.5s
-  abilities.laser = abilityMax.laser;
-}
-function useReflect(){
-  if(abilities.reflect > 0) return;
-  player.reflectTime = 5*60; // 5 seconds reflect window
-  abilities.reflect = abilityMax.reflect;
-}
-function useOverclock(){
-  if(abilities.overclock > 0) return;
-  player.overclockTime = 7*60; // 7 seconds
-  abilities.overclock = abilityMax.overclock;
-}
-
 function activateAbility(id){
-  if(!id) return;
-  if(abilities[id] > 0) return;
+  if(!id||abilities[id]>0)return;
   switch(id){
-    case 'shield':    useShield(); break;
-    case 'slow':      useSlow(); break;
-    case 'shockwave': useShockwave(); break;
-    case 'freeze':    useFreeze(); break;
-    case 'decoy':     useDecoy(); break;
-    case 'regen':     useRegen(); break;
-    case 'dash':      useDash(); break;
-    case 'megaHeal':  useMegaHeal(); break;
-    case 'barrier':   useBarrier(); break;
-    case 'speed':     useSpeedBoost(); break;
-    case 'cleanse':   useCleanse(); break;
-    case 'laser':     useLaser(); break;
-    case 'reflect':   useReflect(); break;
-    case 'overclock': useOverclock(); break;
+    case'shield':useShield();break;
+    case'slow':useSlow();break;
+    case'shockwave':useShockwave();break;
+    case'freeze':useFreeze();break;
+    case'decoy':useDecoy();break;
+    case'regen':useRegen();break;
+    case'megaHeal':useMegaHeal();break;
+    case'barrier':useBarrier();break;
+    case'speed':useSpeedBoost();break;
+    case'cleanse':useCleanse();break;
   }
 }
 
-/* UI clicks for slots (slots map to activeAbilities) */
-document.querySelectorAll('.abilityBtn').forEach(btn => {
-  const slot = parseInt(btn.dataset.slot, 10);
-  btn.addEventListener('click', () => useAbilitySlot(slot));
+/* Ability slots click */
+document.querySelectorAll('.abilityBtn').forEach(btn=>{
+  const slot=parseInt(btn.dataset.slot,10);
+  btn.addEventListener('click',()=>useAbilitySlot(slot));
 });
-
 function useAbilitySlot(slot){
-  const id = activeAbilities[slot];
-  if(!id) return;
+  const id=activeAbilities[slot];
+  if(!id)return;
   activateAbility(id);
 }
 
-/* Keyboard abilities & movement (with arrow keys) */
-document.addEventListener('keydown', e => {
-  const key = e.key;
-  const k = key.toLowerCase();
-  keys[k] = true;
-
-  // Map arrow keys to WASD for movement
-  if(key === 'ArrowUp')   keys['w'] = true;
-  if(key === 'ArrowDown') keys['s'] = true;
-  if(key === 'ArrowLeft') keys['a'] = true;
-  if(key === 'ArrowRight')keys['d'] = true;
-
-  if(k === '1') useAbilitySlot(0);
-  if(k === '2') useAbilitySlot(1);
-  if(k === '3') useAbilitySlot(2);
-  if(k === '4') useAbilitySlot(3);
-});
-document.addEventListener('keyup', e => {
-  const key = e.key;
-  const k = key.toLowerCase();
-  keys[k] = false;
-
-  if(key === 'ArrowUp')   keys['w'] = false;
-  if(key === 'ArrowDown') keys['s'] = false;
-  if(key === 'ArrowLeft') keys['a'] = false;
-  if(key === 'ArrowRight')keys['d'] = false;
-});
-
-/* --------- Joystick --------- */
-let joystickActive = false;
-let joystickVX = 0;
-let joystickVY = 0;
-const joyOuter = document.getElementById('joystickOuter');
-const joyInner = document.getElementById('joystickInner');
-const JOY_MAX = 56;
-const JOY_FACTOR = 0.14;
-let joyBaseX = 0;
-let joyBaseY = 0;
-
-canvas.addEventListener('touchstart', ev => {
-  ev.preventDefault();
-  const t = ev.touches[0];
-  joyBaseX = t.clientX;
-  joyBaseY = t.clientY;
-  joyOuter.style.display = 'block';
-  joyOuter.style.left = (joyBaseX - joyOuter.offsetWidth/2) + 'px';
-  joyOuter.style.top  = (joyBaseY - joyOuter.offsetHeight/2) + 'px';
-  joystickActive = true;
-  joystickVX = 0;
-  joystickVY = 0;
-});
-
-canvas.addEventListener('touchmove', ev => {
-  ev.preventDefault();
-  if(!joystickActive) return;
-  const t = ev.touches[0];
-  let dx = t.clientX - joyBaseX;
-  let dy = t.clientY - joyBaseY;
-  const dist = Math.sqrt(dx*dx + dy*dy);
-  if(dist > JOY_MAX){
-    const a = Math.atan2(dy,dx);
-    dx = Math.cos(a)*JOY_MAX;
-    dy = Math.sin(a)*JOY_MAX;
-  }
-  joyInner.style.left = (joyOuter.offsetWidth/2 - joyInner.offsetWidth/2 + dx) + 'px';
-  joyInner.style.top  = (joyOuter.offsetHeight/2 - joyInner.offsetHeight/2 + dy) + 'px';
-
-  joystickVX = (dx / JOY_MAX) * player.maxSpeed * JOY_FACTOR;
-  joystickVY = (dy / JOY_MAX) * player.maxSpeed * JOY_FACTOR;
-});
-
-function endJoystick(){
-  joystickActive = false;
-  joystickVX = 0;
-  joystickVY = 0;
-  joyOuter.style.display = 'none';
-  joyInner.style.left = (joyOuter.offsetWidth/2 - joyInner.offsetWidth/2) + 'px';
-  joyInner.style.top  = (joyOuter.offsetHeight/2 - joyInner.offsetHeight/2) + 'px';
+/* Dash core action */
+function performDash(){
+  const mag=Math.hypot(lastMoveDirX,lastMoveDirY);
+  if(mag===0)return;
+  const dashDist=150;
+  const nx=lastMoveDirX/mag,ny=lastMoveDirY/mag;
+  player.x+=nx*dashDist;
+  player.y+=ny*dashDist;
+  if(player.x-player.size/2<0)player.x=player.size/2;
+  if(player.x+player.size/2>canvas.width)player.x=canvas.width-player.size/2;
+  if(player.y-player.size/2<0)player.y=player.size/2;
+  if(player.y+player.size/2>canvas.height)player.y=canvas.height-player.size/2;
+  dashFlashTime=8;
+  dashCount++;
 }
-canvas.addEventListener('touchend', ev => { ev.preventDefault(); endJoystick(); });
-canvas.addEventListener('touchcancel', ev => { ev.preventDefault(); endJoystick(); });
 
-/* --------- Movement & health --------- */
+/* Keyboard */
+document.addEventListener('keydown',e=>{
+  const k=e.key.toLowerCase();
+  keys[k]=true;
+  if(k==='1')useAbilitySlot(0);
+  if(k==='2')useAbilitySlot(1);
+  if(k==='3')useAbilitySlot(2);
+  if(k==='4')useAbilitySlot(3);
+  if(k==='b')performDash();
+});
+document.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
+
+/* Dash mobile button */
+document.getElementById('dashBtnMobile').addEventListener('click',performDash);
+
+/* Joystick */
+let joystickActive=false,joystickVX=0,joystickVY=0;
+const joyOuter=document.getElementById('joystickOuter');
+const joyInner=document.getElementById('joystickInner');
+const JOY_MAX=56,JOY_FACTOR=0.14;
+let joyBaseX=0,joyBaseY=0;
+
+canvas.addEventListener('touchstart',ev=>{
+  ev.preventDefault();
+  const t=ev.touches[0];
+  joyBaseX=t.clientX;joyBaseY=t.clientY;
+  joyOuter.style.display='block';
+  joyOuter.style.left=(joyBaseX-joyOuter.offsetWidth/2)+'px';
+  joyOuter.style.top=(joyBaseY-joyOuter.offsetHeight/2)+'px';
+  joystickActive=true;joystickVX=0;joystickVY=0;
+});
+canvas.addEventListener('touchmove',ev=>{
+  ev.preventDefault();
+  if(!joystickActive)return;
+  const t=ev.touches[0];
+  let dx=t.clientX-joyBaseX,dy=t.clientY-joyBaseY;
+  const dist=Math.sqrt(dx*dx+dy*dy);
+  if(dist>JOY_MAX){
+    const a=Math.atan2(dy,dx);
+    dx=Math.cos(a)*JOY_MAX;dy=Math.sin(a)*JOY_MAX;
+  }
+  joyInner.style.left=(joyOuter.offsetWidth/2-joyInner.offsetWidth/2+dx)+'px';
+  joyInner.style.top=(joyOuter.offsetHeight/2-joyInner.offsetHeight/2+dy)+'px';
+  joystickVX=(dx/JOY_MAX)*player.maxSpeed*JOY_FACTOR;
+  joystickVY=(dy/JOY_MAX)*player.maxSpeed*JOY_FACTOR;
+});
+function endJoystick(){
+  joystickActive=false;joystickVX=0;joystickVY=0;
+  joyOuter.style.display='none';
+  joyInner.style.left=(joyOuter.offsetWidth/2-joyInner.offsetWidth/2)+'px';
+  joyInner.style.top=(joyOuter.offsetHeight/2-joyInner.offsetHeight/2)+'px';
+}
+canvas.addEventListener('touchend',ev=>{ev.preventDefault();endJoystick();});
+canvas.addEventListener('touchcancel',ev=>{ev.preventDefault();endJoystick();});
+
+/* Movement & health */
 function movePlayer(){
-  let ax=0, ay=0;
-  if(keys['w']) ay -= 1;
-  if(keys['s']) ay += 1;
-  if(keys['a']) ax -= 1;
-  if(keys['d']) ax += 1;
+  let ax=0,ay=0;
+  if(keys['w']||keys['arrowup'])ay-=1;
+  if(keys['s']||keys['arrowdown'])ay+=1;
+  if(keys['a']||keys['arrowleft'])ax-=1;
+  if(keys['d']||keys['arrowright'])ax+=1;
 
-  const moveVecX = ax + joystickVX*10;
-  const moveVecY = ay + joystickVY*10;
-  if(moveVecX !== 0 || moveVecY !== 0){
-    const mag = Math.sqrt(moveVecX*moveVecX + moveVecY*moveVecY);
-    if(mag > 0){
-      lastMoveDirX = moveVecX / mag;
-      lastMoveDirY = moveVecY / mag;
+  const moveVecX=ax+joystickVX*10;
+  const moveVecY=ay+joystickVY*10;
+  if(moveVecX!==0||moveVecY!==0){
+    const mag=Math.sqrt(moveVecX*moveVecX+moveVecY*moveVecY);
+    if(mag>0){
+      lastMoveDirX=moveVecX/mag;
+      lastMoveDirY=moveVecY/mag;
     }
   }
 
-  let speed = player.speed;
-  if(player.speedBoostTime > 0) speed *= 1.8;
-  if(player.overclockTime > 0)  speed *= 1.2;
+  let speed=player.speed;
+  if(player.speedBoostTime>0)speed*=1.8;
 
-  player.vx += ax * speed + joystickVX;
-  player.vy += ay * speed + joystickVY;
-  player.vx *= 0.86;
-  player.vy *= 0.86;
+  player.vx+=ax*speed+joystickVX;
+  player.vy+=ay*speed+joystickVY;
+  player.vx*=0.86;player.vy*=0.86;
+  player.vx=Math.max(Math.min(player.vx,player.maxSpeed),-player.maxSpeed);
+  player.vy=Math.max(Math.min(player.vy,player.maxSpeed),-player.maxSpeed);
 
-  let maxSpd = player.maxSpeed;
-  if(player.overclockTime > 0) maxSpd *= 1.2;
-
-  player.vx = Math.max(Math.min(player.vx, maxSpd), -maxSpd);
-  player.vy = Math.max(Math.min(player.vy, maxSpd), -maxSpd);
-
-  player.x += player.vx;
-  player.y += player.vy;
-
-  if(player.x - player.size/2 < 0) player.x = player.size/2;
-  if(player.x + player.size/2 > canvas.width) player.x = canvas.width - player.size/2;
-  if(player.y - player.size/2 < 0) player.y = player.size/2;
-  if(player.y + player.size/2 > canvas.height) player.y = canvas.height - player.size/2;
+  player.x+=player.vx;player.y+=player.vy;
+  if(player.x-player.size/2<0)player.x=player.size/2;
+  if(player.x+player.size/2>canvas.width)player.x=canvas.width-player.size/2;
+  if(player.y-player.size/2<0)player.y=player.size/2;
+  if(player.y+player.size/2>canvas.height)player.y=canvas.height-player.size/2;
 }
-
 function applyDamage(base){
-  if(player.shieldActive) return;
-  let dmg = base * modeConfig.damageMultiplier;
-  if(player.barrierTime > 0) dmg *= 0.5;
-  player.health -= dmg;
-  if(player.health <= 0){
-    player.health = 0;
-    updateHealthBar();
-    gameOver();
-    return;
+  if(player.shieldActive)return;
+  let dmg=base*modeConfig.damageMultiplier;
+  if(player.barrierTime>0)dmg*=0.5;
+  player.health-=dmg;
+  if(player.health<=0){
+    player.health=0;updateHealthBar();gameOver();return;
   }
   updateHealthBar();
 }
-
 function updateHealthBar(){
-  const fill = document.getElementById('healthFill');
-  fill.style.width = Math.max(0, player.health) + '%';
-  if(player.health > 60){
-    fill.style.background = 'linear-gradient(90deg,#1fff8f,#a7ff4a)';
-  } else if(player.health > 30){
-    fill.style.background = 'linear-gradient(90deg,#ffe35a,#ffb84a)';
-  } else{
-    fill.style.background = 'linear-gradient(90deg,#ff4f7b,#ff9966)';
-  }
+  const fill=document.getElementById('healthFill');
+  fill.style.width=Math.max(0,player.health)+'%';
+  if(player.health>60)fill.style.background='linear-gradient(90deg,#1fff8f,#a7ff4a)';
+  else if(player.health>30)fill.style.background='linear-gradient(90deg,#ffe35a,#ffb84a)';
+  else fill.style.background='linear-gradient(90deg,#ff4f7b,#ff9966)';
 }
 
-/* --------- Timer --------- */
+/* Timer */
 function updateTimerLabel(){
-  const total = Math.floor(elapsedMs);
-  const minutes = Math.floor(total / 60000);
-  const seconds = Math.floor((total % 60000) / 1000);
-  const centis  = Math.floor((total % 1000) / 10);
-  const mm = String(minutes).padStart(2,'0');
-  const ss = String(seconds).padStart(2,'0');
-  const cc = String(centis).padStart(2,'0');
-  timerLabel.textContent = `${mm}:${ss}.${cc}`;
+  const total=Math.floor(elapsedMs);
+  const minutes=Math.floor(total/60000);
+  const seconds=Math.floor((total%60000)/1000);
+  const centis=Math.floor((total%1000)/10);
+  const mm=String(minutes).padStart(2,'0');
+  const ss=String(seconds).padStart(2,'0');
+  const cc=String(centis).padStart(2,'0');
+  timerLabel.textContent=`${mm}:${ss}.${cc}`;
 }
 
-/* --------- Game Over & Restart --------- */
+/* Game over & restart */
 function gameOver(){
-  running = false;
+  running=false;
   cancelAnimationFrame(animationId);
-  setTimeout(() => {
-    alert('Game Over! Time: ' + timerLabel.textContent + '  – Click Restart to play again.');
-  }, 50);
+  setTimeout(()=>{alert('Game Over! Time: '+timerLabel.textContent+'  – Click Restart to play again.');},50);
 }
-
-document.getElementById('restartBtn').addEventListener('click', () => {
+document.getElementById('restartBtn').addEventListener('click',()=>{
   resetGame();
-  openingScreen.style.display = 'flex'; // back to mode select
+  openingScreen.style.display='flex';
 });
-
 function resetGame(){
-  shapes = [];
-  pellets = [];
-  spinBeams = [];
-  poisonZones = [];
-  player.x = canvas.width/2;
-  player.y = canvas.height/2;
-  player.vx = player.vy = 0;
-  player.health = 100;
-  player.shieldActive = false;
-  player.slowTime = 0;
-  player.freezeTime = 0;
-  player.shockwaveTime = 0;
-  player.shockwaveRadius = 0;
-  player.regenTime = 0;
-  player.barrierTime = 0;
-  player.speedBoostTime = 0;
-  player.reflectTime = 0;
-  player.overclockTime = 0;
-  player.laserTime = 0;
-  decoy.active = false;
-  decoy.timer = 0;
-  dashFlashTime = 0;
-  megaHealFlashTime = 0;
-  cleanseWaveTime = 0;
-  cleanseWaveRadius = 0;
-  elapsedMs = 0;
-  lastFrameTime = null;
-  updateTimerLabel();
-  updateHealthBar();
-  for(let k in abilities) abilities[k] = 0;
+  shapes=[];pellets=[];spinBeams=[];circleTraps=[];multiBursts=[];
+  player.x=canvas.width/2;player.y=canvas.height/2;
+  player.vx=player.vy=0;player.health=100;
+  player.shieldActive=false;player.slowTime=0;player.freezeTime=0;
+  player.shockwaveTime=0;player.shockwaveRadius=0;
+  player.regenTime=0;player.barrierTime=0;player.speedBoostTime=0;
+  decoy.active=false;decoy.timer=0;
+  dashFlashTime=0;megaHealFlashTime=0;cleanseWaveTime=0;cleanseWaveRadius=0;
+  elapsedMs=0;lastFrameTime=null;dashCount=0;
+  updateTimerLabel();updateHealthBar();
+  for(let k in abilities)abilities[k]=0;
   for(let i=0;i<4;i++){
-    const el = document.getElementById('slot'+i+'CD');
-    if(el) el.style.width = '0%';
+    const el=document.getElementById('slot'+i+'CD');
+    if(el)el.style.width='0%';
   }
-  spawnTimer = 0;
+  spawnTimer=0;
 }
 
-/* --------- Main loop --------- */
-function getSpeedScale(){
-  return player.slowTime > 0 ? 0.35 : 1.0;
-}
-
+/* Main loop */
+function getSpeedScale(){return player.slowTime>0?0.35:1.0;}
 function animate(){
-  if(!running) return;
+  if(!running)return;
+  const now=performance.now();
+  if(lastFrameTime===null)lastFrameTime=now;
+  const dt=now-lastFrameTime;lastFrameTime=now;
+  elapsedMs+=dt;updateTimerLabel();
 
-  // timer update
-  const now = performance.now();
-  if(lastFrameTime === null) lastFrameTime = now;
-  const dt = now - lastFrameTime;
-  lastFrameTime = now;
-  elapsedMs += dt;
-  updateTimerLabel();
-
-  const baseSpeedScale = getSpeedScale();
-  const enemySpeedScale = player.freezeTime > 0 ? 0 : baseSpeedScale;
+  const baseSpeedScale=getSpeedScale();
+  const enemySpeedScale=player.freezeTime>0?0:baseSpeedScale;
 
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  // Toxic Storm poison zones spawn
-  if(selectedMode === 'toxic' && Math.random() < 0.02){
-    spawnPoisonZone();
-  }
-
-  // background glow around player
-  const g = ctx.createRadialGradient(player.x,player.y,0,player.x,player.y,400);
+  const g=ctx.createRadialGradient(player.x,player.y,0,player.x,player.y,400);
   g.addColorStop(0,'rgba(79,140,255,0.26)');
   g.addColorStop(1,'rgba(0,0,0,0.05)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle=g;ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  // time slow overlay
-  if(player.slowTime > 0){
-    ctx.fillStyle = 'rgba(40,40,80,0.25)';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-  }
-  // freeze overlay
-  if(player.freezeTime > 0){
-    ctx.fillStyle = 'rgba(120,200,255,0.18)';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-  }
+  if(player.slowTime>0){ctx.fillStyle='rgba(40,40,80,0.25)';ctx.fillRect(0,0,canvas.width,canvas.height);}
+  if(player.freezeTime>0){ctx.fillStyle='rgba(120,200,255,0.18)';ctx.fillRect(0,0,canvas.width,canvas.height);}
 
-  // Toxic Storm poison zones draw & damage
-  for(let i=poisonZones.length-1;i>=0;i--){
-    const z = poisonZones[i];
-    z.life--;
-    const alpha = Math.max(0, z.life / (8*60)) * 0.3;
-    ctx.fillStyle = `rgba(80,255,140,${alpha})`;
-    ctx.beginPath();
-    ctx.arc(z.x, z.y, z.r, 0, Math.PI*2);
-    ctx.fill();
-    ctx.strokeStyle = `rgba(80,255,140,${alpha+0.15})`;
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(z.x, z.y, z.r+4*Math.sin(z.life/12), 0, Math.PI*2);
-    ctx.stroke();
-
-    const dx = player.x - z.x;
-    const dy = player.y - z.y;
-    if(dx*dx + dy*dy < z.r*z.r){
-      applyDamage(0.4);
-    }
-
-    if(z.life <= 0){
-      poisonZones.splice(i,1);
-    }
-  }
-
-  // spawn logic
   spawnTimer--;
-  if(spawnTimer <= 0){
+  if(spawnTimer<=0){
     spawnShape();
-    if(Math.random() < modeConfig.pelletChance && shapes.length>0){
-      const s = shapes[Math.floor(Math.random()*shapes.length)];
+    if(Math.random()<modeConfig.pelletChance && shapes.length>0){
+      const s=shapes[Math.floor(Math.random()*shapes.length)];
       spawnPelletsFrom(s);
     }
-    if(Math.random() < modeConfig.beamChance){
-      spinBeams.push(new SpinBeam());
-    }
-    spawnTimer = modeConfig.spawnInterval;
+    if(Math.random()<modeConfig.beamChance)spinBeams.push(new SpinBeam());
+    if(Math.random()<0.18)multiBursts.push(new MultiBurst(Math.random()*canvas.width,Math.random()*canvas.height,randomColor()));
+    if(Math.random()<0.09)circleTraps.push(new CircleTrap(player.x,player.y));
+    spawnTimer=modeConfig.spawnInterval;
   }
 
-  // LASER ability: damage along a ray + visual
-  if(player.laserTime > 0){
-    player.laserTime--;
-    const len = Math.max(canvas.width, canvas.height)*1.3;
-    let dirx = lastMoveDirX;
-    let diry = lastMoveDirY;
-    const mag = Math.sqrt(dirx*dirx + diry*diry);
-    if(mag === 0){ dirx = 1; diry = 0; }
-    else { dirx /= mag; diry /= mag; }
-    const x1 = player.x;
-    const y1 = player.y;
-    const x2 = player.x + dirx*len;
-    const y2 = player.y + diry*len;
-
-    // visual beam
-    ctx.save();
-    ctx.globalCompositeOperation = 'lighter';
-    const grad = ctx.createLinearGradient(x1,y1,x2,y2);
-    grad.addColorStop(0,'rgba(255,255,255,0.9)');
-    grad.addColorStop(0.4,'rgba(120,200,255,0.9)');
-    grad.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.strokeStyle = grad;
-    ctx.lineWidth = 10;
-    ctx.beginPath();
-    ctx.moveTo(x1,y1);
-    ctx.lineTo(x2,y2);
-    ctx.stroke();
-    ctx.lineWidth = 20;
-    ctx.globalAlpha = 0.22;
-    ctx.beginPath();
-    ctx.moveTo(x1,y1);
-    ctx.lineTo(x2,y2);
-    ctx.stroke();
-    ctx.restore();
-
-    const beamRadius = 18;
-
-    // shapes hit by laser
-    shapes = shapes.filter(s => {
-      const d = pointSegmentDistance(s.x,s.y,x1,y1,x2,y2);
-      return d > s.size + beamRadius;
-    });
-
-    // pellets hit by laser
-    pellets = pellets.filter(p => {
-      const d = pointSegmentDistance(p.x,p.y,x1,y1,x2,y2);
-      return d > p.size + beamRadius;
-    });
-  }
-
-  // shapes
+  /* shapes */
   for(let i=shapes.length-1;i>=0;i--){
-    const s = shapes[i];
+    const s=shapes[i];
     s.update(enemySpeedScale);
-    // collision with decoy first
     if(decoy.active){
-      const ddx = s.x - decoy.x;
-      const ddy = s.y - decoy.y;
-      const dDist = Math.sqrt(ddx*ddx + ddy*ddy);
-      if(dDist < s.size + player.size/2){
-        shapes.splice(i,1);
-        continue;
-      }
+      const ddx=s.x-decoy.x,ddy=s.y-decoy.y;
+      const dDist=Math.sqrt(ddx*ddx+ddy*ddy);
+      if(dDist<s.size+player.size/2){shapes.splice(i,1);continue;}
     }
-    // collision with player
-    const dx = s.x - player.x;
-    const dy = s.y - player.y;
-    const dist = Math.sqrt(dx*dx + dy*dy);
-    if(dist < s.size + player.size/2){
-      applyDamage(4);
-      shapes.splice(i,1);
-      continue;
-    }
-    // out of bounds cleanup
-    if(s.x<-100||s.x>canvas.width+100||s.y<-100||s.y>canvas.height+100){
-      shapes.splice(i,1);
-    }
+    const dx=s.x-player.x,dy=s.y-player.y;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<s.size+player.size/2){applyDamage(4);shapes.splice(i,1);continue;}
+    if(s.x<-100||s.x>canvas.width+100||s.y<-100||s.y>canvas.height+100)shapes.splice(i,1);
   }
 
-  // pellets
+  /* multi bursts */
+  for(let i=multiBursts.length-1;i>=0;i--){
+    const m=multiBursts[i];
+    m.update(enemySpeedScale);
+    if(m.exploded && m.timer<=-10)multiBursts.splice(i,1);
+  }
+
+  /* pellets */
   for(let i=pellets.length-1;i>=0;i--){
-    const p = pellets[i];
+    const p=pellets[i];
     p.update(enemySpeedScale);
-
-    // tiny trail effect when slowTime > 0 (motion blur)
-    if(player.slowTime > 0){
-      ctx.globalAlpha = 0.2;
+    if(player.slowTime>0){
+      ctx.globalAlpha=0.2;
       ctx.beginPath();
-      ctx.arc(p.x - p.vx*2, p.y - p.vy*2, p.size*0.8, 0, Math.PI*2);
+      ctx.arc(p.x-p.vx*2,p.y-p.vy*2,p.size*0.8,0,Math.PI*2);
       ctx.fill();
-      ctx.globalAlpha = 1;
+      ctx.globalAlpha=1;
     }
-
-    let removePellet = false;
-
-    // hit decoy?
     if(decoy.active){
-      const ddx = p.x - decoy.x;
-      const ddy = p.y - decoy.y;
-      if(ddx*ddx + ddy*ddy < Math.pow(p.size + player.size/2,2)){
-        removePellet = true;
-      }
+      const ddx=p.x-decoy.x,ddy=p.y-decoy.y;
+      if(ddx*ddx+ddy*ddy<Math.pow(p.size+player.size/2,2)){pellets.splice(i,1);continue;}
     }
-
-    if(removePellet){
-      pellets.splice(i,1);
-      continue;
-    }
-
-    const dx = p.x - player.x;
-    const dy = p.y - player.y;
-    const dist = Math.sqrt(dx*dx + dy*dy);
-
-    if(dist < p.size + player.size/2){
-      // Reflect ability: bounce bullet instead of taking damage
-      if(player.reflectTime > 0){
-        if(!p.reflected){
-          p.reflected = true;
-          const toEnemyX = -dx;
-          const toEnemyY = -dy;
-          const mag = Math.sqrt(toEnemyX*toEnemyX + toEnemyY*toEnemyY) || 1;
-          const spd = Math.sqrt(p.vx*p.vx + p.vy*p.vy) || modeConfig.pelletSpeed;
-          p.vx = (toEnemyX / mag) * spd;
-          p.vy = (toEnemyY / mag) * spd;
-          p.color = 'rgba(255,255,255,0.9)';
-        }
-        // don't remove pellet, don't damage player
-      } else {
-        applyDamage(6);
-        pellets.splice(i,1);
-        continue;
-      }
-    }
-
-    // reflected pellet can kill shapes
-    if(p.reflected){
-      for(let j=shapes.length-1;j>=0;j--){
-        const s = shapes[j];
-        const sx = s.x - p.x;
-        const sy = s.y - p.y;
-        if(sx*sx + sy*sy < Math.pow(s.size + p.size,2)){
-          shapes.splice(j,1);
-          removePellet = true;
-          break;
-        }
-      }
-    }
-
-    if(removePellet){
-      pellets.splice(i,1);
-      continue;
-    }
-
-    if(p.x<-40||p.x>canvas.width+40||p.y<-40||p.y>canvas.height+40){
-      pellets.splice(i,1);
-    }
+    const dx=p.x-player.x,dy=p.y-player.y;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<p.size+player.size/2){applyDamage(6);pellets.splice(i,1);continue;}
+    if(p.x<-40||p.x>canvas.width+40||p.y<-40||p.y>canvas.height+40)pellets.splice(i,1);
   }
 
-  // spin beams
+  /* spin beams */
   for(let i=spinBeams.length-1;i>=0;i--){
-    const b = spinBeams[i];
+    const b=spinBeams[i];
     b.update(enemySpeedScale);
-    if(b.timer <= 0){
-      spinBeams.splice(i,1);
-      continue;
-    }
-    // collision check: transform player into beam space
-    const dx = player.x - canvas.width/2;
-    const dy = player.y - canvas.height/2;
-    const ca = Math.cos(-b.angle);
-    const sa = Math.sin(-b.angle);
-    const px = dx*ca - dy*sa;
-    const py = dx*sa + dy*ca;
-    if(Math.abs(py) < 14 && Math.abs(px) < b.length/2){
-      applyDamage(3);
+    if(b.timer<=0){spinBeams.splice(i,1);continue;}
+    const dx=player.x-canvas.width/2,dy=player.y-canvas.height/2;
+    const ca=Math.cos(-b.angle),sa=Math.sin(-b.angle);
+    const px=dx*ca-dy*sa,py=dx*sa+dy*ca;
+    if(Math.abs(py)<14 && Math.abs(px)<b.length/2)applyDamage(3);
+  }
+
+  /* circle traps */
+  for(let i=circleTraps.length-1;i>=0;i--){
+    const c=circleTraps[i];
+    c.update();
+    if(c.life<=0){
+      if(dashCount===c.dashStart)applyDamage(10); /* didn't dash during trap */
+      circleTraps.splice(i,1);
     }
   }
 
-  // ability timers + VFX
-  if(player.shieldActive){
-    player.shieldTime--;
-    if(player.shieldTime <= 0) player.shieldActive = false;
-  }
-  if(player.slowTime > 0){
-    player.slowTime--;
-  }
-  if(player.freezeTime > 0){
-    player.freezeTime--;
-  }
-  if(player.reflectTime > 0){
-    player.reflectTime--;
-  }
-  if(player.overclockTime > 0){
-    player.overclockTime--;
-  }
-  if(player.shockwaveTime > 0){
+  /* ability timers & VFX */
+  if(player.shieldActive){player.shieldTime--;if(player.shieldTime<=0)player.shieldActive=false;}
+  if(player.slowTime>0)player.slowTime--;
+  if(player.freezeTime>0)player.freezeTime--;
+  if(player.shockwaveTime>0){
     player.shockwaveTime--;
-    player.shockwaveRadius += 18;
-    ctx.strokeStyle = `rgba(255,255,255,${player.shockwaveTime/20})`;
-    ctx.lineWidth = 4;
+    player.shockwaveRadius+=18;
+    ctx.strokeStyle=`rgba(255,255,255,${player.shockwaveTime/20})`;
+    ctx.lineWidth=4;
     ctx.beginPath();
-    ctx.arc(player.x, player.y, player.shockwaveRadius, 0, Math.PI*2);
+    ctx.arc(player.x,player.y,player.shockwaveRadius,0,Math.PI*2);
     ctx.stroke();
   }
-  if(player.regenTime > 0){
+  if(player.regenTime>0){
     player.regenTime--;
-    if(player.health < 100){
-      player.health += 0.25;
-      if(player.health > 100) player.health = 100;
+    if(player.health<100){
+      player.health+=0.25;
+      if(player.health>100)player.health=100;
       updateHealthBar();
     }
-    // regen aura
     ctx.save();
-    ctx.globalAlpha = 0.8;
-    ctx.strokeStyle = 'rgba(80,255,140,0.8)';
-    ctx.lineWidth = 3;
+    ctx.globalAlpha=0.8;
+    ctx.strokeStyle='rgba(80,255,140,0.8)';
+    ctx.lineWidth=3;
     ctx.beginPath();
-    const r = player.size/2 + 6 + (player.regenTime % 12);
-    ctx.arc(player.x, player.y, r, 0, Math.PI*2);
+    const r=player.size/2+6+(player.regenTime%12);
+    ctx.arc(player.x,player.y,r,0,Math.PI*2);
     ctx.stroke();
     ctx.restore();
   }
-  if(player.barrierTime > 0){
-    player.barrierTime--;
-  }
-  if(player.speedBoostTime > 0){
-    player.speedBoostTime--;
-  }
+  if(player.barrierTime>0)player.barrierTime--;
+  if(player.speedBoostTime>0)player.speedBoostTime--;
 
-  // decoy timer + draw
   if(decoy.active){
     decoy.timer--;
-    if(decoy.timer <= 0){
-      decoy.active = false;
-    } else {
-      ctx.globalAlpha = 0.6;
-      ctx.fillStyle = 'rgba(160,160,255,0.7)';
-      ctx.fillRect(decoy.x - player.size/2, decoy.y - player.size/2, player.size, player.size);
-      ctx.globalAlpha = 1.0;
+    if(decoy.timer<=0)decoy.active=false;
+    else{
+      ctx.globalAlpha=0.6;
+      ctx.fillStyle='rgba(160,160,255,0.7)';
+      ctx.fillRect(decoy.x-player.size/2,decoy.y-player.size/2,player.size,player.size);
+      ctx.globalAlpha=1;
     }
   }
 
-  // dash flash VFX
-  if(dashFlashTime > 0){
+  if(dashFlashTime>0){
     dashFlashTime--;
-    ctx.globalAlpha = dashFlashTime/8;
-    ctx.fillStyle = 'rgba(255,255,255,0.9)';
-    ctx.fillRect(player.x - player.size, player.y - player.size, player.size, player.size);
-    ctx.globalAlpha = 1;
+    ctx.globalAlpha=dashFlashTime/8;
+    ctx.fillStyle='rgba(255,255,255,0.9)';
+    ctx.fillRect(player.x-player.size,player.y-player.size,player.size,player.size);
+    ctx.globalAlpha=1;
   }
-
-  // mega heal flash (green screen bloom)
-  if(megaHealFlashTime > 0){
+  if(megaHealFlashTime>0){
     megaHealFlashTime--;
-    const alpha = (megaHealFlashTime/15) * 0.4;
-    ctx.fillStyle = `rgba(80,255,140,${alpha})`;
+    const alpha=(megaHealFlashTime/15)*0.4;
+    ctx.fillStyle=`rgba(80,255,140,${alpha})`;
     ctx.fillRect(0,0,canvas.width,canvas.height);
   }
-
-  // cleanse wave VFX
-  if(cleanseWaveTime > 0){
+  if(cleanseWaveTime>0){
     cleanseWaveTime--;
-    cleanseWaveRadius += 22;
-    ctx.strokeStyle = `rgba(255,255,255,${cleanseWaveTime/18})`;
-    ctx.lineWidth = 5;
+    cleanseWaveRadius+=22;
+    ctx.strokeStyle=`rgba(255,255,255,${cleanseWaveTime/18})`;
+    ctx.lineWidth=5;
     ctx.beginPath();
-    ctx.arc(player.x, player.y, cleanseWaveRadius,0,Math.PI*2);
+    ctx.arc(player.x,player.y,cleanseWaveRadius,0,Math.PI*2);
     ctx.stroke();
   }
 
-  // cooldown overlays for active ability slots
   for(let i=0;i<activeAbilities.length;i++){
-    const id = activeAbilities[i];
-    const cdEl = document.getElementById('slot'+i+'CD');
-    if(!id || !cdEl) continue;
-    if(abilities[id] > 0){
-      const step = player.overclockTime > 0 ? 3 : 1;
-      abilities[id] -= step;
-      if(abilities[id] < 0) abilities[id] = 0;
-      const max = abilityMax[id] || 60;
-      const percent = (abilities[id]/max)*100;
-      cdEl.style.width = percent + '%';
-    } else {
-      cdEl.style.width = '0%';
-    }
+    const id=activeAbilities[i];
+    const cdEl=document.getElementById('slot'+i+'CD');
+    if(!id||!cdEl)continue;
+    if(abilities[id]>0){
+      abilities[id]--;
+      const max=abilityMax[id]||60;
+      const percent=(abilities[id]/max)*100;
+      cdEl.style.width=percent+'%';
+    }else cdEl.style.width='0%';
   }
 
-  // shield visual
   if(player.shieldActive){
-    const t = performance.now()/220;
-    const pulse = (Math.sin(t)+1)/2;
-    const alpha = 0.3 + 0.4*pulse;
-    ctx.strokeStyle = `rgba(79,180,255,${alpha})`;
-    ctx.lineWidth = 10;
+    const t=performance.now()/220;
+    const pulse=(Math.sin(t)+1)/2;
+    const alpha=0.3+0.4*pulse;
+    ctx.strokeStyle=`rgba(79,180,255,${alpha})`;
+    ctx.lineWidth=10;
     ctx.strokeRect(
-      player.x - player.size/2 - 6,
-      player.y - player.size/2 - 6,
-      player.size + 12,
-      player.size + 12
+      player.x-player.size/2-6,
+      player.y-player.size/2-6,
+      player.size+12,
+      player.size+12
     );
   }
-
-  // barrier visual
-  if(player.barrierTime > 0){
-    const t = performance.now()/260;
-    const pulse = (Math.sin(t)+1)/2;
-    const alpha = 0.25 + 0.3*pulse;
-    ctx.strokeStyle = `rgba(255,180,80,${alpha})`;
-    ctx.lineWidth = 6;
+  if(player.barrierTime>0){
+    const t=performance.now()/260;
+    const pulse=(Math.sin(t)+1)/2;
+    const alpha=0.25+0.3*pulse;
+    ctx.strokeStyle=`rgba(255,180,80,${alpha})`;
+    ctx.lineWidth=6;
     ctx.beginPath();
-    ctx.arc(player.x, player.y, player.size*1.4, 0, Math.PI*2);
+    ctx.arc(player.x,player.y,player.size*1.4,0,Math.PI*2);
     ctx.stroke();
   }
-
-  // speed boost visual
-  if(player.speedBoostTime > 0){
+  if(player.speedBoostTime>0){
     ctx.save();
-    ctx.strokeStyle = 'rgba(150,200,255,0.8)';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle='rgba(150,200,255,0.8)';
+    ctx.lineWidth=2;
     ctx.beginPath();
-    ctx.moveTo(player.x - player.size/2 - 16, player.y);
-    ctx.lineTo(player.x - player.size/2 - 4, player.y);
-    ctx.moveTo(player.x + player.size/2 + 4, player.y);
-    ctx.lineTo(player.x + player.size/2 + 16, player.y);
+    ctx.moveTo(player.x-player.size/2-16,player.y);
+    ctx.lineTo(player.x-player.size/2-4,player.y);
+    ctx.moveTo(player.x+player.size/2+4,player.y);
+    ctx.lineTo(player.x+player.size/2+16,player.y);
     ctx.stroke();
     ctx.restore();
   }
 
-  // reflect visual
-  if(player.reflectTime > 0){
-    const t = performance.now()/200;
-    const pulse = (Math.sin(t)+1)/2;
-    ctx.save();
-    ctx.strokeStyle = `rgba(200,200,255,${0.35+0.25*pulse})`;
-    ctx.lineWidth = 8;
-    ctx.beginPath();
-    ctx.arc(player.x, player.y, player.size*1.6, 0, Math.PI*2);
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  // overclock visual (reddish glow)
-  if(player.overclockTime > 0){
-    const alpha = 0.18 + 0.12*Math.sin(performance.now()/150);
-    ctx.fillStyle = `rgba(255,90,90,${alpha})`;
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-  }
-
-  // glitched mode overlay
-  if(selectedMode === 'glitched'){
-    ctx.save();
-    ctx.globalAlpha = 0.15;
-    ctx.fillStyle = 'rgba(255,0,150,0.5)';
-    for(let i=0;i<8;i++){
-      const y = Math.random()*canvas.height;
-      ctx.fillRect(0,y,canvas.width,2);
-    }
-    ctx.globalAlpha = 0.12;
-    ctx.fillStyle = 'rgba(0,255,255,0.4)';
-    for(let i=0;i<4;i++){
-      const x = Math.random()*canvas.width;
-      const h = 10+Math.random()*30;
-      ctx.fillRect(x,Math.random()*canvas.height,3,h);
-    }
-    ctx.restore();
-  }
-
-  // player
-  ctx.fillStyle = player.color;
-  ctx.fillRect(player.x - player.size/2, player.y - player.size/2, player.size, player.size);
+  ctx.fillStyle=player.color;
+  ctx.fillRect(player.x-player.size/2,player.y-player.size/2,player.size,player.size);
 
   movePlayer();
-
-  animationId = requestAnimationFrame(animate);
+  animationId=requestAnimationFrame(animate);
 }
 
-/* --------- Start game from mode+loadout --------- */
+/* Start game */
 function startGame(){
   resetGame();
-  running = true;
-  lastFrameTime = performance.now();
+  running=true;
+  lastFrameTime=performance.now();
   animate();
 }
 
-/* --------- Resize --------- */
-window.addEventListener('resize', () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+/* Resize */
+window.addEventListener('resize',()=>{
+  canvas.width=window.innerWidth;
+  canvas.height=window.innerHeight;
 });
 </script>
 </body>
