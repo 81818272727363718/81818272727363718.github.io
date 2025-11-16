@@ -784,6 +784,10 @@
         <div class="mode-name">Echo Field</div>
         <div class="mode-tag">Resonance builds faster but hazards sync up.</div>
       </div>
+      <div class="mode-card" data-mode="musicRhythm">
+        <div class="mode-name">Music Rhythm</div>
+        <div class="mode-tag">A full track of beat-synced hazards. Finish the song to win.</div>
+      </div>
       </div>
     </div>
     <div id="openingActions">
@@ -833,6 +837,9 @@
         <li><b>Gravity Well</b> – Singularities pull hazards inward (32s).</li>
         <li><b>Arc Storm</b> – Expanding lightning ring (25s).</li>
         <li><b>Nano Swarm</b> – Lingering dissolving field (30s).</li>
+        <li><b>Starfall Salvo</b> – Meteor barrage that melts anything it touches (40s).</li>
+        <li><b>Harmonic Field</b> – Stationary dome that slows and erodes hazards (38s).</li>
+        <li><b>Beat Drones</b> – Twin drones orbit and fire rhythm shots (28s).</li>
       </ul>
     </div>
     <div class="infoSection" data-section="mechanics">
@@ -841,6 +848,7 @@
         <li><b>Resonance</b>: Build the meter by surviving and dashing. At 100% an Echo Burst slows the arena, trims bullets, and hands you barrier + speed buffs.</li>
         <li><b>Focus Chain</b>: Avoid damage to climb tiers that accelerate cooldowns, drip extra resonance, and add a global slow aura.</li>
         <li><b>Momentum Drive</b>: Fills very slowly while you stay in motion. Maintain movement for ~15 seconds (dashes help a little) to unleash five Overdrive pulses before it fully resets.</li>
+        <li><b>Music Rhythm</b>: Hazards, pellets, and beams only spawn on-beat. Survive the full song and the mode ends the moment the track finishes.</li>
         <li><b>Loadouts</b>: Each mode remembers your best time and expects a bespoke ability combo, so mix utility with offense.</li>
       </ul>
     </div>
@@ -1071,8 +1079,29 @@ const RUN_TIPS = [
   'Speed Boost + Dash lets you cross the map instantly.',
   'Focus Chain tiers speed up ability cooldowns—stay perfect to reach Mythic.',
   'Echo Field rewards aggressive dashing; bursts land quicker with resonance boosts.',
-  'Maelstrom lasers telegraph before firing—slide parallel until they sweep.'
+  'Maelstrom lasers telegraph before firing—slide parallel until they sweep.',
+  'Music Rhythm mode is beat-locked: every hazard lands on the downbeat, so listen for the next cue before moving.'
 ];
+
+const rhythmState = {
+  active: false,
+  beatMs: 0,
+  nextBeatMs: 0,
+  totalBeats: 0,
+  beatsElapsed: 0,
+  beatsPerMeasure: 4,
+  completed: false
+};
+
+function resetRhythmState(){
+  rhythmState.active = false;
+  rhythmState.beatMs = 0;
+  rhythmState.nextBeatMs = 0;
+  rhythmState.totalBeats = 0;
+  rhythmState.beatsElapsed = 0;
+  rhythmState.beatsPerMeasure = 4;
+  rhythmState.completed = false;
+}
 
 const bestTimes = (() => {
   try {
@@ -1282,6 +1311,35 @@ const SOUND_LIBRARY = {
   ],
   ability_nano: [
     { type: 'sawtooth', freq: 300, duration: 0.16, volume: 0.18 }
+  ],
+  ability_starfall: [
+    { type: 'sawtooth', freq: 200, duration: 0.24, volume: 0.28 },
+    { type: 'triangle', freq: 420, duration: 0.18, volume: 0.18, offset: 0.08 }
+  ],
+  ability_harmonic: [
+    { type: 'sine', freq: 320, duration: 0.4, volume: 0.18 },
+    { type: 'sine', freq: 480, duration: 0.5, volume: 0.12, offset: 0.12 }
+  ],
+  ability_beat: [
+    { type: 'square', freq: 560, duration: 0.1, volume: 0.2 },
+    { type: 'triangle', freq: 760, duration: 0.1, volume: 0.15, offset: 0.05 }
+  ],
+  music_downbeat: [
+    { type: 'sine', freq: 110, duration: 0.35, volume: 0.28 },
+    { type: 'triangle', freq: 55, duration: 0.5, volume: 0.22 }
+  ],
+  music_backbeat: [
+    { type: 'square', freq: 220, duration: 0.2, volume: 0.18 },
+    { type: 'square', freq: 330, duration: 0.18, volume: 0.16, offset: 0.05 }
+  ],
+  music_hihat: [
+    { type: 'square', freq: 880, duration: 0.05, volume: 0.12 },
+    { type: 'square', freq: 660, duration: 0.04, volume: 0.1, offset: 0.01 }
+  ],
+  run_clear: [
+    { type: 'triangle', freq: 420, duration: 0.3, volume: 0.24 },
+    { type: 'triangle', freq: 640, duration: 0.35, volume: 0.18, offset: 0.08 },
+    { type: 'triangle', freq: 840, duration: 0.35, volume: 0.16, offset: 0.16 }
   ]
 };
 
@@ -1571,6 +1629,25 @@ const MODES = {
     resonanceBonus: 1.35,
     focusBoost: 0.9,
     hazards: { beamObject: 1.6, multiNode: 1.4, laserGrid: 1.1 }
+  },
+  musicRhythm: {
+    name: 'MUSIC RHYTHM',
+    spawnInterval: 55,
+    spawnIntervalRange: [55, 55],
+    pelletSpeed: 4.2,
+    shapeSpeed: 1.25,
+    damageMultiplier: 1.1,
+    beamChance: 0,
+    pelletChance: 0,
+    playerSpeedMult: 1,
+    resonanceBonus: 1.2,
+    focusBoost: 1.05,
+    rhythm: {
+      bpm: 128,
+      measures: 32,
+      beatsPerMeasure: 4
+    },
+    hazards: { circleTrap: 1.1, pulseMine: 1.2, beamObject: 1.1, sawOrb: 1.3, meteorShard: 1.2 }
   }
 };
 
@@ -1631,6 +1708,65 @@ function runHazardRolls(){
   rollHazard('emitterPod', spawnEmitterPod);
   rollHazard('seekerSwarm', spawnSeekerSwarm);
   rollHazard('vortexEye', spawnVortexEye);
+}
+
+function configureRhythmMode(){
+  resetRhythmState();
+  if(!modeConfig.rhythm) return;
+  rhythmState.active = true;
+  rhythmState.beatsPerMeasure = modeConfig.rhythm.beatsPerMeasure || 4;
+  const measures = modeConfig.rhythm.measures || 32;
+  rhythmState.totalBeats = modeConfig.rhythm.totalBeats || rhythmState.beatsPerMeasure * measures;
+  rhythmState.beatMs = 60000 / (modeConfig.rhythm.bpm || 120);
+  rhythmState.nextBeatMs = 0;
+}
+
+function handleRhythmBeats(){
+  if(!rhythmState.active) return;
+  const beatLen = rhythmState.beatMs;
+  while(elapsedMs >= rhythmState.nextBeatMs && rhythmState.beatsElapsed < rhythmState.totalBeats){
+    triggerRhythmBeat(rhythmState.beatsElapsed);
+    rhythmState.beatsElapsed++;
+    rhythmState.nextBeatMs += beatLen;
+  }
+  if(rhythmState.beatsElapsed >= rhythmState.totalBeats && !rhythmState.completed){
+    rhythmState.completed = true;
+    completeRhythmTrack();
+  }
+}
+
+function triggerRhythmBeat(beatIndex){
+  const beatsPerMeasure = rhythmState.beatsPerMeasure || 4;
+  const downbeat = beatIndex % beatsPerMeasure === 0;
+  if(downbeat){
+    playSound('music_downbeat');
+  } else if(beatIndex % 2 === 0){
+    playSound('music_backbeat');
+  } else {
+    playSound('music_hihat');
+  }
+
+  spawnShape();
+  if(shapes.length && (downbeat || beatIndex % 2 === 0)){
+    const s = shapes[Math.floor(Math.random()*shapes.length)];
+    spawnPelletsFrom(s);
+  }
+
+  if(downbeat && beatIndex % (beatsPerMeasure * 2) === 0){
+    spinBeams.push(new SpinBeam());
+    playSound('beam_spin');
+  }
+
+  runHazardRolls();
+
+  const phraseBeat = beatIndex % (beatsPerMeasure * 4);
+  if(phraseBeat === beatsPerMeasure){
+    spawnCircleTrap();
+  } else if(phraseBeat === beatsPerMeasure * 2){
+    spawnPulseMine();
+  } else if(phraseBeat === beatsPerMeasure * 3){
+    spawnSawOrb();
+  }
 }
 
 refreshBestCallout();
@@ -1877,13 +2013,17 @@ const ALL_ABILITIES = {
   orbitals: { name:'Orbitals',    desc:'Spinning shards block and shred nearby hazards.' },
   gravity:  { name:'Gravity Well',desc:'Anchors a singularity that drags enemies inward.' },
   arc:      { name:'Arc Storm',   desc:'Fires an expanding lightning ring.' },
-  nano:     { name:'Nano Swarm',  desc:'Lingering nanites erode anything inside.' }
+  nano:     { name:'Nano Swarm',  desc:'Lingering nanites erode anything inside.' },
+  starfall: { name:'Starfall Salvo', desc:'Call down cascading meteors that torch hazards.' },
+  harmonic: { name:'Harmonic Field', desc:'Drop a slowing dome that melts anything inside.' },
+  beatDrones: { name:'Beat Drones', desc:'Deploy orbiting drones that fire rhythm shots.' }
 };
 
 const abilities = {
   shield:0, slow:0, shockwave:0, freeze:0, decoy:0, regen:0,
   megaHeal:0, barrier:0, speed:0, cleanse:0,
-  blink:0, turret:0, orbitals:0, gravity:0, arc:0, nano:0
+  blink:0, turret:0, orbitals:0, gravity:0, arc:0, nano:0,
+  starfall:0, harmonic:0, beatDrones:0
 };
 const abilityMax = {
   shield:   45*60,
@@ -1901,7 +2041,10 @@ const abilityMax = {
   orbitals: 30*60,
   gravity:  32*60,
   arc:      25*60,
-  nano:     30*60
+  nano:     30*60,
+  starfall: 40*60,
+  harmonic: 38*60,
+  beatDrones: 28*60
 };
 
 let selectedAbilityIds = [];
@@ -2024,6 +2167,10 @@ let orbitals = [];
 let gravityWells = [];
 let arcBursts = [];
 let nanoFields = [];
+let starfallComets = [];
+let harmonicFields = [];
+let beatDrones = [];
+let beatShots = [];
 let spawnTimer = 0;
 let animationId = null;
 
@@ -2851,6 +2998,40 @@ function useNanoSwarm(){
   gainResonance(3);
 }
 
+function useStarfall(){
+  if(!abilityReady('starfall')) return;
+  playSound('ability_starfall');
+  for(let i=0;i<6;i++){
+    starfallComets.push({
+      x: Math.random()*canvas.width,
+      y: -120 - i*20,
+      vx: (Math.random()-0.5)*1.5,
+      vy: 10 + Math.random()*2.5,
+      life: 160 + Math.random()*40
+    });
+  }
+  abilities.starfall = abilityMax.starfall;
+  gainResonance(3.2);
+}
+
+function useHarmonicField(){
+  if(!abilityReady('harmonic')) return;
+  playSound('ability_harmonic');
+  harmonicFields.push({ x: player.x, y: player.y, radius: 260, life: 9*60, maxLife: 9*60 });
+  abilities.harmonic = abilityMax.harmonic;
+  gainResonance(2.8);
+}
+
+function useBeatDrones(){
+  if(!abilityReady('beatDrones')) return;
+  playSound('ability_beat');
+  for(let i=0;i<2;i++){
+    beatDrones.push({ angle: i*Math.PI, life: 12*60, fire: 0, radius: 110 + i*20, spin: 0.03 + i*0.01 });
+  }
+  abilities.beatDrones = abilityMax.beatDrones;
+  gainResonance(2.4);
+}
+
 function activateAbility(id){
   if(!id) return;
   if(abilities[id] > 0) return;
@@ -2871,6 +3052,9 @@ function activateAbility(id){
     case 'gravity':   useGravityWell(); break;
     case 'arc':       useArcStorm(); break;
     case 'nano':      useNanoSwarm(); break;
+    case 'starfall':  useStarfall(); break;
+    case 'harmonic':  useHarmonicField(); break;
+    case 'beatDrones':useBeatDrones(); break;
   }
 }
 
@@ -3140,24 +3324,38 @@ function hideGameOverPanel(){
   if(gameOverPanel) gameOverPanel.style.display = 'none';
 }
 
-function showGameOverSummary(finalTime){
+function showGameOverSummary(finalTime, victory=false, badgeText){
   if(!gameOverPanel) return;
   summaryModeEl.textContent = modeConfig.name;
   summaryTimeEl.textContent = formatMs(finalTime);
   const { best, updated } = recordBestTime(currentModeKey, finalTime);
   summaryBestEl.textContent = formatMs(best);
-  summaryBadge.textContent = updated ? 'NEW PERSONAL BEST!' : 'Personal Best';
-  summaryBadge.classList.toggle('muted', !updated);
-  summaryTip.textContent = 'Tip: ' + RUN_TIPS[Math.floor(Math.random()*RUN_TIPS.length)];
+  if(victory){
+    summaryBadge.textContent = badgeText || 'Victory!';
+    summaryBadge.classList.remove('muted');
+    summaryTip.textContent = 'Track clear! Enjoy the breather before the next mix.';
+  } else {
+    summaryBadge.textContent = updated ? 'NEW PERSONAL BEST!' : 'Personal Best';
+    summaryBadge.classList.toggle('muted', !updated);
+    summaryTip.textContent = 'Tip: ' + RUN_TIPS[Math.floor(Math.random()*RUN_TIPS.length)];
+  }
   gameOverPanel.style.display = 'block';
   playSound('summary_open');
 }
 
-function gameOver(){
+function finishRun(victory=false, badgeText){
   running = false;
   cancelAnimationFrame(animationId);
-  playSound('game_over');
-  showGameOverSummary(elapsedMs);
+  playSound(victory ? 'run_clear' : 'game_over');
+  showGameOverSummary(elapsedMs, victory, badgeText);
+}
+
+function gameOver(){
+  finishRun(false);
+}
+
+function completeRhythmTrack(){
+  finishRun(true, 'TRACK COMPLETE');
 }
 
 document.getElementById('restartBtn').addEventListener('click', returnToMenu);
@@ -3186,6 +3384,10 @@ function resetGame(){
   gravityWells = [];
   arcBursts = [];
   nanoFields = [];
+  starfallComets = [];
+  harmonicFields = [];
+  beatDrones = [];
+  beatShots = [];
   player.x = canvas.width/2;
   player.y = canvas.height/2;
   player.vx = player.vy = 0;
@@ -3225,6 +3427,7 @@ function resetGame(){
     if(el) el.style.width = '0%';
   }
   spawnTimer = 0;
+  resetRhythmState();
 }
 
 /* --------- Main loop --------- */
@@ -3290,23 +3493,27 @@ function animate(){
     ctx.fillRect(0,0,canvas.width,canvas.height);
   }
 
-  spawnTimer--;
-  if(spawnTimer <= 0){
-    spawnShape();
-    const pelletChance = modeConfig.pelletChance ?? 0.35;
-    if(Math.random() < pelletChance && shapes.length>0){
-      const s = shapes[Math.floor(Math.random()*shapes.length)];
-      spawnPelletsFrom(s);
+  if(rhythmState.active){
+    handleRhythmBeats();
+  } else {
+    spawnTimer--;
+    if(spawnTimer <= 0){
+      spawnShape();
+      const pelletChance = modeConfig.pelletChance ?? 0.35;
+      if(Math.random() < pelletChance && shapes.length>0){
+        const s = shapes[Math.floor(Math.random()*shapes.length)];
+        spawnPelletsFrom(s);
+      }
+      if(Math.random() < (modeConfig.beamChance || 0)){
+        spinBeams.push(new SpinBeam());
+        playSound('beam_spin');
+      }
+      runHazardRolls();
+      if(typeof modeConfig.customCycle === 'function'){
+        modeConfig.customCycle();
+      }
+      spawnTimer = getNextSpawnInterval();
     }
-    if(Math.random() < (modeConfig.beamChance || 0)){
-      spinBeams.push(new SpinBeam());
-      playSound('beam_spin');
-    }
-    runHazardRolls();
-    if(typeof modeConfig.customCycle === 'function'){
-      modeConfig.customCycle();
-    }
-    spawnTimer = getNextSpawnInterval();
   }
 
   // circle traps
@@ -3736,6 +3943,129 @@ function animate(){
     }
   }
 
+  // starfall comets
+  for(let i=starfallComets.length-1;i>=0;i--){
+    const comet = starfallComets[i];
+    comet.life--;
+    const prevX = comet.x;
+    const prevY = comet.y;
+    comet.x += comet.vx;
+    comet.y += comet.vy;
+    ctx.strokeStyle = 'rgba(255,190,120,0.8)';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(prevX, prevY);
+    ctx.lineTo(comet.x, comet.y);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(255,230,180,0.8)';
+    ctx.beginPath();
+    ctx.arc(comet.x, comet.y, 12, 0, Math.PI*2);
+    ctx.fill();
+    destroyClosestThreat(comet.x, comet.y, 18);
+    destroyClosestThreat((comet.x + prevX)/2, (comet.y + prevY)/2, 12);
+    if(comet.life <= 0 || comet.y > canvas.height + 160){
+      starfallComets.splice(i,1);
+    }
+  }
+
+  // harmonic fields
+  for(let i=harmonicFields.length-1;i>=0;i--){
+    const field = harmonicFields[i];
+    field.life--;
+    const radiusSq = field.radius * field.radius;
+    const alpha = Math.max(0, field.life / (field.maxLife || 1));
+    ctx.strokeStyle = `rgba(140,180,255,${0.25 + alpha*0.35})`;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(field.x, field.y, field.radius, 0, Math.PI*2);
+    ctx.stroke();
+    ctx.fillStyle = `rgba(100,140,255,${0.04 + alpha*0.08})`;
+    ctx.beginPath();
+    ctx.arc(field.x, field.y, field.radius, 0, Math.PI*2);
+    ctx.fill();
+    const soften = (list, handler) => {
+      for(let j=list.length-1;j>=0;j--){
+        const obj = list[j];
+        const ox = obj.x;
+        const oy = obj.y;
+        const dx = ox - field.x;
+        const dy = oy - field.y;
+        if(dx*dx + dy*dy <= radiusSq){
+          handler(obj, j, list, dx, dy);
+        }
+      }
+    };
+    soften(shapes, (obj, idx, list, dx, dy) => {
+      obj.x -= dx * 0.01;
+      obj.y -= dy * 0.01;
+      if(Math.random() < 0.02) list.splice(idx,1);
+    });
+    soften(pellets, (obj, idx, list) => {
+      obj.vx *= 0.9;
+      obj.vy *= 0.9;
+      if(Math.random() < 0.03) obj.size = Math.max(1, obj.size-0.2);
+      if(Math.random() < 0.02) list.splice(idx,1);
+    });
+    soften(meteorShards, (obj, idx, list) => {
+      obj.vx *= 0.85;
+      obj.vy *= 0.85;
+      if(Math.random() < 0.04) list.splice(idx,1);
+    });
+    soften(seekerMinis, (obj, idx, list, dx, dy) => {
+      obj.x -= dx * 0.015;
+      obj.y -= dy * 0.015;
+      if(Math.random() < 0.05) list.splice(idx,1);
+    });
+    if(field.life <= 0){
+      harmonicFields.splice(i,1);
+    }
+  }
+
+  // beat drones
+  for(let i=beatDrones.length-1;i>=0;i--){
+    const drone = beatDrones[i];
+    drone.life--;
+    drone.angle += drone.spin;
+    const x = player.x + Math.cos(drone.angle) * drone.radius;
+    const y = player.y + Math.sin(drone.angle) * drone.radius;
+    ctx.fillStyle = 'rgba(140,200,255,0.9)';
+    ctx.beginPath();
+    ctx.arc(x, y, 10, 0, Math.PI*2);
+    ctx.fill();
+    drone.fire--;
+    if(drone.fire <= 0){
+      const target = findClosestThreat(x, y);
+      if(target){
+        const angle = Math.atan2(target.y - y, target.x - x);
+        beatShots.push({ x, y, vx: Math.cos(angle)*14, vy: Math.sin(angle)*14, life: 32 });
+        drone.fire = 26;
+      }
+    }
+    if(drone.life <= 0){
+      beatDrones.splice(i,1);
+    }
+  }
+
+  for(let i=beatShots.length-1;i>=0;i--){
+    const shot = beatShots[i];
+    shot.life--;
+    shot.x += shot.vx;
+    shot.y += shot.vy;
+    ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(shot.x - shot.vx*0.4, shot.y - shot.vy*0.4);
+    ctx.lineTo(shot.x, shot.y);
+    ctx.stroke();
+    if(destroyClosestThreat(shot.x, shot.y, 8)){
+      beatShots.splice(i,1);
+      continue;
+    }
+    if(shot.life <= 0 || shot.x<-120 || shot.x>canvas.width+120 || shot.y<-120 || shot.y>canvas.height+120){
+      beatShots.splice(i,1);
+    }
+  }
+
   // spin beams
   for(let i=spinBeams.length-1;i>=0;i--){
     const b = spinBeams[i];
@@ -3949,6 +4279,7 @@ function startGame(){
   resetGame();
   running = true;
   lastFrameTime = performance.now();
+   configureRhythmMode();
   playSound('game_start');
   animate();
 }
