@@ -101,16 +101,18 @@ h1, h2, h3 { font-weight: 600; }
 
 <body>
 
-<!-- ===================== 🔊 MUSIC ENGINE ===================== -->
-<audio id="bgm" src="https://raw.githubusercontent.com/Greek10/Greek10.github.io/refs/heads/main/Blaze.mp3" loop></audio>
+<!-- ===================== 🔊 BACKGROUND MUSIC ===================== -->
+<audio id="bgm" src="https://raw.githubusercontent.com/Greek10/Greek10.github.io/main/Blaze.mp3" loop></audio>
+
 <script>
+// Browser autoplay fix — music starts after first click
 window.addEventListener("click", () => {
     const bg = document.getElementById("bgm");
-    bg.volume = 0.40;      // volume 40%
-    bg.play();
-}, { once: true });
+    bg.volume = 0.45;
+    bg.play().catch(e => console.log("Autoplay blocked:", e));
+}, { once:true });
 </script>
-<!-- ============================================================ -->
+<!-- ================================================================= -->
 
 <!-- ===================== LOADER ===================== -->
 <div id="loader" class="loader-screen">
