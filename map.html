@@ -219,21 +219,43 @@
       display: block;
     }
 
-    .country {
-      fill: rgba(255, 255, 255, 0.08);
+    .ocean {
+      fill: rgba(15, 23, 42, 0.85);
+      pointer-events: none;
+    }
+
+    .globe {
+      fill: rgba(15, 23, 42, 0.35);
       stroke: rgba(255, 255, 255, 0.08);
-      stroke-width: 0.5;
-      transition: fill 0.3s ease, stroke 0.3s ease;
+      stroke-width: 1px;
+      pointer-events: none;
+    }
+
+    .graticule {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.08);
+      stroke-width: 0.5px;
+      pointer-events: none;
+    }
+
+    .country {
+      stroke: rgba(11, 18, 35, 0.45);
+      stroke-width: 0.75;
+      fill-opacity: 0.85;
+      transition: filter 0.3s ease, stroke 0.2s ease, fill-opacity 0.2s ease;
     }
 
     .country:hover {
-      fill: rgba(125, 211, 252, 0.25);
       cursor: pointer;
+      stroke: rgba(255, 255, 255, 0.45);
+      fill-opacity: 1;
+      filter: brightness(1.08);
     }
 
     .country.guessed {
-      fill: rgba(34, 197, 94, 0.6);
-      stroke: rgba(34, 197, 94, 0.85);
+      fill: rgba(34, 197, 94, 0.85) !important;
+      fill-opacity: 1;
+      stroke: rgba(34, 197, 94, 0.9);
       filter: drop-shadow(0 0 12px rgba(34, 197, 94, 0.35));
     }
 
@@ -322,7 +344,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3" onerror="(function(){const s=document.createElement('script');s.src='https://unpkg.com/topojson-client@3';document.head.appendChild(s);}())"></script>
   <script>
     const mapSvg = d3.select('#map');
     const guessesList = document.getElementById('guesses');
@@ -333,67 +354,239 @@
     const progressEl = document.getElementById('progress');
     const progressLabel = document.getElementById('progress-label');
 
-    const projection = d3.geoMercator().scale(140).translate([480, 270]);
-    const path = d3.geoPath(projection);
+    const width = 960;
+    const height = 520;
+    const bounds = [20, 20, width - 20, height - 20];
+    const projection = d3.geoMercator().scale(150).translate([width / 2, height / 1.7]);
+    const geoPath = d3.geoPath(projection);
+    const graticule = d3.geoGraticule10();
 
     const guessed = new Set();
     const slugToId = new Map();
-    const idToName = new Map();
-    const centroids = new Map();
-    let dataReady = false;
+    const idToCountry = new Map();
 
-    const alias = {
-      'united states': 'united states of america',
-      'usa': 'united states of america',
-      'u.s.a': 'united states of america',
-      'us': 'united states of america',
-      'u.s': 'united states of america',
-      'russia': 'russian federation',
-      'south korea': 'korea, republic of',
-      'north korea': "korea, democratic people's republic of",
-      'drc': 'congo, the democratic republic of the',
-      'dr congo': 'congo, the democratic republic of the',
-      'congo': 'congo, republic of the',
-      'iran': 'iran, islamic republic of',
-      'uae': 'united arab emirates',
-      'ivory coast': "cote d'ivoire",
-      'czechia': 'czech republic',
-      'vatican': 'holy see',
-      'uk': 'united kingdom',
-      'england': 'united kingdom',
-      'scotland': 'united kingdom',
-      'wales': 'united kingdom',
-      'burma': 'myanmar',
-      'eswatini': 'swaziland',
-      'cape verde': 'cabo verde',
-      'micronesia': 'micronesia, federated states of',
-      'são tomé and príncipe': 'sao tome and principe',
-      'sao tome': 'sao tome and principe',
-      'swaziland': 'swaziland',
-      'laos': "lao people's democratic republic",
-      'syria': 'syrian arab republic',
-      'tanzania': 'tanzania, united republic of',
-      'venezuela': 'venezuela, bolivarian republic of',
-      'moldova': 'moldova, republic of',
-      'macedonia': 'macedonia, republic of',
-      'bolivia': 'bolivia, plurinational state of',
-      'palestine': 'palestine, state of'
-    };
-
-    const slug = (str) => {
-      return str
+    const slug = (str) =>
+      str
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, ' ')
         .trim();
+
+    const COUNTRY_DATA = [
+      { name: 'Afghanistan', code: 'AFG', lat: 33.94, lon: 67.71, region: 'asia', aliases: ['islamic republic of afghanistan'] },
+      { name: 'Albania', code: 'ALB', lat: 41.15, lon: 20.17, region: 'europe' },
+      { name: 'Algeria', code: 'DZA', lat: 28.03, lon: 1.66, region: 'africa' },
+      { name: 'Andorra', code: 'AND', lat: 42.51, lon: 1.52, region: 'europe' },
+      { name: 'Angola', code: 'AGO', lat: -11.2, lon: 17.87, region: 'africa' },
+      { name: 'Antigua and Barbuda', code: 'ATG', lat: 17.07, lon: -61.8, region: 'americas', aliases: ['antigua', 'barbuda'] },
+      { name: 'Argentina', code: 'ARG', lat: -34.0, lon: -64.0, region: 'americas' },
+      { name: 'Armenia', code: 'ARM', lat: 40.18, lon: 44.51, region: 'asia' },
+      { name: 'Australia', code: 'AUS', lat: -25.27, lon: 133.78, region: 'oceania' },
+      { name: 'Austria', code: 'AUT', lat: 47.52, lon: 13.33, region: 'europe' },
+      { name: 'Azerbaijan', code: 'AZE', lat: 40.14, lon: 47.58, region: 'asia' },
+      { name: 'Bahamas', code: 'BHS', lat: 25.03, lon: -77.4, region: 'americas', aliases: ['the bahamas', 'commonwealth of the bahamas'] },
+      { name: 'Bahrain', code: 'BHR', lat: 26.07, lon: 50.55, region: 'asia' },
+      { name: 'Bangladesh', code: 'BGD', lat: 23.68, lon: 90.36, region: 'asia' },
+      { name: 'Barbados', code: 'BRB', lat: 13.19, lon: -59.54, region: 'americas' },
+      { name: 'Belarus', code: 'BLR', lat: 53.71, lon: 27.96, region: 'europe' },
+      { name: 'Belgium', code: 'BEL', lat: 50.84, lon: 4.7, region: 'europe' },
+      { name: 'Belize', code: 'BLZ', lat: 17.19, lon: -88.5, region: 'americas' },
+      { name: 'Benin', code: 'BEN', lat: 9.31, lon: 2.32, region: 'africa' },
+      { name: 'Bhutan', code: 'BTN', lat: 27.51, lon: 90.43, region: 'asia' },
+      { name: 'Bolivia', code: 'BOL', lat: -16.29, lon: -63.59, region: 'americas', aliases: ['bolivia, plurinational state of', 'plurinational state of bolivia'] },
+      { name: 'Bosnia and Herzegovina', code: 'BIH', lat: 44.2, lon: 17.68, region: 'europe', aliases: ['bosnia', 'bosnia-herzegovina'] },
+      { name: 'Botswana', code: 'BWA', lat: -22.33, lon: 24.68, region: 'africa' },
+      { name: 'Brazil', code: 'BRA', lat: -10.81, lon: -52.9, region: 'americas' },
+      { name: 'Brunei', code: 'BRN', lat: 4.54, lon: 114.73, region: 'asia', aliases: ['brunei darussalam'] },
+      { name: 'Bulgaria', code: 'BGR', lat: 42.73, lon: 25.49, region: 'europe' },
+      { name: 'Burkina Faso', code: 'BFA', lat: 12.24, lon: -1.56, region: 'africa' },
+      { name: 'Burundi', code: 'BDI', lat: -3.37, lon: 29.92, region: 'africa' },
+      { name: 'Cabo Verde', code: 'CPV', lat: 15.12, lon: -23.6, region: 'africa', aliases: ['cape verde', 'republic of cabo verde'] },
+      { name: 'Cambodia', code: 'KHM', lat: 12.55, lon: 104.99, region: 'asia' },
+      { name: 'Cameroon', code: 'CMR', lat: 5.99, lon: 12.91, region: 'africa' },
+      { name: 'Canada', code: 'CAN', lat: 56.13, lon: -106.35, region: 'americas' },
+      { name: 'Central African Republic', code: 'CAF', lat: 6.61, lon: 20.94, region: 'africa', aliases: ['car', 'central african rep'] },
+      { name: 'Chad', code: 'TCD', lat: 15.45, lon: 18.73, region: 'africa' },
+      { name: 'Chile', code: 'CHL', lat: -35.68, lon: -71.54, region: 'americas' },
+      { name: 'China', code: 'CHN', lat: 35.86, lon: 104.2, region: 'asia' },
+      { name: 'Colombia', code: 'COL', lat: 4.57, lon: -74.3, region: 'americas' },
+      { name: 'Comoros', code: 'COM', lat: -11.78, lon: 43.87, region: 'africa', aliases: ['the comoros'] },
+      { name: 'Republic of the Congo', code: 'COG', lat: -0.23, lon: 15.83, region: 'africa', aliases: ['congo brazzaville', 'congo republic', 'republic of the congo', 'roc', 'brazzaville'] },
+      { name: 'Costa Rica', code: 'CRI', lat: 9.75, lon: -83.75, region: 'americas' },
+      { name: "Cote d'Ivoire", code: 'CIV', lat: 7.54, lon: -5.55, region: 'africa', aliases: ['ivory coast', 'cote divoire', 'cote de ivoire'] },
+      { name: 'Croatia', code: 'HRV', lat: 45.1, lon: 15.2, region: 'europe' },
+      { name: 'Cuba', code: 'CUB', lat: 21.52, lon: -77.78, region: 'americas' },
+      { name: 'Cyprus', code: 'CYP', lat: 35.13, lon: 33.43, region: 'asia' },
+      { name: 'Czech Republic', code: 'CZE', lat: 49.82, lon: 15.47, region: 'europe', aliases: ['czechia', 'czech rep'] },
+      { name: 'Denmark', code: 'DNK', lat: 56.26, lon: 9.5, region: 'europe' },
+      { name: 'Djibouti', code: 'DJI', lat: 11.83, lon: 42.59, region: 'africa' },
+      { name: 'Dominica', code: 'DMA', lat: 15.41, lon: -61.37, region: 'americas' },
+      { name: 'Dominican Republic', code: 'DOM', lat: 18.74, lon: -70.16, region: 'americas', aliases: ['dominican'] },
+      { name: 'Democratic Republic of the Congo', code: 'COD', lat: -2.88, lon: 23.66, region: 'africa', aliases: ['congo kinshasa', 'drc', 'dr congo', 'democratic republic of congo', 'rd congo', 'rdc', 'congo, the democratic republic of the', 'congo'] },
+      { name: 'Ecuador', code: 'ECU', lat: -1.83, lon: -78.18, region: 'americas' },
+      { name: 'Egypt', code: 'EGY', lat: 26.82, lon: 30.8, region: 'africa' },
+      { name: 'El Salvador', code: 'SLV', lat: 13.79, lon: -88.9, region: 'americas' },
+      { name: 'Equatorial Guinea', code: 'GNQ', lat: 1.65, lon: 10.27, region: 'africa' },
+      { name: 'Eritrea', code: 'ERI', lat: 15.18, lon: 39.78, region: 'africa' },
+      { name: 'Estonia', code: 'EST', lat: 58.6, lon: 25.01, region: 'europe' },
+      { name: 'Eswatini', code: 'SWZ', lat: -26.52, lon: 31.47, region: 'africa', aliases: ['swaziland', 'kingdom of eswatini'] },
+      { name: 'Ethiopia', code: 'ETH', lat: 9.15, lon: 40.49, region: 'africa' },
+      { name: 'Fiji', code: 'FJI', lat: -17.71, lon: 178.07, region: 'oceania' },
+      { name: 'Finland', code: 'FIN', lat: 61.92, lon: 25.75, region: 'europe' },
+      { name: 'France', code: 'FRA', lat: 46.23, lon: 2.21, region: 'europe' },
+      { name: 'Gabon', code: 'GAB', lat: -0.8, lon: 11.6, region: 'africa' },
+      { name: 'Gambia', code: 'GMB', lat: 13.44, lon: -15.31, region: 'africa', aliases: ['the gambia', 'republic of the gambia'] },
+      { name: 'Georgia', code: 'GEO', lat: 42.32, lon: 43.36, region: 'asia' },
+      { name: 'Germany', code: 'DEU', lat: 51.17, lon: 10.45, region: 'europe' },
+      { name: 'Ghana', code: 'GHA', lat: 7.95, lon: -1.03, region: 'africa' },
+      { name: 'Greece', code: 'GRC', lat: 39.07, lon: 21.82, region: 'europe' },
+      { name: 'Grenada', code: 'GRD', lat: 12.12, lon: -61.68, region: 'americas' },
+      { name: 'Guatemala', code: 'GTM', lat: 15.78, lon: -90.23, region: 'americas' },
+      { name: 'Guinea', code: 'GIN', lat: 9.94, lon: -9.7, region: 'africa' },
+      { name: 'Guinea-Bissau', code: 'GNB', lat: 11.8, lon: -15.18, region: 'africa', aliases: ['guinea bissau'] },
+      { name: 'Guyana', code: 'GUY', lat: 4.86, lon: -58.93, region: 'americas' },
+      { name: 'Haiti', code: 'HTI', lat: 18.97, lon: -72.29, region: 'americas' },
+      { name: 'Honduras', code: 'HND', lat: 15.2, lon: -86.24, region: 'americas' },
+      { name: 'Hungary', code: 'HUN', lat: 47.16, lon: 19.5, region: 'europe' },
+      { name: 'Iceland', code: 'ISL', lat: 64.96, lon: -19.02, region: 'europe' },
+      { name: 'India', code: 'IND', lat: 20.59, lon: 78.96, region: 'asia' },
+      { name: 'Indonesia', code: 'IDN', lat: -2.6, lon: 118.02, region: 'asia' },
+      { name: 'Iran', code: 'IRN', lat: 32.43, lon: 53.69, region: 'asia', aliases: ['iran, islamic republic of', 'islamic republic of iran'] },
+      { name: 'Iraq', code: 'IRQ', lat: 33.22, lon: 43.68, region: 'asia' },
+      { name: 'Ireland', code: 'IRL', lat: 53.41, lon: -8.24, region: 'europe', aliases: ['republic of ireland'] },
+      { name: 'Israel', code: 'ISR', lat: 31.05, lon: 34.85, region: 'asia' },
+      { name: 'Italy', code: 'ITA', lat: 41.87, lon: 12.57, region: 'europe' },
+      { name: 'Jamaica', code: 'JAM', lat: 18.11, lon: -77.3, region: 'americas' },
+      { name: 'Japan', code: 'JPN', lat: 36.2, lon: 138.25, region: 'asia' },
+      { name: 'Jordan', code: 'JOR', lat: 30.59, lon: 36.24, region: 'asia' },
+      { name: 'Kazakhstan', code: 'KAZ', lat: 48.02, lon: 66.92, region: 'asia' },
+      { name: 'Kenya', code: 'KEN', lat: -0.02, lon: 37.9, region: 'africa' },
+      { name: 'Kiribati', code: 'KIR', lat: 1.87, lon: -157.36, region: 'oceania' },
+      { name: 'Kuwait', code: 'KWT', lat: 29.31, lon: 47.48, region: 'asia' },
+      { name: 'Kyrgyzstan', code: 'KGZ', lat: 41.2, lon: 74.77, region: 'asia' },
+      { name: "Lao People's Democratic Republic", code: 'LAO', lat: 19.86, lon: 102.5, region: 'asia', aliases: ['laos'] },
+      { name: 'Latvia', code: 'LVA', lat: 56.88, lon: 24.6, region: 'europe' },
+      { name: 'Lebanon', code: 'LBN', lat: 33.85, lon: 35.86, region: 'asia' },
+      { name: 'Lesotho', code: 'LSO', lat: -29.61, lon: 28.23, region: 'africa' },
+      { name: 'Liberia', code: 'LBR', lat: 6.43, lon: -9.43, region: 'africa' },
+      { name: 'Libya', code: 'LBY', lat: 26.34, lon: 17.23, region: 'africa' },
+      { name: 'Liechtenstein', code: 'LIE', lat: 47.17, lon: 9.56, region: 'europe' },
+      { name: 'Lithuania', code: 'LTU', lat: 55.17, lon: 23.88, region: 'europe' },
+      { name: 'Luxembourg', code: 'LUX', lat: 49.82, lon: 6.13, region: 'europe' },
+      { name: 'Madagascar', code: 'MDG', lat: -18.77, lon: 46.87, region: 'africa' },
+      { name: 'Malawi', code: 'MWI', lat: -13.25, lon: 34.3, region: 'africa' },
+      { name: 'Malaysia', code: 'MYS', lat: 4.21, lon: 101.98, region: 'asia' },
+      { name: 'Maldives', code: 'MDV', lat: 3.2, lon: 73.22, region: 'asia', aliases: ['the maldives'] },
+      { name: 'Mali', code: 'MLI', lat: 17.57, lon: -3.99, region: 'africa' },
+      { name: 'Malta', code: 'MLT', lat: 35.94, lon: 14.38, region: 'europe' },
+      { name: 'Marshall Islands', code: 'MHL', lat: 7.13, lon: 171.19, region: 'oceania', aliases: ['the marshall islands'] },
+      { name: 'Mauritania', code: 'MRT', lat: 21.0, lon: -10.94, region: 'africa' },
+      { name: 'Mauritius', code: 'MUS', lat: -20.35, lon: 57.55, region: 'africa' },
+      { name: 'Mexico', code: 'MEX', lat: 23.63, lon: -102.55, region: 'americas' },
+      { name: 'Micronesia', code: 'FSM', lat: 7.43, lon: 150.55, region: 'oceania', aliases: ['micronesia, federated states of', 'federated states of micronesia', 'fsm'] },
+      { name: 'Moldova', code: 'MDA', lat: 47.0, lon: 28.86, region: 'europe', aliases: ['moldova, republic of', 'republic of moldova'] },
+      { name: 'Monaco', code: 'MCO', lat: 43.74, lon: 7.42, region: 'europe' },
+      { name: 'Mongolia', code: 'MNG', lat: 46.86, lon: 103.84, region: 'asia' },
+      { name: 'Montenegro', code: 'MNE', lat: 42.71, lon: 19.37, region: 'europe' },
+      { name: 'Morocco', code: 'MAR', lat: 31.79, lon: -7.09, region: 'africa' },
+      { name: 'Mozambique', code: 'MOZ', lat: -18.66, lon: 35.53, region: 'africa' },
+      { name: 'Myanmar', code: 'MMR', lat: 21.91, lon: 95.96, region: 'asia', aliases: ['burma', 'republic of the union of myanmar'] },
+      { name: 'Namibia', code: 'NAM', lat: -22.96, lon: 18.49, region: 'africa' },
+      { name: 'Nauru', code: 'NRU', lat: -0.52, lon: 166.93, region: 'oceania' },
+      { name: 'Nepal', code: 'NPL', lat: 28.39, lon: 84.12, region: 'asia' },
+      { name: 'Netherlands', code: 'NLD', lat: 52.13, lon: 5.29, region: 'europe', aliases: ['the netherlands', 'holland'] },
+      { name: 'New Zealand', code: 'NZL', lat: -40.9, lon: 174.89, region: 'oceania', aliases: ['aotearoa'] },
+      { name: 'Nicaragua', code: 'NIC', lat: 12.86, lon: -85.21, region: 'americas' },
+      { name: 'Niger', code: 'NER', lat: 17.61, lon: 8.08, region: 'africa' },
+      { name: 'Nigeria', code: 'NGA', lat: 9.08, lon: 8.68, region: 'africa' },
+      { name: 'North Korea', code: 'PRK', lat: 40.34, lon: 127.51, region: 'asia', aliases: ["korea, democratic people's republic of", "democratic people's republic of korea", 'dprk'] },
+      { name: 'North Macedonia', code: 'MKD', lat: 41.6, lon: 21.75, region: 'europe', aliases: ['macedonia'] },
+      { name: 'Norway', code: 'NOR', lat: 60.47, lon: 8.47, region: 'europe' },
+      { name: 'Oman', code: 'OMN', lat: 21.47, lon: 55.98, region: 'asia' },
+      { name: 'Pakistan', code: 'PAK', lat: 30.38, lon: 69.35, region: 'asia' },
+      { name: 'Palau', code: 'PLW', lat: 7.52, lon: 134.58, region: 'oceania' },
+      { name: 'Palestine', code: 'PSE', lat: 31.9, lon: 35.2, region: 'asia', aliases: ['state of palestine', 'palestinian territories'] },
+      { name: 'Panama', code: 'PAN', lat: 8.54, lon: -80.78, region: 'americas' },
+      { name: 'Papua New Guinea', code: 'PNG', lat: -6.31, lon: 143.96, region: 'oceania', aliases: ['png'] },
+      { name: 'Paraguay', code: 'PRY', lat: -23.44, lon: -58.44, region: 'americas' },
+      { name: 'Peru', code: 'PER', lat: -9.19, lon: -75.02, region: 'americas' },
+      { name: 'Philippines', code: 'PHL', lat: 12.88, lon: 121.77, region: 'asia', aliases: ['the philippines'] },
+      { name: 'Poland', code: 'POL', lat: 51.92, lon: 19.15, region: 'europe' },
+      { name: 'Portugal', code: 'PRT', lat: 39.4, lon: -8.22, region: 'europe' },
+      { name: 'Qatar', code: 'QAT', lat: 25.35, lon: 51.18, region: 'asia' },
+      { name: 'Romania', code: 'ROU', lat: 45.94, lon: 24.97, region: 'europe' },
+      { name: 'Russia', code: 'RUS', lat: 61.52, lon: 105.32, region: 'asia', aliases: ['russian federation'] },
+      { name: 'Rwanda', code: 'RWA', lat: -1.94, lon: 29.87, region: 'africa' },
+      { name: 'Saint Kitts and Nevis', code: 'KNA', lat: 17.36, lon: -62.78, region: 'americas', aliases: ['st kitts', 'st. kitts'] },
+      { name: 'Saint Lucia', code: 'LCA', lat: 13.91, lon: -60.98, region: 'americas', aliases: ['st lucia', 'st. lucia'] },
+      { name: 'Saint Vincent and the Grenadines', code: 'VCT', lat: 13.25, lon: -61.2, region: 'americas', aliases: ['st vincent', 'st. vincent'] },
+      { name: 'Samoa', code: 'WSM', lat: -13.76, lon: -172.1, region: 'oceania', aliases: ['western samoa'] },
+      { name: 'San Marino', code: 'SMR', lat: 43.94, lon: 12.45, region: 'europe' },
+      { name: 'Sao Tome and Principe', code: 'STP', lat: 0.19, lon: 6.73, region: 'africa', aliases: ['são tomé and príncipe', 'sao tome', 'sao tome & principe'] },
+      { name: 'Saudi Arabia', code: 'SAU', lat: 23.89, lon: 45.08, region: 'asia' },
+      { name: 'Senegal', code: 'SEN', lat: 14.5, lon: -14.45, region: 'africa' },
+      { name: 'Serbia', code: 'SRB', lat: 44.02, lon: 21.01, region: 'europe' },
+      { name: 'Seychelles', code: 'SYC', lat: -4.68, lon: 55.49, region: 'africa', aliases: ['the seychelles'] },
+      { name: 'Sierra Leone', code: 'SLE', lat: 8.46, lon: -11.78, region: 'africa' },
+      { name: 'Singapore', code: 'SGP', lat: 1.35, lon: 103.82, region: 'asia' },
+      { name: 'Slovakia', code: 'SVK', lat: 48.67, lon: 19.7, region: 'europe' },
+      { name: 'Slovenia', code: 'SVN', lat: 46.15, lon: 14.99, region: 'europe' },
+      { name: 'Solomon Islands', code: 'SLB', lat: -9.65, lon: 160.21, region: 'oceania', aliases: ['the solomon islands'] },
+      { name: 'Somalia', code: 'SOM', lat: 5.15, lon: 46.2, region: 'africa' },
+      { name: 'South Africa', code: 'ZAF', lat: -30.56, lon: 22.94, region: 'africa' },
+      { name: 'South Korea', code: 'KOR', lat: 35.91, lon: 127.77, region: 'asia', aliases: ['korea, republic of', 'republic of korea'] },
+      { name: 'South Sudan', code: 'SSD', lat: 6.88, lon: 31.31, region: 'africa' },
+      { name: 'Spain', code: 'ESP', lat: 40.46, lon: -3.75, region: 'europe' },
+      { name: 'Sri Lanka', code: 'LKA', lat: 7.87, lon: 80.77, region: 'asia', aliases: ['ceylon'] },
+      { name: 'Sudan', code: 'SDN', lat: 12.86, lon: 30.22, region: 'africa' },
+      { name: 'Suriname', code: 'SUR', lat: 3.92, lon: -56.03, region: 'americas' },
+      { name: 'Sweden', code: 'SWE', lat: 60.13, lon: 18.64, region: 'europe' },
+      { name: 'Switzerland', code: 'CHE', lat: 46.82, lon: 8.23, region: 'europe' },
+      { name: 'Syria', code: 'SYR', lat: 34.8, lon: 38.99, region: 'asia', aliases: ['syrian arab republic'] },
+      { name: 'Taiwan', code: 'TWN', lat: 23.7, lon: 120.96, region: 'asia', aliases: ['republic of china', 'chinese taipei'] },
+      { name: 'Tajikistan', code: 'TJK', lat: 38.86, lon: 71.28, region: 'asia' },
+      { name: 'Tanzania', code: 'TZA', lat: -6.37, lon: 34.89, region: 'africa', aliases: ['tanzania, united republic of', 'united republic of tanzania'] },
+      { name: 'Thailand', code: 'THA', lat: 15.87, lon: 100.99, region: 'asia' },
+      { name: 'Timor-Leste', code: 'TLS', lat: -8.87, lon: 125.73, region: 'asia', aliases: ['east timor', 'timor leste'] },
+      { name: 'Togo', code: 'TGO', lat: 8.62, lon: 0.82, region: 'africa' },
+      { name: 'Tonga', code: 'TON', lat: -21.18, lon: -175.2, region: 'oceania' },
+      { name: 'Trinidad and Tobago', code: 'TTO', lat: 10.69, lon: -61.22, region: 'americas', aliases: ['trinidad', 'trinidad & tobago'] },
+      { name: 'Tunisia', code: 'TUN', lat: 33.89, lon: 9.54, region: 'africa' },
+      { name: 'Turkey', code: 'TUR', lat: 38.96, lon: 35.24, region: 'asia' },
+      { name: 'Turkmenistan', code: 'TKM', lat: 38.97, lon: 59.56, region: 'asia' },
+      { name: 'Tuvalu', code: 'TUV', lat: -7.11, lon: 177.64, region: 'oceania' },
+      { name: 'Uganda', code: 'UGA', lat: 1.37, lon: 32.29, region: 'africa' },
+      { name: 'Ukraine', code: 'UKR', lat: 48.38, lon: 31.17, region: 'europe' },
+      { name: 'United Arab Emirates', code: 'ARE', lat: 23.42, lon: 53.85, region: 'asia', aliases: ['uae', 'u.a.e', 'the uae', 'emirates'] },
+      { name: 'United Kingdom', code: 'GBR', lat: 55.38, lon: -3.44, region: 'europe', aliases: ['uk', 'u.k.', 'u.k', 'u k', 'england', 'scotland', 'wales', 'northern ireland', 'great britain', 'britain', 'gb', 'the united kingdom'] },
+      { name: 'United States of America', code: 'USA', lat: 39.78, lon: -98.58, region: 'americas', aliases: ['usa', 'united states', 'us', 'u.s.a', 'u.s', 'america', 'the united states', 'the usa', 'u s', 'u s a'] },
+      { name: 'Uruguay', code: 'URY', lat: -32.52, lon: -55.77, region: 'americas' },
+      { name: 'Uzbekistan', code: 'UZB', lat: 41.38, lon: 64.59, region: 'asia' },
+      { name: 'Vanuatu', code: 'VUT', lat: -15.38, lon: 166.96, region: 'oceania' },
+      { name: 'Vatican City', code: 'VAT', lat: 41.9, lon: 12.45, region: 'europe', aliases: ['holy see', 'vatican', 'the vatican'] },
+      { name: 'Venezuela', code: 'VEN', lat: 6.42, lon: -66.58, region: 'americas', aliases: ['venezuela, bolivarian republic of', 'bolivarian republic of venezuela'] },
+      { name: 'Vietnam', code: 'VNM', lat: 14.06, lon: 108.28, region: 'asia' },
+      { name: 'Yemen', code: 'YEM', lat: 15.55, lon: 48.52, region: 'asia' },
+      { name: 'Zambia', code: 'ZMB', lat: -13.13, lon: 27.85, region: 'africa' },
+      { name: 'Zimbabwe', code: 'ZWE', lat: -19.02, lon: 29.15, region: 'africa' },
+      { name: 'Kosovo', code: 'XKX', lat: 42.6, lon: 20.9, region: 'europe', aliases: ['kosova'] },
+      { name: 'Western Sahara', code: 'ESH', lat: 24.21, lon: -12.89, region: 'africa', aliases: ['sahrawi arab democratic republic'] }
+    ];
+
+    const colorScale = {
+      africa: '#22d3ee',
+      americas: '#34d399',
+      asia: '#f472b6',
+      europe: '#a78bfa',
+      oceania: '#facc15'
     };
 
     const updateStats = () => {
       const guessedCount = guessed.size;
-      const total = idToName.size;
+      const total = COUNTRY_DATA.length;
       scoreEl.textContent = `${guessedCount} guessed`;
-      remainingEl.textContent = `${total - guessedCount} remaining`;
+      remainingEl.textContent = `${Math.max(total - guessedCount, 0)} remaining`;
       const pct = total ? Math.round((guessedCount / total) * 100) : 0;
       progressEl.style.width = `${pct}%`;
       progressLabel.textContent = `${pct}%`;
@@ -410,21 +603,15 @@
       const country = mapSvg.select(`path[data-id="${id}"]`);
       country.classed('guessed', true);
 
-      if (!centroids.has(id)) {
-        const geo = country.datum();
-        if (geo) {
-          const c = path.centroid(geo);
-          centroids.set(id, c);
-        }
-      }
-
-      const [x, y] = centroids.get(id) || [];
-      if (x !== undefined && y !== undefined) {
+      const centroid = country.datum()?.centroid;
+      if (centroid) {
+        mapSvg.selectAll(`text.label[data-id="${id}"]`).remove();
         mapSvg
           .append('text')
           .attr('class', 'label')
-          .attr('x', x)
-          .attr('y', y)
+          .attr('data-id', id)
+          .attr('x', centroid[0])
+          .attr('y', centroid[1])
           .text(name);
       }
     };
@@ -432,18 +619,11 @@
     const handleGuess = () => {
       const raw = guessInput.value.trim();
       if (!raw) return;
-      if (!dataReady) {
-        guessInput.placeholder = 'Loading map data...';
-        return;
-      }
       guessInput.value = '';
 
-      let key = slug(raw);
-      if (alias[key]) {
-        key = slug(alias[key]);
-      }
-
+      const key = slug(raw);
       const id = slugToId.get(key);
+
       if (!id) {
         guessInput.placeholder = 'Not a country — try again!';
         return;
@@ -455,78 +635,81 @@
       }
 
       guessed.add(id);
-      revealCountry(id, idToName.get(id));
-      addGuessBadge(idToName.get(id));
+      const country = idToCountry.get(id);
+      revealCountry(id, country.name);
+      addGuessBadge(country.name);
       updateStats();
     };
 
-    const renderMap = (countries) => {
+    const drawWorld = () => {
+      mapSvg.selectAll('*').remove();
+
       mapSvg
-        .selectAll('path')
-        .data(countries)
+        .append('rect')
+        .attr('class', 'ocean')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('width', width)
+        .attr('height', height);
+
+      mapSvg
+        .append('path')
+        .attr('class', 'globe')
+        .attr('d', geoPath({ type: 'Sphere' }));
+
+      mapSvg
+        .append('path')
+        .attr('class', 'graticule')
+        .attr('d', geoPath(graticule));
+
+      const countries = COUNTRY_DATA.map((country, index) => {
+        const [x, y] = projection([country.lon, country.lat]);
+        return { ...country, x, y, index };
+      });
+
+      const delaunay = d3.Delaunay.from(countries, (d) => d.x, (d) => d.y);
+      const voronoi = delaunay.voronoi(bounds);
+
+      const geometries = countries
+        .map((country) => {
+          const polygon = voronoi.cellPolygon(country.index);
+          if (!polygon) return null;
+          const pathData = `M${polygon.map((p) => p.join(',')).join('L')}Z`;
+          const centroid = d3.polygonCentroid(polygon);
+          return { ...country, pathData, centroid };
+        })
+        .filter(Boolean);
+
+      mapSvg
+        .append('g')
+        .attr('class', 'countries')
+        .selectAll('path.country')
+        .data(geometries)
         .enter()
         .append('path')
         .attr('class', 'country')
-        .attr('data-id', (d) => d.id)
-        .attr('data-name', (d) => idToName.get(d.id))
-        .attr('d', path);
+        .attr('data-id', (d) => d.code)
+        .attr('data-name', (d) => d.name)
+        .attr('fill', (d) => colorScale[d.region] || 'rgba(255,255,255,0.08)')
+        .attr('d', (d) => d.pathData)
+        .datum((d) => d);
     };
 
-    const fetchWithFallback = async (sources, loader) => {
-      const errors = [];
-      for (const url of sources) {
-        try {
-          return await loader(url);
-        } catch (err) {
-          errors.push(`${url}: ${err}`);
-        }
-      }
-      throw new Error(errors.join(' | '));
-    };
-
-    const init = async () => {
-      const worldSources = [
-        'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json',
-        'https://unpkg.com/world-atlas@2/countries-110m.json',
-        'https://cdn.jsdelivr.net/gh/topojson/world-atlas@2/countries-110m.json'
-      ];
-
-      const nameSources = [
-        'https://cdn.jsdelivr.net/npm/world-atlas@2/world/110m.tsv',
-        'https://unpkg.com/world-atlas@2/world/110m.tsv',
-        'https://cdn.jsdelivr.net/gh/topojson/world-atlas@2/world/110m.tsv'
-      ];
-
-      try {
-        const [world, names] = await Promise.all([
-          fetchWithFallback(worldSources, (url) => d3.json(url)),
-          fetchWithFallback(nameSources, (url) => d3.tsv(url))
-        ]);
-
-        names.forEach((d) => {
-          idToName.set(d.id, d.name);
-          slugToId.set(slug(d.name), d.id);
+    const boot = () => {
+      COUNTRY_DATA.forEach((country) => {
+        idToCountry.set(country.code, country);
+        slugToId.set(slug(country.name), country.code);
+        (country.aliases || []).forEach((alias) => {
+          slugToId.set(slug(alias), country.code);
         });
+      });
 
-        Object.entries(alias).forEach(([key, value]) => {
-          const target = slug(value);
-          if (slugToId.has(target)) {
-            slugToId.set(slug(key), slugToId.get(target));
-          }
-        });
-
-        const countries = topojson.feature(world, world.objects.countries).features.filter((d) => idToName.has(d.id));
-        renderMap(countries);
-        dataReady = true;
-        updateStats();
-        guessInput.placeholder = 'Type a country name and hit Enter';
-      } catch (error) {
-        console.error('Failed to load map data', error);
-        guessInput.placeholder = 'Unable to load map data right now — please check your connection and refresh';
-      }
+      drawWorld();
+      updateStats();
+      guessInput.placeholder = 'Type a country name and hit Enter';
     };
 
-    init();
+    boot();
 
     submitBtn.addEventListener('click', handleGuess);
     guessInput.addEventListener('keydown', (e) => {
