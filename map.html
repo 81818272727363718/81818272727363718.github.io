@@ -37,7 +37,7 @@
 
     .scene {
       display: grid;
-      grid-template-columns: minmax(320px, 420px) 1fr;
+      grid-template-columns: minmax(280px, 360px) 1fr;
       gap: 18px;
       padding: 18px;
       height: 100vh;
@@ -66,7 +66,7 @@
       padding: 18px;
       display: grid;
       grid-template-rows: auto auto 1fr;
-      gap: 14px;
+      gap: 12px;
     }
 
     .header {
@@ -125,10 +125,10 @@
     .input {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       background: rgba(255, 255, 255, 0.05);
-      padding: 12px 14px;
-      border-radius: 14px;
+      padding: 8px 12px;
+      border-radius: 12px;
       border: 1px solid rgba(255, 255, 255, 0.08);
       transition: border 0.2s ease, box-shadow 0.2s ease;
     }
@@ -144,7 +144,7 @@
       border: none;
       outline: none;
       color: var(--text);
-      font-size: 1rem;
+      font-size: 0.95rem;
     }
 
     .input button {
@@ -152,8 +152,9 @@
       border: none;
       color: #0b1223;
       font-weight: 700;
-      padding: 10px 14px;
-      border-radius: 12px;
+      padding: 8px 12px;
+      font-size: 0.95rem;
+      border-radius: 10px;
       cursor: pointer;
       transition: transform 0.1s ease, box-shadow 0.2s ease;
       box-shadow: 0 10px 30px rgba(14, 165, 233, 0.35);
@@ -339,6 +340,7 @@
     const slugToId = new Map();
     const idToName = new Map();
     const centroids = new Map();
+    let dataReady = false;
 
     const alias = {
       'united states': 'united states of america',
@@ -365,13 +367,23 @@
       'eswatini': 'swaziland',
       'cape verde': 'cabo verde',
       'micronesia': 'micronesia, federated states of',
-      'são tomé and príncipe': 'sao tome and principe'
+      'são tomé and príncipe': 'sao tome and principe',
+      'sao tome': 'sao tome and principe',
+      'swaziland': 'swaziland',
+      'laos': "lao people's democratic republic",
+      'syria': 'syrian arab republic',
+      'tanzania': 'tanzania, united republic of',
+      'venezuela': 'venezuela, bolivarian republic of',
+      'moldova': 'moldova, republic of',
+      'macedonia': 'macedonia, republic of',
+      'bolivia': 'bolivia, plurinational state of',
+      'palestine': 'palestine, state of'
     };
 
     const slug = (str) => {
       return str
         .normalize('NFD')
-        .replace(/\p{Diacritic}/gu, '')
+        .replace(/[\u0300-\u036f]/g, '')
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, ' ')
         .trim();
@@ -420,6 +432,10 @@
     const handleGuess = () => {
       const raw = guessInput.value.trim();
       if (!raw) return;
+      if (!dataReady) {
+        guessInput.placeholder = 'Loading map data...';
+        return;
+      }
       guessInput.value = '';
 
       let key = slug(raw);
@@ -457,24 +473,31 @@
     };
 
     const init = async () => {
-      const world = await d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
-      const names = await d3.tsv('https://cdn.jsdelivr.net/npm/world-atlas@2/world/110m.tsv');
+      try {
+        const world = await d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
+        const names = await d3.tsv('https://cdn.jsdelivr.net/npm/world-atlas@2/world/110m.tsv');
 
-      names.forEach((d) => {
-        idToName.set(d.id, d.name);
-        slugToId.set(slug(d.name), d.id);
-      });
+        names.forEach((d) => {
+          idToName.set(d.id, d.name);
+          slugToId.set(slug(d.name), d.id);
+        });
 
-      Object.entries(alias).forEach(([key, value]) => {
-        const target = slug(value);
-        if (slugToId.has(target)) {
-          slugToId.set(slug(key), slugToId.get(target));
-        }
-      });
+        Object.entries(alias).forEach(([key, value]) => {
+          const target = slug(value);
+          if (slugToId.has(target)) {
+            slugToId.set(slug(key), slugToId.get(target));
+          }
+        });
 
-      const countries = topojson.feature(world, world.objects.countries).features.filter((d) => idToName.has(d.id));
-      renderMap(countries);
-      updateStats();
+        const countries = topojson.feature(world, world.objects.countries).features.filter((d) => idToName.has(d.id));
+        renderMap(countries);
+        dataReady = true;
+        updateStats();
+        guessInput.placeholder = 'Type a country name and hit Enter';
+      } catch (error) {
+        console.error('Failed to load map data', error);
+        guessInput.placeholder = 'Unable to load map data right now';
+      }
     };
 
     init();
