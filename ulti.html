@@ -232,44 +232,54 @@ function showSection(id){
 document.querySelectorAll('button[data-target]').forEach(btn=>btn.onclick=()=>showSection(btn.dataset.target));
 
 // Roblox live data via RoProxy + multiple fallbacks
-const rbxBtn=document.getElementById('rbxFetch');
-const proxyWrap=url=>`https://corsproxy.io/?${encodeURIComponent(url)}`;
-async function fetchJson(url,opts){
-  const headers = opts?.method === 'POST' ? {'Content-Type':'application/json'} : {};
-  const res=await fetch(url,{mode:'cors',credentials:'omit',headers:{...headers,...(opts?.headers||{})},...opts});
-  if(!res.ok) throw new Error(`Request failed: ${res.status}`);
+const proxyWrap = url => `https://corsproxy.io/?${encodeURIComponent(url)}`;
+const rbxBtn = document.getElementById("rbxFetch");
+
+async function fetchJson(url, opts = {}) {
+  const res = await fetch(url, {
+    method: opts.method || "GET",
+    headers: opts.headers || {},
+    body: opts.body || null
+  });
+
+  if (!res.ok) throw new Error("Request failed: " + res.status);
   return await res.json();
 }
-const usernameEndpoints=[
-  'https://users.roproxy.com/v1/usernames/users',
-  'https://users.rprxy.xyz/v1/usernames/users',
-  proxyWrap('https://users.roblox.com/v1/usernames/users'),
-  proxyWrap('https://users.roblox.com/v1/users/search?keyword=__USER__&limit=1')
-];
-const rbxHosts=[
-  'https://users.roproxy.com',
-  'https://users.rprxy.xyz',
-  proxyWrap('https://users.roblox.com')
-];
-function withHost(path){
-  return rbxHosts.map(base=>`${base}${path}`);
-}
-async function lookupUser(username){
-  const payload={usernames:[username],excludeBannedUsers:true,excludeUsernamePrefixes:{}};
-  for(const url of usernameEndpoints){
-    try{
-      if(url.includes('__USER__')){
-        const data=await fetchJson(url.replace('__USER__',encodeURIComponent(username)));
-        const match=data.data?.[0];
-        if(match) return match;
-      }else{
-        const data=await fetchJson(url,{method:'POST',body:JSON.stringify(payload)});
-        const match=data.data?.[0];
-        if(match) return match;
+
+// ✔ FIXED: correct payload
+// ✔ FIXED: correct fallback chain
+// ✔ FIXED: consistent POST body across proxies
+
+async function lookupUser(username) {
+  const payload = { usernames: [username] };
+
+  const endpoints = [
+    "https://users.roproxy.com/v1/usernames/users",
+    "https://users.rprxy.xyz/v1/usernames/users",
+    proxyWrap("https://users.roblox.com/v1/usernames/users")
+  ];
+
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) continue;  
+      const data = await res.json();
+
+      if (data?.data?.length > 0) {
+        return data.data[0];
       }
-    } catch(err){ console.warn('lookup fallback',err); }
+
+    } catch (err) {
+      console.warn("lookup fallback failed:", err);
+    }
   }
-  throw new Error('Unable to reach Roblox user services. Try again.');
+
+  throw new Error("Unable to reach Roblox user services. Try again.");
 }
 async function renderRoblox(){
   const wrap=document.getElementById('rbxResults');
