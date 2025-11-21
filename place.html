@@ -1,1 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Canvas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0c1021;
+            --card: #111832;
+            --accent: #6be6ff;
+            --muted: #9fb5d0;
+            --success: #8bf8c0;
+            --danger: #ff6b8b;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: radial-gradient(circle at 20% 20%, #102040 0, rgba(16,32,64,0) 35%),
+                        radial-gradient(circle at 80% 0%, #082038 0, rgba(8,32,56,0) 35%),
+                        var(--bg);
+            color: #e7f0ff;
+            min-height: 100vh;
+        }
+        header {
+            padding: 24px 32px 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .title {
+            font-size: clamp(28px, 3vw, 36px);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .title span {
+            background: linear-gradient(120deg, #6be6ff, #8e7aff);
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .pill {
+            padding: 10px 16px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+            color: var(--muted);
+            font-weight: 600;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        main {
+            padding: 0 32px 32px;
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 20px;
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 18px 18px 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.35);
+        }
+        .card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+        }
+        .muted { color: var(--muted); }
+        .auth-grid { display: grid; gap: 10px; }
+        label {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+        input, select, button {
+            font-family: inherit;
+        }
+        input[type="text"], input[type="password"] {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: #e7f0ff;
+            padding: 10px 12px;
+            border-radius: 10px;
+            outline: none;
+            transition: 0.15s border, 0.15s box-shadow;
+        }
+        input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(107,230,255,0.15);
+        }
+        .btn {
+            background: linear-gradient(135deg, #6be6ff, #8e7aff);
+            border: none;
+            border-radius: 10px;
+            color: #0c1021;
+            padding: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            box-shadow: 0 8px 25px rgba(107,230,255,0.25);
+        }
+        .btn.secondary {
+            background: rgba(255,255,255,0.05);
+            color: #e7f0ff;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: none;
+        }
+        .btn:hover { transform: translateY(-1px); }
+        .btn:active { transform: translateY(0); }
+        .palette {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(32px, 1fr));
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .color {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 2px solid rgba(255,255,255,0.1);
+            transition: transform 0.1s;
+        }
+        .color:hover { transform: scale(1.05); }
+        .canvas-shell {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 12px;
+            border: 1px solid rgba(255,255,255,0.06);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.35);
+        }
+        .canvas-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        canvas {
+            background: #0a0f1f;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+        }
+        .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .badge {
+            padding: 6px 10px;
+            border-radius: 8px;
+            background: rgba(107,230,255,0.15);
+            color: var(--accent);
+            font-weight: 700;
+        }
+        .status { margin-top: 12px; font-size: 14px; color: var(--muted); }
+        .grid-info { display: flex; gap: 10px; flex-wrap: wrap; }
+        .stat {
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .note { margin-top: 10px; font-size: 13px; color: var(--muted); }
+        @media (max-width: 1024px) {
+            main { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="title">Pixel World <span>// r/place</span></div>
+        <div class="pill">Massive collaborative canvas · Fresh neon UI</div>
+    </header>
 
+    <main>
+        <section class="card" aria-label="Authentication">
+            <h3>Join the canvas</h3>
+            <p class="muted">Sign up or log in to start placing pixels. <strong>TestAdmin23</strong> has admin perks with no cooldown.</p>
+            <div class="auth-grid">
+                <label>Username
+                    <input type="text" id="username" placeholder="Enter username">
+                </label>
+                <label>Password
+                    <input type="password" id="password" placeholder="••••••••">
+                </label>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn" id="loginBtn">Log in</button>
+                    <button class="btn secondary" id="signupBtn" style="flex:1;">Sign up</button>
+                </div>
+            </div>
+            <div class="status" id="authStatus">Not logged in.</div>
+            <div class="note">Accounts are saved locally. If TestAdmin23 does not exist yet, a default admin profile is created for you.</div>
+        </section>
+
+        <section class="canvas-shell">
+            <div class="canvas-header">
+                <div class="toolbar">
+                    <div class="badge" id="roleBadge">Guest</div>
+                    <div class="stat">Selected color: <span id="colorPreview" style="display:inline-block;width:18px;height:18px;border-radius:4px;border:1px solid rgba(255,255,255,0.2);"></span></div>
+                    <div class="stat">Cooldown: <span id="cooldownText">5s</span></div>
+                    <div class="stat">Canvas: 200 x 200</div>
+                </div>
+                <button class="btn secondary" id="resetView">Center view</button>
+            </div>
+            <canvas id="board" width="1200" height="1200"></canvas>
+            <div class="status" id="hoverInfo">Hover over the canvas to see coordinates.</div>
+            <div class="palette" id="palette"></div>
+            <div class="note">Tip: Admins skip cooldowns and can place unlimited pixels. Regular users have a short cooldown between placements to keep things fair.</div>
+        </section>
+    </main>
+
+    <script>
+        const GRID_SIZE = 200;           // Canvas dimensions (200 x 200)
+        const PIXEL_SIZE = 6;            // Visual size of each pixel
+        const COOLDOWN_MS = 5000;        // Cooldown for non-admin users
+        const CANVAS = document.getElementById('board');
+        const CTX = CANVAS.getContext('2d');
+        const paletteEl = document.getElementById('palette');
+        const colorPreview = document.getElementById('colorPreview');
+        const cooldownText = document.getElementById('cooldownText');
+        const hoverInfo = document.getElementById('hoverInfo');
+        const roleBadge = document.getElementById('roleBadge');
+        const authStatus = document.getElementById('authStatus');
+        const resetViewBtn = document.getElementById('resetView');
+
+        let currentColor = '#ff4757';
+        let offsetX = 0;
+        let offsetY = 0;
+        let zoom = 1;
+
+        const COLORS = [
+            '#FF0000', '#FF6B00', '#FFD300', '#00E676', '#00C2FF', '#0065FF', '#8400FF', '#FF00FF', '#FFFFFF', '#C0C0C0', '#808080', '#000000'
+        ];
+
+        function getUsers() {
+            try { return JSON.parse(localStorage.getItem('pixelUsers')) || {}; }
+            catch { return {}; }
+        }
+
+        function saveUsers(users) {
+            localStorage.setItem('pixelUsers', JSON.stringify(users));
+        }
+
+        function ensureAdmin() {
+            const users = getUsers();
+            if (!users['TestAdmin23']) {
+                users['TestAdmin23'] = { password: 'admin', isAdmin: true, lastPixel: 0 };
+                saveUsers(users);
+            }
+        }
+
+        function getBoard() {
+            try { return JSON.parse(localStorage.getItem('pixelBoard')) || createEmptyBoard(); }
+            catch { return createEmptyBoard(); }
+        }
+
+        function saveBoard(board) {
+            localStorage.setItem('pixelBoard', JSON.stringify(board));
+        }
+
+        function createEmptyBoard() {
+            return Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill('#0a0f1f'));
+        }
+
+        const board = getBoard();
+        ensureAdmin();
+
+        // Render helpers
+        function drawBoard() {
+            CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
+            CTX.save();
+            CTX.translate(offsetX, offsetY);
+            CTX.scale(zoom, zoom);
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    CTX.fillStyle = board[y][x];
+                    CTX.fillRect(x * PIXEL_SIZE, y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
+                }
+            }
+            CTX.restore();
+        }
+
+        function setColor(color) {
+            currentColor = color;
+            colorPreview.style.background = color;
+        }
+
+        function updateRoleUI(user) {
+            if (!user) {
+                roleBadge.textContent = 'Guest';
+                roleBadge.style.background = 'rgba(255,255,255,0.08)';
+                cooldownText.textContent = `${COOLDOWN_MS / 1000}s`;
+                return;
+            }
+            roleBadge.textContent = user.isAdmin ? 'Admin' : 'Member';
+            roleBadge.style.background = user.isAdmin ? 'rgba(139,248,192,0.18)' : 'rgba(107,230,255,0.15)';
+            cooldownText.textContent = user.isAdmin ? 'None' : `${COOLDOWN_MS / 1000}s`;
+        }
+
+        function getCurrentUser() {
+            const username = localStorage.getItem('pixelCurrentUser');
+            if (!username) return null;
+            const users = getUsers();
+            return users[username] ? { ...users[username], username } : null;
+        }
+
+        function login(username, password) {
+            const users = getUsers();
+            const user = users[username];
+            if (!user || user.password !== password) {
+                authStatus.textContent = 'Invalid credentials. Try again or sign up.';
+                return;
+            }
+            localStorage.setItem('pixelCurrentUser', username);
+            authStatus.textContent = `Logged in as ${username}${user.isAdmin ? ' (admin)' : ''}.`;
+            updateRoleUI({ ...user, username });
+        }
+
+        function signup(username, password) {
+            const users = getUsers();
+            if (users[username]) {
+                authStatus.textContent = 'That username is taken.';
+                return;
+            }
+            users[username] = { password, isAdmin: false, lastPixel: 0 };
+            saveUsers(users);
+            localStorage.setItem('pixelCurrentUser', username);
+            authStatus.textContent = `Account created! Logged in as ${username}.`;
+            updateRoleUI({ ...users[username], username });
+        }
+
+        function placePixel(x, y) {
+            const user = getCurrentUser();
+            if (!user) {
+                authStatus.textContent = 'Please log in to place pixels.';
+                return;
+            }
+
+            const now = Date.now();
+            if (!user.isAdmin && now - (user.lastPixel || 0) < COOLDOWN_MS) {
+                const wait = Math.ceil((COOLDOWN_MS - (now - (user.lastPixel || 0))) / 1000);
+                authStatus.textContent = `Cooldown active. Wait ${wait}s.`;
+                return;
+            }
+
+            board[y][x] = currentColor;
+            saveBoard(board);
+
+            // update last placement for non-admins
+            const users = getUsers();
+            if (!user.isAdmin) {
+                users[user.username].lastPixel = now;
+                saveUsers(users);
+            }
+
+            drawBoard();
+            authStatus.textContent = `Placed at (${x}, ${y}) as ${user.username}${user.isAdmin ? ' [admin]' : ''}.`;
+        }
+
+        // Palette setup
+        COLORS.forEach(color => {
+            const swatch = document.createElement('button');
+            swatch.className = 'color';
+            swatch.style.background = color;
+            swatch.title = color;
+            swatch.addEventListener('click', () => setColor(color));
+            paletteEl.appendChild(swatch);
+        });
+        setColor(COLORS[0]);
+
+        // Canvas interaction
+        CANVAS.width = GRID_SIZE * PIXEL_SIZE;
+        CANVAS.height = GRID_SIZE * PIXEL_SIZE;
+        drawBoard();
+
+        CANVAS.addEventListener('mousemove', (e) => {
+            const rect = CANVAS.getBoundingClientRect();
+            const x = Math.floor((e.clientX - rect.left - offsetX) / (PIXEL_SIZE * zoom));
+            const y = Math.floor((e.clientY - rect.top - offsetY) / (PIXEL_SIZE * zoom));
+            if (x >= 0 && y >= 0 && x < GRID_SIZE && y < GRID_SIZE) {
+                hoverInfo.textContent = `(${x}, ${y}) · Color ${board[y][x]}`;
+            } else {
+                hoverInfo.textContent = 'Outside canvas';
+            }
+        });
+
+        CANVAS.addEventListener('click', (e) => {
+            const rect = CANVAS.getBoundingClientRect();
+            const x = Math.floor((e.clientX - rect.left - offsetX) / (PIXEL_SIZE * zoom));
+            const y = Math.floor((e.clientY - rect.top - offsetY) / (PIXEL_SIZE * zoom));
+            if (x >= 0 && y >= 0 && x < GRID_SIZE && y < GRID_SIZE) {
+                placePixel(x, y);
+            }
+        });
+
+        // Simple zoom controls using wheel
+        CANVAS.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = Math.sign(e.deltaY);
+            zoom = Math.min(4, Math.max(0.5, zoom - delta * 0.1));
+            drawBoard();
+        }, { passive: false });
+
+        resetViewBtn.addEventListener('click', () => {
+            offsetX = 0;
+            offsetY = 0;
+            zoom = 1;
+            drawBoard();
+        });
+
+        // Basic panning
+        let isPanning = false;
+        let startX = 0, startY = 0;
+        CANVAS.addEventListener('mousedown', (e) => {
+            if (e.button !== 1 && e.button !== 2) return; // middle or right click to pan
+            isPanning = true;
+            startX = e.clientX - offsetX;
+            startY = e.clientY - offsetY;
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (!isPanning) return;
+            offsetX = e.clientX - startX;
+            offsetY = e.clientY - startY;
+            drawBoard();
+        });
+        window.addEventListener('mouseup', () => { isPanning = false; });
+
+        // Auth handlers
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            if (!username || !password) {
+                authStatus.textContent = 'Enter a username and password to log in.';
+                return;
+            }
+            login(username, password);
+        });
+        document.getElementById('signupBtn').addEventListener('click', () => {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            if (!username || !password) {
+                authStatus.textContent = 'Pick a username and password to sign up.';
+                return;
+            }
+            signup(username, password);
+        });
+
+        // Auto-load current session
+        (function initSession() {
+            const user = getCurrentUser();
+            if (user) {
+                authStatus.textContent = `Welcome back, ${user.username}${user.isAdmin ? ' (admin)' : ''}.`;
+            }
+            updateRoleUI(user);
+        })();
+    </script>
+</body>
+</html>
