@@ -197,6 +197,7 @@ th,td{
   <button data-section="gametracker">Game Tracker</button>
   <button data-section="alts">Alt Detector</button>
   <button data-section="avatar">Avatar Evolution</button>
+  <button data-section="deep">Deep Analytics</button>
 </nav>
 
 <!-- PROFILE SECTION -->
@@ -257,6 +258,20 @@ th,td{
     <button id="avLoad">Load Outfits</button>
   </div>
   <div id="avResult" style="margin-top:12px"></div>
+</section>
+
+<!-- DEEP ANALYTICS -->
+<section id="deep" class="section">
+  <h2>Deep Player Analytics (Fingerprint / Archetype / Uniqueness)</h2>
+  <p class="small">
+    Experimental lab combining multiple ideas: behavior fingerprint, uniqueness score, knowledge index, archetype / persona guess, and timeline signals.
+    All based only on public Roblox APIs – this is a best-effort estimate, not magic.
+  </p>
+  <div class="controls">
+    <input id="deepUser" placeholder="Username">
+    <button id="deepRun">Analyze</button>
+  </div>
+  <div id="deepResult" style="margin-top:12px"></div>
 </section>
 
 <!-- POPUP -->
@@ -470,7 +485,7 @@ document.getElementById('lbScan').onclick = async()=>{
   box.innerHTML=html;
 };
 
-// ---------- game tracker (fixed using multiget-place-details + games API) ----------
+// ---------- game tracker (using multiget-place-details + games API) ----------
 let lastGameDetails=null;
 document.getElementById('gtLoad').onclick = ()=>loadGameDetails(true);
 document.getElementById('gtRefresh').onclick = ()=>loadGameDetails(false);
@@ -482,7 +497,6 @@ async function loadGameDetails(reset){
   box.innerHTML='<div class="small">Loading place + universe details...</div>';
   setLoading(true);
   try{
-    // 1) placeId -> place details (with universeId)
     const placeData = await tryMulti([
       `https://games.roproxy.com/v1/games/multiget-place-details?placeIds=${placeId}`,
       `https://games.rprxy.xyz/v1/games/multiget-place-details?placeIds=${placeId}`,
@@ -491,9 +505,8 @@ async function loadGameDetails(reset){
     const place = placeData?.data?.[0];
     if(!place){ throw new Error('Invalid placeId or no data'); }
 
-    const universeId = place.universeId || place.universeId || place.universeId; // redundant but safe
+    const universeId = place.universeId;
 
-    // 2) universeId -> full game info
     const gameData = await tryMulti([
       `https://games.roproxy.com/v1/games?universeIds=${universeId}`,
       `https://games.rprxy.xyz/v1/games?universeIds=${universeId}`,
@@ -565,7 +578,6 @@ function descriptionSimilarity(a,b){
   if(!a || !b) return 0;
   if(a===b) return 1;
   if(a.length<10 || b.length<10) return 0;
-  // crude common substring
   let matches=0;
   const wordsA = a.split(/\s+/);
   const wordsB = new Set(b.split(/\s+/));
@@ -592,11 +604,9 @@ document.getElementById('altCheck').onclick = async()=>{
   box.innerHTML='<div class="card">Fetching deep data...</div>';
   setLoading(true);
   try{
-    // basic user objects
     const [raw1,raw2] = await Promise.all([lookupUser(u1),lookupUser(u2)]);
     const [prof1,prof2] = await Promise.all([getUserProfile(raw1.id),getUserProfile(raw2.id)]);
 
-    // friends / groups / badges / avatar assets
     const [g1,g2,f1,f2,b1,b2,av1,av2] = await Promise.all([
       tryMulti([
         `https://groups.roproxy.com/v2/users/${raw1.id}/groups/roles`,
@@ -649,16 +659,15 @@ document.getElementById('altCheck').onclick = async()=>{
     const assets1=(av1?.assets||[]).map(a=>a.id);
     const assets2=(av2?.assets||[]).map(a=>a.id);
 
-    const groupScore = jaccard(groups1,groups2);        // social overlap
-    const friendScore = jaccard(friends1,friends2);     // direct friend overlap
-    const badgeScore = jaccard(badges1,badges2);        // achievement overlap
-    const avatarScore = jaccard(assets1,assets2);       // wearing same items
+    const groupScore = jaccard(groups1,groups2);
+    const friendScore = jaccard(friends1,friends2);
+    const badgeScore = jaccard(badges1,badges2);
+    const avatarScore = jaccard(assets1,assets2);
     const nameScore = simpleNameSimilarity(prof1.name,prof2.name);
     const displayScore = simpleNameSimilarity(prof1.displayName,prof2.displayName);
     const descScore = descriptionSimilarity(prof1.description,prof2.description);
     const ageScore = ageSimilarity(prof1.created,prof2.created);
 
-    // weight signals
     const total =
       groupScore * 0.18 +
       friendScore * 0.2 +
@@ -740,6 +749,222 @@ document.getElementById('avLoad').onclick = async()=>{
     });
     html += '</div><p class="small">These are saved outfits – basically an avatar evolution list.</p></div>';
     box.innerHTML = html;
+  }catch(err){
+    box.innerHTML = `<div class="card"><h3>Error</h3><p>${err.message}</p></div>`;
+  }
+  setLoading(false);
+};
+
+// ---------- deep analytics ----------
+function clamp01(x){return x<0?0:x>1?1:x;}
+function scaleTo100(x){return Math.round(clamp01(x)*100);}
+
+document.getElementById('deepRun').onclick = async()=>{
+  const username = document.getElementById('deepUser').value.trim();
+  const box = document.getElementById('deepResult');
+  if(!username){box.innerHTML='<div class="card">Enter a username.</div>';return;}
+  box.innerHTML='<div class="card">Building fingerprint + archetype...</div>';
+  setLoading(true);
+  try{
+    const user = await lookupUser(username);
+    const id = user.id;
+    const profile = await getUserProfile(id);
+
+    const [friends,groups,badgesSimple,avatar, outfits] = await Promise.all([
+      tryMulti([
+        `https://friends.roproxy.com/v1/users/${id}/friends?limit=200`,
+        `https://friends.rprxy.xyz/v1/users/${id}/friends?limit=200`,
+        proxyWrap(`https://friends.roblox.com/v1/users/${id}/friends?limit=200`)
+      ]),
+      tryMulti([
+        `https://groups.roproxy.com/v2/users/${id}/groups/roles`,
+        `https://groups.rprxy.xyz/v2/users/${id}/groups/roles`,
+        proxyWrap(`https://groups.roblox.com/v2/users/${id}/groups/roles`)
+      ]),
+      tryMulti([
+        `https://badges.roproxy.com/v1/users/${id}/badges?limit=100`,
+        `https://badges.rprxy.xyz/v1/users/${id}/badges?limit=100`,
+        proxyWrap(`https://badges.roblox.com/v1/users/${id}/badges?limit=100`)
+      ]),
+      tryMulti([
+        `https://avatar.roproxy.com/v1/users/${id}/avatar`,
+        `https://avatar.rprxy.xyz/v1/users/${id}/avatar`,
+        proxyWrap(`https://avatar.roblox.com/v1/users/${id}/avatar`)
+      ]),
+      tryMulti([
+        `https://avatar.roproxy.com/v1/users/${id}/outfits?itemsPerPage=50&page=1`,
+        proxyWrap(`https://avatar.roblox.com/v1/users/${id}/outfits?itemsPerPage=50&page=1`)
+      ])
+    ]);
+
+    const friendsArr = friends?.data||[];
+    const groupsArr = groups?.data||[];
+    const badgesArr = badgesSimple?.data||[];
+    const assetsArr = avatar?.assets||[];
+    const outfitsArr = outfits?.data||[];
+
+    // Badge awarded dates for basic timeline (top 50 to reduce spam)
+    let badgeAwardData = null;
+    const badgeIds = badgesArr.map(b=>b.id).slice(0,50);
+    if(badgeIds.length){
+      badgeAwardData = await tryMulti([
+        `https://badges.roproxy.com/v1/users/${id}/badges/awarded-dates?badgeIds=${badgeIds.join(',')}`,
+        `https://badges.rprxy.xyz/v1/users/${id}/badges/awarded-dates?badgeIds=${badgeIds.join(',')}`,
+        proxyWrap(`https://badges.roblox.com/v1/users/${id}/badges/awarded-dates?badgeIds=${badgeIds.join(',')}`)
+      ]);
+    }
+
+    const created = profile.created ? new Date(profile.created) : null;
+    const now = new Date();
+    const ageDays = created ? Math.max(1, (now-created)/(1000*60*60*24)) : 365;
+    const totalBadges = badgesArr.length;
+    const badgesPerDay = totalBadges/ageDays;
+
+    // rough knowledge index: more badges per day + older account -> higher
+    let knowledgeRaw = 0;
+    knowledgeRaw += Math.min(1, badgesPerDay/0.5); // 0.5 badges/day ~ 100
+    if(ageDays>365) knowledgeRaw += 0.1;
+    if(ageDays>3*365) knowledgeRaw += 0.1;
+    const knowledgeScore = scaleTo100(knowledgeRaw/1.2);
+
+    // uniqueness: many groups + many badges + many distinct assets + outfits
+    const groupCount = groupsArr.length;
+    const assetCount = assetsArr.length;
+    const outfitCount = outfitsArr.length;
+    let uniqRaw = 0;
+    uniqRaw += Math.min(0.4, groupCount/50*0.4);
+    uniqRaw += Math.min(0.3, totalBadges/200*0.3);
+    uniqRaw += Math.min(0.2, assetCount/50*0.2);
+    uniqRaw += Math.min(0.1, outfitCount/10*0.1);
+    const uniquenessScore = scaleTo100(uniqRaw);
+
+    // activity pattern from badge awarded dates
+    let earliest=null, latest=null;
+    if(badgeAwardData?.data?.length){
+      badgeAwardData.data.forEach(b=>{
+        if(!b.awardedDate) return;
+        const d = new Date(b.awardedDate);
+        if(!earliest || d<earliest) earliest=d;
+        if(!latest || d>latest) latest=d;
+      });
+    }
+
+    // archetype tags from groups + badges + description
+    const archetypeCounts = {
+      social:0, combat:0, horror:0, sim:0, obby:0, roleplay:0, trader:0, dev:0
+    };
+    const addTagFromText = txt=>{
+      const t = (txt||'').toLowerCase();
+      if(!t) return;
+      if(/hangout|club|cafe|social|vibe|lounge/.test(t)) archetypeCounts.social++;
+      if(/army|military|war|clan|pvp|fps|gun|arsenal|combat|fight|arena/.test(t)) archetypeCounts.combat++;
+      if(/horror|scary|backrooms|doors|fear|nightmare|spooky/.test(t)) archetypeCounts.horror++;
+      if(/simulator|tycoon|farm|mining|grind|clicker/.test(t)) archetypeCounts.sim++;
+      if(/obby|parkour|tower|jump|difficulty chart/.test(t)) archetypeCounts.obby++;
+      if(/rp|roleplay|city rp|school rp|family/.test(t)) archetypeCounts.roleplay++;
+      if(/limited|trade|trader|flip|investment|rap|sniper|ugc/.test(t)) archetypeCounts.trader++;
+      if(/dev|developer|scripter|studio|builder|build/.test(t)) archetypeCounts.dev++;
+    };
+
+    groupsArr.forEach(g=>{ addTagFromText(g.group.name); addTagFromText(g.group.description); });
+    badgesArr.forEach(b=>addTagFromText(b.name));
+    addTagFromText(profile.description);
+
+    let topArchetype='Unknown';
+    let topVal=0;
+    Object.entries(archetypeCounts).forEach(([k,v])=>{
+      if(v>topVal){topVal=v;topArchetype=k;}
+    });
+    const archetypeLabels={
+      social:'Social / Hangout Player',
+      combat:'Combat / PvP / FPS',
+      horror:'Horror / Challenge Seeker',
+      sim:'Simulator / Tycoon Grinder',
+      obby:'Obby / Parkour Skill Player',
+      roleplay:'Roleplay / Story Player',
+      trader:'Trader / Economy / UGC',
+      dev:'Developer / Builder / Scripter',
+      Unknown:'Unknown / Mixed'
+    };
+    const archetypeText = archetypeLabels[topArchetype] || 'Unknown / Mixed';
+
+    // simple persona guess
+    let persona=[];
+    if(knowledgeScore>70) persona.push('High game knowledge');
+    if(uniquenessScore>70) persona.push('Unique profile fingerprint');
+    if(groupCount>50) persona.push('Heavy group user');
+    if(totalBadges>500) persona.push('Badge collector');
+    if(assetCount>50) persona.push('Fashion / avatar-focused');
+    if(persona.length===0) persona.push('Casual / normal player');
+
+    // timeline summary
+    let timelineLines=[];
+    if(created){
+      timelineLines.push(`Account created: ${created.toLocaleDateString()}`);
+      timelineLines.push(`Account age: ~${Math.round(ageDays)} days`);
+    }
+    if(earliest && latest){
+      const spanDays = Math.max(1,(latest-earliest)/(1000*60*60*24));
+      timelineLines.push(`First recorded badge: ${earliest.toLocaleDateString()}`);
+      timelineLines.push(`Most recent badge: ${latest.toLocaleDateString()}`);
+      timelineLines.push(`Badge activity span: ~${Math.round(spanDays)} days`);
+    }else if(totalBadges){
+      timelineLines.push(`Badges: ${totalBadges} (no award dates available from proxies)`);
+    }else{
+      timelineLines.push('No public badges picked up in the APIs.');
+    }
+
+    const fingerprintId = `${id}-${totalBadges}-${groupCount}-${assetCount}`; // just a symbolic ID
+
+    box.innerHTML = `
+      <div class="card">
+        <h3>Fingerprint Overview</h3>
+        <p>
+          <span class="tag">User: ${profile.name} (${profile.displayName})</span><br>
+          <span class="tag">UserId: ${id}</span><br>
+          <span class="tag">Fingerprint ID: ${fingerprintId}</span>
+        </p>
+        <ul class="small">
+          <li>Friends: ${friendsArr.length}</li>
+          <li>Groups: ${groupCount}</li>
+          <li>Badges (sampled): ${totalBadges}</li>
+          <li>Avatar assets (equipped inventory sample): ${assetCount}</li>
+          <li>Saved outfits: ${outfitCount}</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Scores</h3>
+        <p>
+          <span class="badge-pill badge-ok">Knowledge Index: ${knowledgeScore}/100</span><br>
+          <span class="badge-pill badge-warn">Uniqueness Score: ${uniquenessScore}/100</span><br>
+          <span class="badge-pill badge-ok">Account Age (days): ${Math.round(ageDays)}</span>
+        </p>
+        <p class="small">
+          Knowledge Index is based on badges per day and account age.<br>
+          Uniqueness Score uses groups, badges, avatar assets, and outfits.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Archetype & Persona</h3>
+        <p><b>Dominant Archetype:</b> ${archetypeText}</p>
+        <p><b>Persona Hints:</b></p>
+        <ul class="small">
+          ${persona.map(p=>`<li>${p}</li>`).join('')}
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Timeline Signals</h3>
+        <ul class="small">
+          ${timelineLines.map(l=>`<li>${l}</li>`).join('')}
+        </ul>
+        <p class="small">
+          This is a rough behavior timeline built from account age and badge award dates (when available). It doesn't see private data or exact play sessions.
+        </p>
+      </div>
+    `;
   }catch(err){
     box.innerHTML = `<div class="card"><h3>Error</h3><p>${err.message}</p></div>`;
   }
