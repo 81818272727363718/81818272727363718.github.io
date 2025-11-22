@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Apex Legends API Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<style>
+    /* ====== GLOBAL ====== */
+    :root {
+        --bg: #050816;
+        --card: rgba(15, 23, 42, 0.9);
+        --accent: #38bdf8;
+        --accent-soft: rgba(56, 189, 248, 0.15);
+        --danger: #f97373;
+        --text-main: #e5e7eb;
+        --text-muted: #9ca3af;
+        --radius-lg: 16px;
+        --radius-xl: 20px;
+        --transition: 0.25s ease;
+        --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.9);
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Poppins", sans-serif;
+        background:
+            radial-gradient(circle at 10% 0%, rgba(56, 189, 248, 0.25), transparent 55%),
+            radial-gradient(circle at 100% 100%, rgba(168, 85, 247, 0.22), transparent 60%),
+            #020617;
+        color: var(--text-main);
+    }
+
+    .app-shell {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 24px 16px 64px;
+    }
+
+    header {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    h1 {
+        margin: 0;
+        font-size: 28px;
+        letter-spacing: 0.03em;
+    }
+
+    .subtitle {
+        font-size: 13px;
+        color: var(--text-muted);
+        max-width: 460px;
+    }
+
+    .tag {
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        font-size: 11px;
+        color: var(--text-muted);
+        backdrop-filter: blur(12px);
+        background: rgba(15, 23, 42, 0.6);
+    }
+
+    /* ====== INPUT PANEL ====== */
+    .panel {
+        background: rgba(15, 23, 42, 0.92);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-soft);
+        border: 1px solid rgba(148, 163, 184, 0.45);
+        padding: 18px 18px 16px;
+        margin-bottom: 18px;
+        backdrop-filter: blur(18px);
+    }
+
+    .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .panel-title {
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .small-note {
+        font-size: 11px;
+        color: var(--text-muted);
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    @media (max-width: 780px) {
+        .grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 520px) {
+        .grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 7px 9px;
+        border-radius: 10px;
+        border: 1px solid rgba(148, 163, 184, 0.5);
+        background: rgba(15, 23, 42, 0.9);
+        color: var(--text-main);
+        font-size: 13px;
+        outline: none;
+        transition: border var(--transition), box-shadow var(--transition), background var(--transition);
+    }
+
+    input:focus, select:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.5);
+        background: rgba(15, 23, 42, 0.95);
+    }
+
+    input::placeholder {
+        color: rgba(148, 163, 184, 0.8);
+    }
+
+    .btn-row {
+        margin-top: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .btn-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    button {
+        cursor: pointer;
+        border-radius: 999px;
+        padding: 7px 16px;
+        border: none;
