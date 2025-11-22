@@ -3,687 +3,252 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Neon Multiverse Hub - Portal</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<title>Roblox Lookup – Neon Glass</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
 <style>
-:root {
-  --bg: #04050f;
-  --glass: rgba(255,255,255,0.08);
-  --panel: rgba(255,255,255,0.05);
-  --neon: #00fff7;
-  --pink: #ff2ed4;
-}
-* { box-sizing: border-box; }
 body {
-  margin: 0;
-  font-family: 'Inter', system-ui, sans-serif;
-  background: radial-gradient(circle at 15% 20%, rgba(255,46,212,0.2), transparent 30%),
-              radial-gradient(circle at 80% 0%, rgba(0,255,247,0.18), transparent 32%),
-              radial-gradient(circle at 45% 75%, rgba(130,86,255,0.18), transparent 38%),
-              var(--bg);
-  color: #e8f7ff;
-  min-height: 100vh;
-  overflow-x: hidden;
+  margin:0;
+  font-family:'Inter',sans-serif;
+  background:#04050f;
+  color:white;
+  padding:20px;
 }
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(circle at 50% 20%, rgba(0,255,255,0.06), transparent 30%),
-              radial-gradient(circle at 20% 60%, rgba(255,46,212,0.08), transparent 34%),
-              radial-gradient(circle at 80% 80%, rgba(130,86,255,0.07), transparent 40%);
-  pointer-events: none;
-  z-index: -1;
+.container {
+  max-width:900px;
+  margin:auto;
 }
-body.pulse { animation: pulseBg 12s ease-in-out infinite; }
-@keyframes pulseBg { 0%{filter:hue-rotate(0deg);} 50%{filter:hue-rotate(30deg) saturate(1.1);} 100%{filter:hue-rotate(0deg);} }
-header {
-  position: sticky; top: 0; z-index: 20;
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 18px;
-  background: rgba(4,5,15,0.85);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+h1 {
+  font-family:'Orbitron';
+  text-align:center;
+  margin-bottom:20px;
 }
-h1 { margin: 0; font-family: 'Orbitron', sans-serif; letter-spacing: 1.5px; font-size: 20px; }
-nav { display: flex; gap: 10px; flex-wrap: wrap; }
-.button, nav button {
-  background: var(--panel);
-  color: #e8f7ff;
-  border: 1px solid rgba(255,255,255,0.12);
-  padding: 10px 14px;
-  border-radius: 12px;
-  cursor: pointer;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  text-shadow: 0 0 10px rgba(0,255,255,0.35);
-  transition: 0.2s ease;
+.controls {
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
 }
-.button:hover, nav button:hover, nav button.active {
-  background: linear-gradient(135deg, rgba(0,255,255,0.2), rgba(255,46,212,0.2));
-  box-shadow: 0 10px 30px rgba(0,255,255,0.25);
-  transform: translateY(-2px);
+input {
+  flex:1;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.15);
+  background:rgba(255,255,255,0.07);
+  color:white;
 }
-main { padding: 18px; }
-.section {
-  display: none;
-  background: var(--glass);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 16px;
-  padding: 16px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
-  margin: 16px auto;
+button {
+  padding:12px 18px;
+  border-radius:12px;
+  border:none;
+  background:rgba(0,255,255,0.2);
+  border:1px solid rgba(0,255,255,0.3);
+  color:white;
+  cursor:pointer;
+  font-weight:600;
+  transition:0.2s;
 }
-.section.active { display: block; animation: fadeIn 0.4s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: none;} }
-.portal-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 14px;
-  margin: 14px 0;
+button:hover {
+  background:rgba(0,255,255,0.35);
 }
-.portal-card {
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 14px;
-  padding: 14px;
-  box-shadow: 0 16px 40px rgba(0,0,0,0.35), 0 0 22px rgba(0,255,255,0.2);
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:14px;
 }
-.badge { display: inline-block; padding: 4px 10px; border-radius: 999px; background: rgba(0,255,255,0.12); border: 1px solid rgba(0,255,255,0.3); font-weight: 700; color: #9cf5ff; }
-.control-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-input, select, textarea {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.12);
-  color: #e8f7ff;
-  padding: 10px;
-  border-radius: 10px;
+.card {
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.15);
+  padding:16px;
+  border-radius:14px;
+  box-shadow:0 0 20px rgba(0,255,255,0.2);
 }
-textarea { width: 100%; min-height: 240px; }
-canvas { width: 100%; max-width: 900px; height: 420px; border-radius: 12px; background: radial-gradient(circle at 40% 30%, rgba(0,255,255,0.12), transparent 40%), #050612; }
-.glass-panel { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); box-shadow: 0 20px 60px rgba(0,0,0,0.4); border-radius: 14px; padding: 12px; }
-.neon-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+.card h3 {
+  margin-top:0;
+}
+
+/* Popup */
+#popup {
+  position:fixed;
+  inset:0;
+  display:none;
+  justify-content:center;
+  align-items:center;
+  background:rgba(0,0,0,0.6);
+  backdrop-filter:blur(6px);
+  z-index:100;
+}
+.popup-box {
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(0,255,255,0.35);
+  padding:20px;
+  border-radius:14px;
+  width:90%;
+  max-width:600px;
+  max-height:70vh;
+  overflow:auto;
+  color:white;
+}
 </style>
 </head>
+
 <body>
-<header>
-  <h1>NEON MULTIVERSE HUB</h1>
-  <nav id="nav"></nav>
-</header>
-<main>
-  <div id="portal" class="section active">
-    <h2>Choose Your Dimension</h2>
-    <p>Use the neon portal buttons below to open a dedicated experience. Each portal loads its own tools instead of crowding one screen.</p>
-    <div class="portal-grid">
-      <div class="portal-card">
-        <h3>Roblox API Integrations</h3>
-        <p>Profile lookup, friends, groups, presence, and RAP calculator.</p>
-        <button class="button" data-target="roblox">Enter Roblox Tools</button>
-      </div>
-      <div class="portal-card">
-        <h3>Python Sandbox v6</h3>
-        <p>Pyodide-powered coding pad with save/load and neon themes.</p>
-        <button class="button" data-target="python">Enter Python Sandbox</button>
-      </div>
-      <div class="portal-card">
-        <h3>AI Code Terminal</h3>
-        <p>Neon faux terminal with animated replies and chaos hooks.</p>
-        <button class="button" data-target="terminal">Enter AI Terminal</button>
-      </div>
-      <div class="portal-card">
-        <h3>Chaos Simulator</h3>
-        <p>Trigger meteors, tornadoes, quakes, and neon explosions.</p>
-        <button class="button" data-target="chaos">Enter Chaos Simulator</button>
-      </div>
-      <div class="portal-card">
-        <h3>Backrooms Maze (Bird's Eye)</h3>
-        <p>Top-down maze with stalker AI, stamina, and an escape elevator.</p>
-        <button class="button" data-target="backrooms">Enter Backrooms</button>
-      </div>
-    </div>
+<div class="container">
+  <h1>Roblox Lookup</h1>
+
+  <div class="controls">
+    <input id="rbxUser" placeholder="Enter Roblox username">
+    <button id="rbxFetch">Search</button>
   </div>
 
-  <div id="roblox" class="section">
-    <h2>Roblox API Integrations</h2>
-    <p>Enter a username to fetch live data via RoProxy. The cards will fill with real profile, friends, groups, badges, presence, and avatar info where available.</p>
-    <div class="control-row">
-      <input id="rbxUser" placeholder="Roblox username">
-      <button class="button" id="rbxFetch">Fetch Profile</button>
-      <button class="button" data-target="portal">Back to Portals</button>
-    </div>
-    <div id="rbxResults" class="portal-grid"></div>
-  </div>
+  <div id="rbxResults" class="grid"></div>
+</div>
 
-  <div id="python" class="section">
-    <h2>Python Sandbox v6</h2>
-    <p>Pyodide runs fully in your browser. Save and load code locally.</p>
-    <div class="control-row">
-      <select id="theme">
-        <option value="midnight" selected>Midnight</option>
-        <option value="dracula">Dracula</option>
-        <option value="light">Light</option>
-      </select>
-      <button class="button" id="runPy">Execute</button>
-      <button class="button" id="saveCode">Save</button>
-      <button class="button" id="loadCode">Load</button>
-      <button class="button" data-target="portal">Back to Portals</button>
-    </div>
-    <div class="control-row">
-      <input id="pyInputFeed" placeholder="Input queue (one line per input() call)" style="flex:1;">
-      <span class="badge">Inline input</span>
-    </div>
-    <textarea id="pythonArea">name = input('Enter your name: ')
-print('Hello', name)
-for i in range(3):
-    print('beat', i)
-</textarea>
-    <pre id="pyOutput" class="neon-card" style="min-height:160px;overflow:auto;line-height:1.35;"></pre>
+<!-- Popup -->
+<div id="popup">
+  <div class="popup-box">
+    <h2 id="popupTitle"></h2>
+    <div id="popupContent"></div>
+    <button onclick="closePopup()" style="margin-top:10px;">Close</button>
   </div>
+</div>
 
-  <div id="terminal" class="section">
-    <h2>AI Code Terminal</h2>
-    <div class="neon-card glass-panel" id="terminalDisplay" style="min-height:220px;font-family:monospace;background:rgba(0,0,0,0.45);"></div>
-    <input id="terminalInput" placeholder="Type command (help, hack, generate, music, wipe, chaos, admin, status, theme, scan, clear, joke, neon, echo, matrix, portal, uptime)" style="width:100%;margin-top:8px;">
-    <div style="margin-top:10px;"><button class="button" data-target="portal">Back to Portals</button></div>
-  </div>
-
-  <div id="chaos" class="section">
-    <h2>Chaos Simulator</h2>
-    <p>Drop disasters and watch civilians panic. Toggle speed or randomize for neon mayhem.</p>
-    <div class="control-row">
-      <button class="button" data-disaster="meteor">Meteor</button>
-      <button class="button" data-disaster="tornado">Tornado</button>
-      <button class="button" data-disaster="quake">Earthquake</button>
-      <button class="button" data-disaster="explosion">Explosion</button>
-      <button class="button" id="randomChaos">Random</button>
-      <button class="button" id="speedToggle">Toggle Slowmo</button>
-      <button class="button" id="saveGif">Save GIF</button>
-      <button class="button" data-target="portal">Back to Portals</button>
-    </div>
-    <canvas id="chaosCanvas"></canvas>
-  </div>
-
-  <div id="backrooms" class="section">
-    <h2>Backrooms Maze (Bird's Eye)</h2>
-    <p>Navigate the yellow maze from above. WASD to move, Shift to sprint. Reach the neon elevator while avoiding the stalker.</p>
-    <button class="button" data-target="portal">Back to Portals</button>
-    <canvas id="backroomsCanvas"></canvas>
-  </div>
-
-  <!-- SHOW ALL POPUP -->
-  <div id="popupOverlay" style="
-    position:fixed; inset:0;
-    background:rgba(0,0,0,0.65);
-    display:none; justify-content:center; align-items:center;
-    z-index:200;
-    backdrop-filter:blur(6px);
-  ">
-    <div style="
-      background:rgba(255,255,255,0.07);
-      border:1px solid rgba(0,255,255,0.35);
-      padding:20px;
-      border-radius:14px;
-      width:90%; max-width:600px;
-      max-height:70vh;
-      overflow:auto;
-      box-shadow:0 0 22px rgba(0,255,255,0.25);
-    ">
-      <h2 id="popupTitle" style="margin-top:0;"></h2>
-      <div id="popupContent" style="line-height:1.5;"></div>
-      <button class="button" onclick="closePopup()" style="margin-top:15px;">Close</button>
-    </div>
-  </div>
-
-</main>
-<script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
 <script>
-const sections = ['portal','roblox','python','terminal','chaos','backrooms'];
-const nav = document.getElementById('nav');
-sections.filter(id=>id!=='portal').forEach(id=>{
-  const btn=document.createElement('button');
-  btn.textContent=id.toUpperCase();
-  btn.onclick=()=>showSection(id);
-  nav.appendChild(btn);
-});
-function showSection(id){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  nav.querySelectorAll('button').forEach(b=>b.classList.toggle('active', b.textContent===id.toUpperCase()));
-  if(id==='chaos') { setTimeout(resizeChaos,60); }
-  if(id==='backrooms') { setTimeout(resizeBackrooms,60); }
-}
-document.querySelectorAll('button[data-target]').forEach(btn=>btn.onclick=()=>showSection(btn.dataset.target));
+const proxyWrap=u=>`https://corsproxy.io/?${encodeURIComponent(u)}`;
 
-// Popup helpers for Show All
-function showPopup(title, items) {
-  const overlay = document.getElementById('popupOverlay');
-  document.getElementById('popupTitle').textContent = title;
-  document.getElementById('popupContent').innerHTML =
-    (items && items.length)
-      ? items.map(x => `<div style="padding:4px 0;">${x}</div>`).join('')
-      : '<p>No data.</p>';
-  overlay.style.display = 'flex';
-}
-function closePopup() {
-  document.getElementById('popupOverlay').style.display = 'none';
+async function fetchJson(url,opts={}){
+  const res=await fetch(url,{...opts,headers:{'Content-Type':'application/json'}});
+  if(!res.ok) throw new Error("HTTP "+res.status);
+  return res.json();
 }
 
-// Roblox live data via RoProxy + multiple fallbacks
-const rbxBtn=document.getElementById('rbxFetch');
-const proxyWrap=url=>`https://corsproxy.io/?${encodeURIComponent(url)}`;
-async function fetchJson(url,opts){
-  const headers = opts?.method === 'POST' ? {'Content-Type':'application/json'} : {};
-  const res=await fetch(url,{mode:'cors',credentials:'omit',headers:{...headers,...(opts?.headers||{})},...opts});
-  if(!res.ok) throw new Error(`Request failed: ${res.status}`);
-  return await res.json();
-}
+// FIXED username lookups
+async function lookupUser(name){
+  const payload={usernames:[name]};
+  const urls=[
+    "https://users.roproxy.com/v1/usernames/users",
+    "https://users.rprxy.xyz/v1/usernames/users",
+    proxyWrap("https://users.roblox.com/v1/usernames/users")
+  ];
 
-// FIXED username endpoints (no broken search endpoint)
-const usernameEndpoints=[
-  'https://users.roproxy.com/v1/usernames/users',
-  'https://users.rprxy.xyz/v1/usernames/users',
-  proxyWrap('https://users.roblox.com/v1/usernames/users')
-];
-
-const rbxHosts=[
-  'https://users.roproxy.com',
-  'https://users.rprxy.xyz',
-  proxyWrap('https://users.roblox.com')
-];
-function withHost(path){
-  return rbxHosts.map(base=>`${base}${path}`);
-}
-
-// FIXED lookupUser – correct payload, simpler logic
-async function lookupUser(username){
-  const payload={ usernames:[username] };
-  for(const url of usernameEndpoints){
+  for(const u of urls){
     try{
-      const data=await fetchJson(url,{method:'POST',body:JSON.stringify(payload)});
-      const match=data.data?.[0];
-      if(match) return match;
-    } catch(err){ console.warn('lookup fallback',err); }
+      const data=await fetchJson(u,{method:"POST",body:JSON.stringify(payload)});
+      if(data?.data?.length) return data.data[0];
+    }catch{}
   }
-  throw new Error('Unable to reach Roblox user services. Try again.');
+  throw new Error("Failed to reach Roblox username API.");
 }
 
-async function renderRoblox(){
-  const wrap=document.getElementById('rbxResults');
-  wrap.innerHTML='<div class="portal-card"><p>Loading...</p></div>';
-  const username=document.getElementById('rbxUser').value || 'builderman';
-  try{
+function popup(title,items){
+  document.getElementById("popupTitle").textContent=title;
+  document.getElementById("popupContent").innerHTML=items.map(i=>`<div>${i}</div>`).join("");
+  document.getElementById("popup").style.display="flex";
+}
+function closePopup(){ document.getElementById("popup").style.display="none"; }
+
+async function render(){
+  const results=document.getElementById("rbxResults");
+  const username=document.getElementById("rbxUser").value || "builderman";
+  results.innerHTML=`<div class="card"><p>Loading...</p></div>`;
+
+  try {
     const user=await lookupUser(username);
-    if(!user) throw new Error('User not found');
-    const userId=user.id;
+    const id=user.id;
 
-    async function tryMulti(pathSets){
-      for(const set of pathSets){
-        for(const url of set) {
-          try { return await fetchJson(url.url, url.opts); } catch(err){ console.warn('roblox api fallback',err); }
-        }
+    const multi=async(arr)=>{
+      for(const u of arr){
+        try{ return await fetchJson(u); }catch{}
       }
-      return null; // gracefully allow partial data instead of hard failure
-    }
+      return null;
+    };
 
-    const [profile,presence,friends,groups,badges,avatar]=await Promise.all([
-      tryMulti([withHost(`/v1/users/${userId}`).map(u=>({url:u})), [ {url:proxyWrap(`https://users.roblox.com/v1/users/${userId}`)} ]]),
-      tryMulti([[{url:'https://presence.roproxy.com/v1/presence/users',opts:{method:'POST',body:JSON.stringify({userIds:[userId]})}},
-                 {url:'https://presence.rprxy.xyz/v1/presence/users',opts:{method:'POST',body:JSON.stringify({userIds:[userId]})}},
-                 {url:proxyWrap('https://presence.roblox.com/v1/presence/users'),opts:{method:'POST',body:JSON.stringify({userIds:[userId]})}}]]),
-      tryMulti([[{url:`https://friends.roproxy.com/v1/users/${userId}/friends?limit=200`},{url:`https://friends.rprxy.xyz/v1/users/${userId}/friends?limit=200`},{url:proxyWrap(`https://friends.roblox.com/v1/users/${userId}/friends?limit=200`)}]]),
-      tryMulti([[{url:`https://groups.roproxy.com/v2/users/${userId}/groups/roles`},{url:`https://groups.rprxy.xyz/v2/users/${userId}/groups/roles`},{url:proxyWrap(`https://groups.roblox.com/v2/users/${userId}/groups/roles`)}]]),
-      tryMulti([[{url:`https://badges.roproxy.com/v1/users/${userId}/badges?limit=100`},{url:`https://badges.rprxy.xyz/v1/users/${userId}/badges?limit=100`},{url:proxyWrap(`https://badges.roblox.com/v1/users/${userId}/badges?limit=100`)}]]),
-      tryMulti([[{url:`https://avatar.roproxy.com/v1/users/${userId}/avatar`},{url:`https://avatar.rprxy.xyz/v1/users/${userId}/avatar`},{url:proxyWrap(`https://avatar.roblox.com/v1/users/${userId}/avatar`)}]]),
+    const profile = await multi([
+      `https://users.roproxy.com/v1/users/${id}`,
+      `https://users.rprxy.xyz/v1/users/${id}`,
+      proxyWrap(`https://users.roblox.com/v1/users/${id}`)
     ]);
 
-    const presenceType=presence?.userPresences?.[0]?.userPresenceType;
-    const presenceText=presenceType===2?'In-Game':presenceType===1?'Online':presenceType===3?'Studio':'Offline/Unknown';
-    const rap = (avatar?.assets||[]).reduce((sum,a)=>sum+(a?.recentAveragePrice||0),0);
-    const profileSafe = profile || {displayName:'Unavailable', name:username, created:Date.now(), followersCount:'?'};
+    const friends = await multi([
+      `https://friends.roproxy.com/v1/users/${id}/friends?limit=200`,
+      `https://friends.rprxy.xyz/v1/users/${id}/friends?limit=200`,
+      proxyWrap(`https://friends.roblox.com/v1/users/${id}/friends?limit=200`)
+    ]);
 
-    const friendsAll = (friends?.data || []).map(f => f.name);
-    const groupsAll  = (groups?.data || []).map(g => g.group.name);
-    const badgesAll  = (badges?.data || []).map(b => b.name);
+    const groups = await multi([
+      `https://groups.roproxy.com/v2/users/${id}/groups/roles`,
+      `https://groups.rprxy.xyz/v2/users/${id}/groups/roles`,
+      proxyWrap(`https://groups.roblox.com/v2/users/${id}/groups/roles`)
+    ]);
 
-    const cards=[
-      {
-        title:'Profile',
-        body:`<strong>${profileSafe.displayName}</strong> (@${profileSafe.name})<br>Created: ${profileSafe.created? new Date(profileSafe.created).toLocaleDateString():'Unknown'}<br>Followers: ${profileSafe?.followersCount??'N/A'}`
-      },
-      {
-        title:'Presence',
-        body:`Status: ${presenceText || 'Unknown'}${presence? '' : ' (proxy limited)'}`
-      },
-      {
-        title:'Friends',
-        body: friendsAll.slice(0,6).join(', ') || 'No public friends or blocked by proxy',
-        full: friendsAll
-      },
-      {
-        title:'Groups',
-        body: groupsAll.slice(0,6).join(', ') || 'No groups',
-        full: groupsAll
-      },
-      {
-        title:'Badges',
-        body: badgesAll.slice(0,6).join(', ') || 'No badges',
-        full: badgesAll
-      },
-      {
-        title:'RAP (avatar assets)',
-        body: rap? rap.toLocaleString() : 'Unavailable via current proxy'
-      }
-    ];
+    const badges = await multi([
+      `https://badges.roproxy.com/v1/users/${id}/badges?limit=200`,
+      `https://badges.rprxy.xyz/v1/users/${id}/badges?limit=200`,
+      proxyWrap(`https://badges.roblox.com/v1/users/${id}/badges?limit=200`)
+    ]);
 
-    wrap.innerHTML='';
-    cards.forEach(c=>{
-      const div=document.createElement('div');
-      div.className='portal-card';
-      div.innerHTML=`<h3>${c.title}</h3><p>${c.body}</p>`;
-      if(c.full && c.full.length){
-        const btn=document.createElement('button');
-        btn.className='button';
-        btn.textContent='Show All';
-        btn.style.marginTop='8px';
-        btn.onclick=()=>showPopup(`${c.title} — Full List`, c.full);
+    const avatar = await multi([
+      `https://avatar.roproxy.com/v1/users/${id}/avatar`,
+      `https://avatar.rprxy.xyz/v1/users/${id}/avatar`,
+      proxyWrap(`https://avatar.roblox.com/v1/users/${id}/avatar`)
+    ]);
+
+    const presenceData = await fetchJson(
+      "https://presence.roproxy.com/v1/presence/users",
+      {method:"POST",body:JSON.stringify({userIds:[id]})}
+    );
+
+    const presenceType = presenceData?.userPresences?.[0]?.userPresenceType;
+    const presenceText = presenceType === 2 ? "In-Game" :
+                         presenceType === 1 ? "Online" :
+                         presenceType === 3 ? "Studio" : "Offline";
+
+    const friendsList = (friends?.data||[]).map(f=>f.name);
+    const groupList   = (groups?.data||[]).map(g=>g.group.name);
+    const badgeList   = (badges?.data||[]).map(b=>b.name);
+
+    const rap = (avatar?.assets||[])
+        .reduce((n,a)=>n + (a.recentAveragePrice||0),0)
+        .toLocaleString();
+
+    results.innerHTML = "";
+
+    // Cards
+    function card(title,body,all=null){
+      const div=document.createElement("div");
+      div.className="card";
+      div.innerHTML=`<h3>${title}</h3><p>${body}</p>`;
+      if(all && all.length){
+        const btn=document.createElement("button");
+        btn.textContent="Show All";
+        btn.onclick=()=>popup(title,all);
         div.appendChild(btn);
       }
-      wrap.appendChild(div);
-    });
-  }catch(err){
-    wrap.innerHTML=`<div class="portal-card"><h3>Error</h3><p>${err.message}</p></div>`;
-  }
-}
-rbxBtn.onclick=renderRoblox;
+      results.appendChild(div);
+    }
 
-// AI terminal
-const termDisplay=document.getElementById('terminalDisplay');
-const termInput=document.getElementById('terminalInput');
-const bootTime=performance.now();
-function termPrint(text){
-  const line=document.createElement('div');
-  line.textContent=text;
-  line.style.padding='4px';
-  line.style.animation='fadeIn 0.3s';
-  termDisplay.appendChild(line);
-  termDisplay.scrollTop=termDisplay.scrollHeight;
-}
-termPrint('NEOTERM ready. Type help.');
-termInput.addEventListener('keydown',e=>{
-  if(e.key==='Enter'){
-    const cmd=termInput.value.trim();
-    termInput.value='';
-    handleTerm(cmd);
-  }
-});
-function handleTerm(cmd){
-  termPrint('> '+cmd);
-  const [base,...rest]=cmd.split(' ');
-  const replies={
-    help:'Commands: help, hack, generate, music, wipe, chaos, admin, status, theme, scan, clear, joke, neon, echo, matrix, portal, uptime',
-    hack:'Attempting breach...ACCESS GRANTED',
-    generate:'Synthesizing code fractals...',
-    music:'Playing neon beat (imaginary)',
-    wipe:'Logs wiped',
-    chaos:'Triggering random disasters',
-    admin:'Secret mode unlocked! Elevated permissions granted.',
-    status:'CPU flux 42%, neon grid stable, packets humming. Civilian morale: stable.',
-    theme:'Toggled neon pulse background.',
-    scan:'Scanning multiverse... portals stable, anomalies: 0. Latency: 3ms.',
-    clear:'Clearing terminal buffer...',
-    joke:'Why do programmers love the dark? Because light attracts bugs.',
-    neon:'Cranking glow shaders to 110%.'
-  };
-  if(base==='clear'){ termDisplay.innerHTML=''; termPrint('Screen cleared.'); return; }
-  if(base==='echo'){ termPrint(rest.join(' ')||'(nothing to echo)'); return; }
-  if(base==='matrix'){
-    let ticks=0;
-    const interval=setInterval(()=>{
-      const col='01\\/\\';
-      const line=Array.from({length:32},()=>col[Math.floor(Math.random()*col.length)]).join('');
-      termPrint(line);
-      ticks++; if(ticks>10) clearInterval(interval);
-    },80);
-    return;
-  }
-  if(base==='portal'){ termPrint('Returning to portal hub.'); showSection('portal'); return; }
-  if(base==='uptime'){ const sec=((performance.now()-bootTime)/1000).toFixed(1); termPrint(`Uptime: ${sec}s`); return; }
-  const reply=replies[cmd]||replies[base]||'Unknown command';
-  termPrint(reply);
-  if(cmd==='chaos' || base==='chaos') addChaos(['meteor','explosion','tornado','quake'][Math.floor(Math.random()*4)]);
-  if(cmd==='theme'||cmd==='neon') document.body.classList.toggle('pulse');
-}
-termPrint('███ NEOTERM ONLINE ███');
+    card("Profile",
+      `<strong>${profile.displayName}</strong><br>@${profile.name}<br>
+       Created: ${new Date(profile.created).toLocaleDateString()}`
+    );
 
-// Python sandbox
-let pyReady=false; let pyodide;
-async function loadPy(){
-  pyodide=await loadPyodide();
-  pyReady=true;
-}
-loadPy();
-async function runPy(){
-  const output=document.getElementById('pyOutput');
-  if(!pyReady){ output.textContent='Loading Pyodide...'; return; }
-  const code=document.getElementById('pythonArea').value;
-  const feed=document.getElementById('pyInputFeed').value.split(/\n/).filter(l=>l.length>0);
-  let feedIndex=0; let transcript='';
-  try {
-    pyodide.setStdin({stdin:()=>{
-      let val;
-      if(feedIndex < feed.length){ val = feed[feedIndex++]; }
-      else { val = prompt('input() requested:'); }
-      transcript += `\n[input] ${val??''}`;
-      return (val??'')+'\n';
-    }});
-    pyodide.globals.set('code_to_run', code);
-    const result=await pyodide.runPythonAsync(`
-import sys, io
-buf = io.StringIO()
-_old_out, _old_err = sys.stdout, sys.stderr
-sys.stdout = sys.stderr = buf
-try:
-    exec(code_to_run)
-finally:
-    sys.stdout = _old_out
-    sys.stderr = _old_err
-buf.getvalue()
-    `);
-    output.textContent=(transcript?transcript+'\n':'')+(result || '(no output)');
+    card("Presence", presenceText);
+
+    card("Friends", friendsList.slice(0,6).join(", ") || "None", friendsList);
+
+    card("Groups", groupList.slice(0,6).join(", ") || "None", groupList);
+
+    card("Badges", badgeList.slice(0,5).join(", ") || "None", badgeList);
+
+    card("RAP", rap || "Unavailable");
+
   } catch(err){
-    output.textContent=err;
+    results.innerHTML=`<div class="card"><p>${err.message}</p></div>`;
   }
 }
-document.getElementById('runPy').onclick=runPy;
-document.getElementById('saveCode').onclick=()=>localStorage.setItem('neon-code',document.getElementById('pythonArea').value);
-document.getElementById('loadCode').onclick=()=>{ const v=localStorage.getItem('neon-code'); if(v) document.getElementById('pythonArea').value=v; };
 
-document.getElementById('theme').onchange=(e)=>{
-  const val=e.target.value;
-  const area=document.getElementById('pythonArea');
-  if(val==='light'){ area.style.background='#f7f7ff'; area.style.color='#050510'; }
-  else if(val==='dracula'){ area.style.background='#1e1b2e'; area.style.color='#e8f7ff'; }
-  else { area.style.background='rgba(255,255,255,0.05)'; area.style.color='#e8f7ff'; }
-};
-
-// Chaos simulator (more reactive)
-const chaosCanvas=document.getElementById('chaosCanvas');
-const cCtx=chaosCanvas.getContext('2d');
-let actors=[]; let slowmo=false; let chaosEvents=[]; let debris=[]; let structures=[]; let scorch=[];
-function resizeChaos(){
-  chaosCanvas.width=chaosCanvas.clientWidth||900;
-  chaosCanvas.height=420;
-}
-function initChaos(){
-  resizeChaos();
-  structures=Array.from({length:14}).map(()=>{
-    const w=40+Math.random()*80, h=40+Math.random()*70;
-    return {x:Math.random()*(chaosCanvas.width-w-40)+20, y:Math.random()*(chaosCanvas.height-h-40)+20, w, h};
-  });
-  actors=Array.from({length:32}).map(()=>({x:Math.random()*chaosCanvas.width,y:Math.random()*chaosCanvas.height,vx:0,vy:0,panic:Math.random(),color:`hsl(${180+Math.random()*60},90%,60%)`}));
-}
-function addChaos(type){ chaosEvents.push({type,t:0,x:Math.random()*chaosCanvas.width,y:Math.random()*chaosCanvas.height}); }
-function chaosLoop(){
-  const grad=cCtx.createLinearGradient(0,0,chaosCanvas.width,chaosCanvas.height);
-  grad.addColorStop(0,'#05060f'); grad.addColorStop(1,'#0a0f1f');
-  cCtx.fillStyle=grad; cCtx.fillRect(0,0,chaosCanvas.width,chaosCanvas.height);
-  // neon grid
-  cCtx.strokeStyle='rgba(0,255,255,0.06)'; cCtx.lineWidth=1;
-  for(let x=0;x<chaosCanvas.width;x+=40){ cCtx.beginPath(); cCtx.moveTo(x,0); cCtx.lineTo(x,chaosCanvas.height); cCtx.stroke(); }
-  for(let y=0;y<chaosCanvas.height;y+=40){ cCtx.beginPath(); cCtx.moveTo(0,y); cCtx.lineTo(chaosCanvas.width,y); cCtx.stroke(); }
-  // buildings
-  structures.forEach(s=>{
-    cCtx.fillStyle='rgba(255,255,255,0.03)';
-    cCtx.fillRect(s.x,s.y,s.w,s.h);
-    cCtx.strokeStyle='rgba(0,255,255,0.2)';
-    cCtx.strokeRect(s.x,s.y,s.w,s.h);
-  });
-  scorch.forEach(s=>{ cCtx.fillStyle=`rgba(255,120,60,${s.life/120})`; cCtx.beginPath(); cCtx.arc(s.x,s.y, s.r,0,Math.PI*2); cCtx.fill(); s.life--; });
-  scorch=scorch.filter(s=>s.life>0);
-  chaosEvents.forEach(e=>{
-    e.t++;
-    if(e.type==='meteor'){
-      const trail=20;
-      cCtx.fillStyle='#ffbb55';
-      cCtx.beginPath(); cCtx.arc(e.x,e.y,16,0,Math.PI*2); cCtx.fill();
-      cCtx.fillStyle='rgba(255,140,60,0.35)'; cCtx.beginPath(); cCtx.ellipse(e.x-25,e.y-25,trail,trail*0.5,Math.PI/4,0,Math.PI*2); cCtx.fill();
-      debris.push({x:e.x,y:e.y, vx:(Math.random()-0.5)*2, vy:(Math.random()-0.5)*2, life:80});
-      scorch.push({x:e.x,y:e.y,r:38,life:120});
-      actors.forEach(a=>{ const dx=a.x-e.x, dy=a.y-e.y; const dist=Math.hypot(dx,dy)+1; a.vx+=dx/dist*1.6; a.vy+=dy/dist*1.6;});
-    }
-    if(e.type==='tornado'){
-      cCtx.strokeStyle='rgba(0,255,255,0.6)'; cCtx.lineWidth=2;
-      cCtx.beginPath(); cCtx.arc(e.x,e.y,24+Math.sin(e.t/5)*10,0,Math.PI*2); cCtx.stroke();
-      cCtx.beginPath(); cCtx.arc(e.x,e.y,10+Math.cos(e.t/6)*6,0,Math.PI*2); cCtx.stroke();
-      actors.forEach(a=>{ const ang=Math.atan2(a.y-e.y,a.x-e.x); a.vx+=Math.cos(ang+Math.PI/2)*0.9; a.vy+=Math.sin(ang+Math.PI/2)*0.9; });
-    }
-    if(e.type==='quake'){
-      if(e.t<80){
-        cCtx.fillStyle='rgba(255,255,255,0.08)'; cCtx.fillRect(0,0,chaosCanvas.width,chaosCanvas.height);
-        actors.forEach(a=>{ a.vx+=(Math.random()-0.5)*1.2; a.vy+=(Math.random()-0.5)*1.2;});
-      }
-    }
-    if(e.type==='explosion'){
-      cCtx.fillStyle=`rgba(255,46,212,${Math.max(0,1-e.t/45)})`;
-      cCtx.beginPath(); cCtx.arc(e.x,e.y,e.t*2.8,0,Math.PI*2); cCtx.fill();
-      actors.forEach(a=>{ const dx=a.x-e.x, dy=a.y-e.y; const dist=Math.hypot(dx,dy)+1; a.vx+=dx/dist*2.2; a.vy+=dy/dist*2.2; });
-      debris.push({x:e.x,y:e.y, vx:(Math.random()-0.5)*3, vy:(Math.random()-0.5)*3, life:60});
-      scorch.push({x:e.x,y:e.y,r:24+e.t*0.8,life:160});
-    }
-  });
-  chaosEvents=chaosEvents.filter(e=>e.t<140);
-  debris.forEach(d=>{
-    d.life--; d.x+=d.vx; d.y+=d.vy; d.vx*=0.98; d.vy*=0.98;
-    cCtx.fillStyle=`rgba(255,200,120,${d.life/80})`;
-    cCtx.beginPath(); cCtx.arc(d.x,d.y,4,0,Math.PI*2); cCtx.fill();
-  });
-  debris=debris.filter(d=>d.life>0);
-  function blocked(nx,ny){
-    return structures.some(s=>nx> s.x-8 && nx< s.x+s.w+8 && ny> s.y-8 && ny< s.y+s.h+8);
-  }
-  actors.forEach(a=>{
-    a.panic=Math.min(1,a.panic+chaosEvents.length*0.0025);
-    const mx=a.vx*(slowmo?0.45:1), my=a.vy*(slowmo?0.45:1);
-    const tx=a.x+mx, ty=a.y+my;
-    if(!blocked(tx,a.y)) a.x=tx; else a.vx*=-0.6;
-    if(!blocked(a.x,ty)) a.y=ty; else a.vy*=-0.6;
-    a.vx*=0.982; a.vy*=0.982;
-    if(a.x<8||a.x>chaosCanvas.width-8) a.vx*=-1;
-    if(a.y<8||a.y>chaosCanvas.height-8) a.vy*=-1;
-    const glow=12+22*a.panic;
-    cCtx.shadowColor=`rgba(0,255,255,${0.5+0.3*a.panic})`; cCtx.shadowBlur=glow;
-    cCtx.fillStyle=a.color;
-    cCtx.beginPath(); cCtx.arc(a.x,a.y,6+glow*0.08,0,Math.PI*2); cCtx.fill();
-    cCtx.shadowBlur=0;
-    cCtx.fillStyle=`rgba(255,255,255,${0.08+0.12*a.panic})`;
-    cCtx.fillRect(a.x-2,a.y+8,4,14*a.panic);
-  });
-  requestAnimationFrame(chaosLoop);
-}
-document.querySelectorAll('#chaos .button[data-disaster]').forEach(btn=>btn.onclick=()=>addChaos(btn.dataset.disaster));
-document.getElementById('randomChaos').onclick=()=>addChaos(['meteor','tornado','quake','explosion'][Math.floor(Math.random()*4)]);
-document.getElementById('speedToggle').onclick=()=>slowmo=!slowmo;
-document.getElementById('saveGif').onclick=()=>alert('GIF capture stubbed: connect a GIF encoder to record frames.');
-
-// Backrooms top-down (modernized)
-const backCanvas=document.getElementById('backroomsCanvas');
-const bCtx=backCanvas.getContext('2d');
-let maze=[], player={x:1,y:1,stamina:100}, stalker={x:5,y:5,alert:0};
-const cell=26;
-let lastBackTime=performance.now();
-function resizeBackrooms(){ backCanvas.style.maxWidth='960px'; backCanvas.style.width='100%'; }
-function generateMaze(){
-  const w=23,h=23; maze=[...Array(h)].map(()=>Array(w).fill(1));
-  function carve(x,y){
-    const dirs=[[1,0],[-1,0],[0,1],[0,-1]].sort(()=>Math.random()-0.5);
-    maze[y][x]=0;
-    dirs.forEach(([dx,dy])=>{
-      const nx=x+dx*2, ny=y+dy*2;
-      if(nx>0&&ny>0&&nx<w-1&&ny<h-1&&maze[ny][nx]===1){
-        maze[y+dy][x+dx]=0; carve(nx,ny);
-      }
-    });
-  }
-  carve(1,1); player={x:1,y:1,stamina:100}; stalker={x:w-2,y:h-2,alert:0};
-  backCanvas.width=w*cell; backCanvas.height=h*cell;
-}
-const keys={};
-document.addEventListener('keydown',e=>{ keys[e.code]=true; });
-document.addEventListener('keyup',e=>{ keys[e.code]=false; });
-function drawOverlay(text,y){
-  bCtx.fillStyle='rgba(0,0,0,0.45)'; bCtx.fillRect(10,y-14,180,26);
-  bCtx.fillStyle='#00fff7'; bCtx.fillText(text,18,y+2);
-}
-function openCell(x,y){ return maze[Math.floor(y)]?.[Math.floor(x)]===0; }
-function backroomsLoop(ts){
-  const dt=Math.min(32,(ts-lastBackTime)||16); lastBackTime=ts;
-  const lightGrad=bCtx.createRadialGradient(player.x*cell+cell/2, player.y*cell+cell/2, cell*1.5, player.x*cell+cell/2, player.y*cell+cell/2, cell*5);
-  lightGrad.addColorStop(0,'rgba(255,255,190,0.3)');
-  lightGrad.addColorStop(1,'rgba(255,255,120,0.05)');
-  bCtx.fillStyle='#0b0b07'; bCtx.fillRect(0,0,backCanvas.width,backCanvas.height);
-  bCtx.fillStyle=lightGrad; bCtx.fillRect(0,0,backCanvas.width,backCanvas.height);
-  for(let y=0;y<maze.length;y++) for(let x=0;x<maze[0].length;x++){
-    if(maze[y][x]===1){
-      bCtx.fillStyle='rgba(255,240,120,0.28)';
-      bCtx.fillRect(x*cell,y*cell,cell,cell);
-      bCtx.fillStyle='rgba(255,200,90,0.12)';
-      bCtx.fillRect(x*cell+4,y*cell+4,cell-8,cell-8);
-    }
-  }
-  const sprinting=keys['ShiftLeft']||keys['ShiftRight'];
-  const speed=sprinting&&player.stamina>0?0.0085:0.0055;
-  if(sprinting) player.stamina=Math.max(0,player.stamina-0.25); else player.stamina=Math.min(100,player.stamina+0.18);
-  const dx=(keys['KeyD']?1:0)-(keys['KeyA']?1:0);
-  const dy=(keys['KeyS']?1:0)-(keys['KeyW']?1:0);
-  const move=dt*speed*60;
-  const nx=player.x+dx*move, ny=player.y+dy*move;
-  if(openCell(nx, player.y)) player.x=nx;
-  if(openCell(player.x, ny)) player.y=ny;
-  stalker.alert=Math.min(1, stalker.alert + (Math.random()*0.002) + (sprinting?0.006:0.002));
-  const chaseSpeed=0.006 + stalker.alert*0.01;
-  stalker.x+=(player.x-stalker.x)*chaseSpeed; stalker.y+=(player.y-stalker.y)*chaseSpeed;
-  bCtx.shadowBlur=18; bCtx.shadowColor='rgba(255,0,0,0.7)';
-  bCtx.fillStyle='rgba(255,40,90,0.9)'; bCtx.beginPath(); bCtx.arc(stalker.x*cell+cell/2, stalker.y*cell+cell/2, cell*0.55, 0, Math.PI*2); bCtx.fill();
-  bCtx.shadowColor='rgba(0,255,255,0.7)'; bCtx.fillStyle='rgba(255,255,255,0.95)'; bCtx.beginPath(); bCtx.arc(player.x*cell+cell/2, player.y*cell+cell/2, cell*0.45,0,Math.PI*2); bCtx.fill();
-  bCtx.shadowColor='rgba(0,200,255,0.9)'; bCtx.fillStyle='#00f0ff'; bCtx.beginPath(); bCtx.arc((maze[0].length-2)*cell+cell/2,(maze.length-2)*cell+cell/2,cell*0.5,0,Math.PI*2); bCtx.fill();
-  bCtx.shadowBlur=0;
-  // overlays
-  bCtx.font='14px Inter'; bCtx.fillStyle='#fff';
-  drawOverlay(`Stamina: ${Math.round(player.stamina)}%`,20);
-  drawOverlay(`Threat: ${Math.round(stalker.alert*100)}%`,50);
-  if(Math.abs(player.x-(maze[0].length-2))<0.5 && Math.abs(player.y-(maze.length-2))<0.5){ generateMaze(); }
-  if(Math.hypot(player.x-stalker.x, player.y-stalker.y)<1){ player.x=1; player.y=1; stalker.alert=0; }
-  requestAnimationFrame(backroomsLoop);
-}
-
-// Init
-generateMaze();
-resizeBackrooms();
-initChaos(); chaosLoop(); requestAnimationFrame(backroomsLoop);
-showSection('portal');
-window.addEventListener('resize',()=>{resizeChaos(); resizeBackrooms();});
+document.getElementById("rbxFetch").onclick=render;
 </script>
+
 </body>
 </html>
