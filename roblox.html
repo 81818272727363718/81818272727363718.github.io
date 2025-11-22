@@ -718,7 +718,7 @@ async function checkBadgeAwardDate() {
   }
 }
 
-/* ========== Game Ban Checker (FIXED) ========== */
+/* ========== Game Ban Checker (with 3 universe fallbacks) ========== */
 document.getElementById('banCheckBtn').onclick = checkGameBanStatus;
 
 async function checkGameBanStatus() {
@@ -742,39 +742,31 @@ async function checkGameBanStatus() {
     const user = await lookupUser(username);
     const userId = user.id;
 
-    // 2) placeId → universeId (FIXED endpoint)
-   // STEP 2 — placeId → universeId (uses 3 full fallbacks)
-let universeDetails = null;
-const universeUrls = [
-  `https://games.roproxy.com/v1/games/multiget-place-details?placeIds=${placeId}`,
-  `https://games.rprxy.xyz/v1/games/multiget-place-details?placeIds=${placeId}`,
-  proxyWrap(`https://games.roblox.com/v1/games/multiget-place-details?placeIds=${placeId}`)
-];
+    // 2) placeId → universeId with 3 fallbacks
+    let universeDetails = null;
+    const universeUrls = [
+      `https://games.roproxy.com/v1/games/multiget-place-details?placeIds=${placeId}`,
+      `https://games.rprxy.xyz/v1/games/multiget-place-details?placeIds=${placeId}`,
+      proxyWrap(`https://games.roblox.com/v1/games/multiget-place-details?placeIds=${placeId}`)
+    ];
 
-for (const url of universeUrls) {
-  try {
-    const data = await fetchJson(url);
-    if (data?.data?.length) {
-      universeDetails = data;
-      break;
+    for (const url of universeUrls) {
+      try {
+        const data = await fetchJson(url);
+        if (data?.data?.length) {
+          universeDetails = data;
+          break;
+        }
+      } catch (err) {
+        // try next
+      }
     }
-  } catch (err) {
-    // try next API
-  }
-}
 
-let placeInfo = null;
-if (universeDetails && universeDetails.data && universeDetails.data[0]) {
-  placeInfo = universeDetails.data[0];
-}
+    let placeInfo = null;
+    if (universeDetails && universeDetails.data && universeDetails.data[0]) {
+      placeInfo = universeDetails.data[0];
+    }
 
-if (!placeInfo || !placeInfo.universeId) {
-  resultBox.innerHTML =
-    '<h3>Game Ban Check</h3><p>Invalid Place ID or Roblox did not return universe data.</p>';
-  return;
-}
-
-const universeId = placeInfo.universeId;
     if (!placeInfo || !placeInfo.universeId) {
       resultBox.innerHTML =
         '<h3>Game Ban Check</h3><p>Invalid Place ID or Roblox did not return universe data.</p>';
