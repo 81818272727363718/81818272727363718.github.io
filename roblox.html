@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roblox Neon Lookup</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #04050f;
+  --panel: rgba(255,255,255,0.06);
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:'Inter',system-ui,sans-serif;
+  background:radial-gradient(circle at 15% 20%, rgba(255,46,212,0.2), transparent 30%),
+             radial-gradient(circle at 80% 0%, rgba(0,255,247,0.18), transparent 32%),
+             radial-gradient(circle at 45% 75%, rgba(130,86,255,0.18), transparent 38%),
+             var(--bg);
+  color:#e8f7ff;
+  min-height:100vh;
+  padding:20px;
+}
+h1{
+  font-family:'Orbitron',sans-serif;
+  text-align:center;
+  letter-spacing:1.2px;
+}
+.container{
+  max-width:980px;
+  margin:0 auto;
+}
+.controls{
+  display:flex;
+  gap:10px;
+  margin:18px 0;
+  flex-wrap:wrap;
+}
+input{
+  flex:1;
+  min-width:200px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.05);
+  color:#e8f7ff;
+}
+button{
+  padding:10px 16px;
+  border-radius:12px;
+  border:1px solid rgba(0,255,255,0.4);
+  background:rgba(0,255,255,0.18);
+  color:#e8f7ff;
+  font-weight:600;
+  cursor:pointer;
+  text-shadow:0 0 10px rgba(0,255,255,0.5);
+  transition:0.18s;
+}
+button:hover{
+  background:rgba(0,255,255,0.3);
+  box-shadow:0 0 20px rgba(0,255,255,0.35);
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:14px;
+}
+.card{
+  background:var(--panel);
+  border:1px solid rgba(255,255,255,0.14);
+  border-radius:14px;
+  padding:14px;
+  box-shadow:0 12px 30px rgba(0,0,0,0.45),0 0 18px rgba(0,255,255,0.2);
+}
+.card h3{margin-top:0;}
+
+/* Popup */
+#popupOverlay{
+  position:fixed;
+  inset:0;
+  display:none;
+  justify-content:center;
+  align-items:center;
+  background:rgba(0,0,0,0.65);
+  backdrop-filter:blur(6px);
+  z-index:100;
+}
+.popup-box{
+  background:rgba(8,12,26,0.95);
+  border:1px solid rgba(0,255,255,0.4);
+  border-radius:14px;
+  padding:18px;
+  width:90%;
+  max-width:620px;
+  max-height:72vh;
+  overflow:auto;
+  box-shadow:0 0 30px rgba(0,255,255,0.3);
+}
+.popup-box h2{margin-top:0;}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Roblox Neon Lookup</h1>
+  <div class="controls">
+    <input id="rbxUser" placeholder="Roblox username (e.g. builderman)">
+    <button id="rbxFetch">Fetch Profile</button>
+  </div>
+  <div id="rbxResults" class="grid"></div>
+</div>
+
+<!-- Show All popup -->
+<div id="popupOverlay">
+  <div class="popup-box">
+    <h2 id="popupTitle"></h2>
+    <div id="popupContent"></div>
+    <button onclick="closePopup()" style="margin-top:10px;">Close</button>
+  </div>
+</div>
+
+<script>
+// ---------- helpers ----------
+const proxyWrap=url=>`https://corsproxy.io/?${encodeURIComponent(url)}`;
+
+async function fetchJson(url,opts){
+  const headers = opts?.method === 'POST'
+    ? {'Content-Type':'application/json', ...(opts.headers||{})}
+    : (opts?.headers||{});
+  const res = await fetch(url,{
+    mode:'cors',
+    credentials:'omit',
+    ...opts,
+    headers
+  });
+  if(!res.ok) throw new Error(`Request failed: ${res.status}`);
+  return await res.json();
+}
+
+// username lookup (same logic as working big version, but simplified payload)
+const usernameEndpoints=[
+  'https://users.roproxy.com/v1/usernames/users',
+  'https://users.rprxy.xyz/v1/usernames/users',
+  proxyWrap('https://users.roblox.com/v1/usernames/users')
+];
+
+async function lookupUser(username){
+  const payload={ usernames:[username] };
+  for(const url of usernameEndpoints){
+    try{
+      const data=await fetchJson(url,{method:'POST',body:JSON.stringify(payload)});
+      const match=data.data?.[0];
+      if(match) return match;
+    }catch(e){
+      console.warn('username fallback failed',e);
+    }
+  }
+  throw new Error('Unable to reach Roblox user services.');
+}
+
+// popup
+function showPopup(title,items){
+  document.getElementById('popupTitle').textContent=title;
+  document.getElementById('popupContent').innerHTML =
+    (items && items.length)
+      ? items.map(x=>`<div style="padding:3px 0;">${x}</div>`).join('')
+      : '<p>No data.</p>';
+  document.getElementById('popupOverlay').style.display='flex';
+}
+function closePopup(){
+  document.getElementById('popupOverlay').style.display='none';
+}
+
+// ---------- main render ----------
+async function renderRoblox(){
+  const wrap=document.getElementById('rbxResults');
+  const username=document.getElementById('rbxUser').value.trim() || 'builderman';
+  wrap.innerHTML='<div class="card"><p>Loading...</p></div>';
+
+  try{
+    const user = await lookupUser(username);
+    const userId = user.id;
+
+    async function tryMulti(sets){
+      for(const set of sets){
+        for(const cfg of set){
+          try{
+            return await fetchJson(cfg.url,cfg.opts);
+          }catch(e){
+            console.warn('api fallback',cfg.url,e);
+          }
+        }
+      }
+      return null;
+    }
+
+    const withHosts = (path, bases) => bases.map(b=>({url:`${b}${path}`}));
+
+    const userBases = [
+      'https://users.roproxy.com',
+      'https://users.rprxy.xyz',
+      proxyWrap('https://users.roblox.com')
+    ];
+    const friendsBases = [
+      'https://friends.roproxy.com',
+      'https://friends.rprxy.xyz',
+      proxyWrap('https://friends.roblox.com')
+    ];
+    const groupsBases = [
+      'https://groups.roproxy.com',
+      'https://groups.rprxy.xyz',
+      proxyWrap('https://groups.roblox.com')
+    ];
+    const badgesBases = [
+      'https://badges.roproxy.com',
+      'https://badges.rprxy.xyz',
+      proxyWrap('https://badges.roblox.com')
+    ];
+    const avatarBases = [
+      'https://avatar.roproxy.com',
+      'https://avatar.rprxy.xyz',
+      proxyWrap('https://avatar.roblox.com')
+    ];
+
+    const [profile,presence,friends,groups,badges,avatar] = await Promise.all([
+      tryMulti([ withHosts(`/v1/users/${userId}`, userBases) ]),
+      tryMulti([[
+        {url:'https://presence.roproxy.com/v1/presence/users',opts:{method:'POST',body:JSON.stringify({userIds:[userId]})}},
+        {url:'https://presence.rprxy.xyz/v1/presence/users',opts:{method:'POST',body:JSON.stringify({userIds:[userId]})}},
+        {url:proxyWrap('https://presence.roblox.com/v1/presence/users'),opts:{method:'POST',body:JSON.stringify({userIds:[userId]})}}
+      ]]),
+      tryMulti([ withHosts(`/v1/users/${userId}/friends?limit=200`, friendsBases) ]),
+      tryMulti([ withHosts(`/v2/users/${userId}/groups/roles`, groupsBases) ]),
+      tryMulti([ withHosts(`/v1/users/${userId}/badges?limit=200`, badgesBases) ]),
+      tryMulti([ withHosts(`/v1/users/${userId}/avatar`, avatarBases) ])
+    ]);
+
+    const presenceType = presence?.userPresences?.[0]?.userPresenceType;
+    const presenceText = presenceType===2 ? 'In-Game'
+                      : presenceType===1 ? 'Online'
+                      : presenceType===3 ? 'Studio'
+                      : presence ? 'Offline' : 'Unknown (presence blocked)';
+
+    const friendsAll = (friends?.data || []).map(f=>f.name);
+    const groupsAll  = (groups?.data || []).map(g=>g.group.name);
+    const badgesAll  = (badges?.data || []).map(b=>b.name);
+    const rapVal = (avatar?.assets || []).reduce((sum,a)=>sum+(a?.recentAveragePrice||0),0);
+    const rapText = rapVal ? rapVal.toLocaleString() : 'Unavailable';
+
+    const profileSafe = profile || {displayName:'Unknown', name:username, created:null};
+
+    wrap.innerHTML='';
+    function addCard(title, bodyHtml, fullList){
+      const div=document.createElement('div');
+      div.className='card';
+      div.innerHTML=`<h3>${title}</h3><p>${bodyHtml}</p>`;
+      if(fullList && fullList.length){
+        const btn=document.createElement('button');
+        btn.textContent='Show All';
+        btn.style.marginTop='8px';
+        btn.onclick=()=>showPopup(title + ' – Full List', fullList);
+        div.appendChild(btn);
+      }
+      wrap.appendChild(div);
+    }
+
+    addCard(
+      'Profile',
+      `<strong>${profileSafe.displayName}</strong><br>@${profileSafe.name}<br>` +
+      (profileSafe.created ? `Created: ${new Date(profileSafe.created).toLocaleDateString()}` : 'Created: Unknown')
+    );
+
+    addCard('Presence', presenceText);
+
+    addCard(
+      'Friends',
+      friendsAll.length ? friendsAll.slice(0,6).join(', ') : 'No public friends / proxy blocked',
+      friendsAll
+    );
+
+    addCard(
+      'Groups',
+      groupsAll.length ? groupsAll.slice(0,6).join(', ') : 'No groups',
+      groupsAll
+    );
+
+    addCard(
+      'Badges',
+      badgesAll.length ? badgesAll.slice(0,6).join(', ') : 'No badges',
+      badgesAll
+    );
+
+    addCard('RAP (avatar assets)', rapText);
+
+  }catch(err){
+    console.error(err);
+    document.getElementById('rbxResults').innerHTML =
+      `<div class="card"><h3>Error</h3><p>${err.message || 'Unknown error'}</p></div>`;
+  }
+}
+
+document.getElementById('rbxFetch').onclick=renderRoblox;
+</script>
+</body>
+</html>
