@@ -3,246 +3,717 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Roblox Neon Lookup</title>
+<title>Roblox Intelligence Toolkit</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Orbitron:wght@600&display=swap" rel="stylesheet">
 <style>
-body{margin:0;font-family:Inter;background:#060713;color:#e9faff;padding:20px}
-h1{text-align:center;font-family:Orbitron;margin-top:0}
-.controls{display:flex;flex-wrap:wrap;gap:10px;margin:15px 0}
-input{flex:1;min-width:180px;padding:10px;border-radius:10px;border:1px solid #3af2ff;background:#10121d;color:#fff}
-button{padding:10px 16px;border-radius:10px;border:1px solid #3af2ff;background:#0d1620;color:#fff;font-weight:600;cursor:pointer}
-button:hover{background:#163040}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:15px}
-.card{background:#0c1020;border:1px solid #2ad4ff;padding:14px;border-radius:12px;box-shadow:0 0 18px rgba(0,255,255,0.15)}
-#badgePage{display:none;margin-top:20px}
-#badgeResultPage{margin-top:15px}
-#loadingOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:200}
-.spinner{width:60px;height:60px;border-radius:50%;border:4px solid rgba(0,255,255,0.2);border-top-color:#00fff7;animation:spin .7s linear infinite}
+:root{
+  --bg:#050612;
+  --card:#0b0f1f;
+  --accent:#00fff7;
+  --accent2:#ff2ed4;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Inter,system-ui,sans-serif;
+  background:
+    radial-gradient(circle at 10% 0%,rgba(255,46,212,.18),transparent 45%),
+    radial-gradient(circle at 90% 100%,rgba(0,255,247,.25),transparent 45%),
+    var(--bg);
+  color:#e9faff;
+  padding:16px;
+}
+h1{
+  text-align:center;
+  font-family:Orbitron,sans-serif;
+  margin:6px 0 12px;
+}
+nav{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  justify-content:center;
+  margin-bottom:16px;
+}
+button{
+  border-radius:999px;
+  border:1px solid rgba(0,255,255,.4);
+  background:#0c1320;
+  color:#e9faff;
+  padding:8px 14px;
+  cursor:pointer;
+  font-weight:600;
+  font-size:13px;
+}
+button:hover,button.active{
+  background:linear-gradient(135deg,rgba(0,255,255,.3),rgba(255,46,212,.4));
+  box-shadow:0 0 18px rgba(0,255,255,.4);
+}
+input,textarea,select{
+  background:#0c1020;
+  border:1px solid rgba(0,255,255,.35);
+  color:#fff;
+  border-radius:10px;
+  padding:8px 10px;
+}
+textarea{width:100%;min-height:120px;resize:vertical}
+.controls{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin:10px 0;
+}
+.controls input,.controls select{flex:1;min-width:160px}
+.section{
+  display:none;
+  background:rgba(0,0,0,.3);
+  border-radius:14px;
+  padding:14px;
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 18px 50px rgba(0,0,0,.55);
+}
+.section.active{display:block}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:12px;
+  margin-top:10px;
+}
+.card{
+  background:var(--card);
+  border-radius:12px;
+  padding:12px;
+  border:1px solid rgba(0,255,255,.28);
+  box-shadow:0 0 18px rgba(0,0,0,.6);
+}
+.tag{
+  display:inline-block;
+  padding:2px 10px;
+  border-radius:999px;
+  font-size:11px;
+  border:1px solid rgba(0,255,255,.4);
+  color:#9ffcff;
+  margin-bottom:4px;
+}
+#suggestionsList{
+  display:none;
+  position:absolute;
+  background:#050814;
+  border:1px solid rgba(0,255,255,.3);
+  border-radius:8px;
+  margin-top:2px;
+  width:100%;
+  z-index:30;
+  max-height:220px;
+  overflow:auto;
+}
+.suggestion-item{
+  padding:6px 8px;
+  cursor:pointer;
+  font-size:13px;
+}
+.suggestion-item:hover{background:#141c30}
+#loadingOverlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.55);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:200;
+}
+.spinner{
+  width:60px;height:60px;
+  border-radius:50%;
+  border:4px solid rgba(0,255,255,.2);
+  border-top-color:var(--accent);
+  animation:spin .7s linear infinite;
+}
 @keyframes spin{to{transform:rotate(360deg)}}
-#popupOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:150}
-.popup{background:#0b0f1d;border:1px solid #4efaff;padding:16px;border-radius:12px;width:90%;max-width:480px;max-height:70vh;overflow:auto}
-.popup-item{padding:6px 0;border-bottom:1px solid #233}
-.popup-item:hover{color:#3af2ff;cursor:pointer}
-#popupSearch{width:100%;padding:10px;margin-bottom:10px;border-radius:10px;border:1px solid #3af2ff;background:#141726;color:#fff}
-#suggestionsList{display:none;position:absolute;background:#0c1020;border:1px solid #2ad4ff;width:100%;border-radius:10px;z-index:20}
-.suggestion-item{padding:8px;cursor:pointer}
-.suggestion-item:hover{background:#18222f}
+#popupOverlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:150;
+}
+.popup{
+  background:#050814;
+  border-radius:12px;
+  border:1px solid rgba(0,255,255,.4);
+  padding:12px;
+  width:92%;
+  max-width:520px;
+  max-height:80vh;
+  overflow:auto;
+}
+.popup-item{
+  padding:6px 4px;
+  border-bottom:1px solid #151a2a;
+  font-size:13px;
+  cursor:pointer;
+}
+.popup-item:hover{color:var(--accent)}
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+th,td{
+  border-bottom:1px solid rgba(255,255,255,.06);
+  padding:4px 6px;
+  text-align:left;
+}
+.badge-pill{
+  display:inline-block;
+  padding:2px 8px;
+  border-radius:999px;
+  font-size:11px;
+  margin-right:4px;
+}
+.badge-ok{background:rgba(0,255,140,.16);border:1px solid rgba(0,255,140,.5)}
+.badge-warn{background:rgba(255,180,0,.16);border:1px solid rgba(255,200,0,.6)}
+.badge-bad{background:rgba(255,40,100,.16);border:1px solid rgba(255,60,140,.7)}
+.outfit-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px}
+.outfit-card{
+  min-width:130px;
+  background:#050814;
+  border-radius:10px;
+  padding:6px;
+  border:1px solid rgba(0,255,255,.3);
+  text-align:center;
+  font-size:12px;
+}
+.outfit-card img{width:100%;border-radius:8px;display:block}
+.small{font-size:12px;opacity:.85}
 </style>
 </head>
 <body>
+<h1>ROBLOX INTELLIGENCE TOOLKIT</h1>
 
-<h1>Roblox Neon Lookup</h1>
+<nav>
+  <button data-section="profile" class="active">Profile</button>
+  <button data-section="badgeboard">Badge Leaderboard</button>
+  <button data-section="gametracker">Game Tracker</button>
+  <button data-section="alts">Alt Detector</button>
+  <button data-section="avatar">Avatar Evolution</button>
+  <button data-section="sniper">Username Sniper</button>
+</nav>
 
-<div id="mainPage">
-  <div class="controls">
+<!-- PROFILE SECTION -->
+<section id="profile" class="section active">
+  <h2>Profile / Friends / Groups / Badges</h2>
+  <div class="controls" style="position:relative">
     <input id="rbxUser" placeholder="Roblox username">
     <button id="rbxFetch">Fetch Profile</button>
-    <button id="goBadgePage">Badge Award Checker</button>
+    <div id="suggestionsList"></div>
   </div>
-
-  <div id="suggestions"><div id="suggestionsList"></div></div>
-
   <div id="rbxResults" class="grid"></div>
-</div>
+</section>
 
-<!-- BADGE PAGE -->
-<div id="badgePage">
-  <h2>Badge Award Checker</h2>
+<!-- BADGE LEADERBOARD -->
+<section id="badgeboard" class="section">
+  <h2>Badge Leaderboard (Custom List)</h2>
+  <p class="small">Enter a badge ID and a list of usernames. This checks who owns the badge and sorts them by award date (fastest at top).</p>
   <div class="controls">
-    <input id="badgeUser2" placeholder="Username">
-    <input id="badgeId2" placeholder="Badge ID">
-    <button id="badgeCheckBtn2">Check Award</button>
+    <input id="lbBadgeId" placeholder="Badge ID">
   </div>
-
   <div class="controls">
-    <input id="webhookUrl" placeholder="Discord Webhook URL (optional)">
-    <button id="sendToWebhook">Send Result</button>
+    <textarea id="lbUsernames" placeholder="One username per line"></textarea>
   </div>
+  <button id="lbScan">Scan List</button>
+  <div id="lbResult" style="margin-top:12px"></div>
+</section>
 
-  <div id="badgeResultPage" class="card" style="display:none"></div>
+<!-- GAME TRACKER -->
+<section id="gametracker" class="section">
+  <h2>Game Tracker (Place ID → Live Stats)</h2>
+  <p class="small">Uses Roblox place details to show universeId, name, creator and current online count.</p>
+  <div class="controls">
+    <input id="gtPlaceId" placeholder="Place ID (e.g. 1818)">
+    <button id="gtLoad">Load Game</button>
+    <button id="gtRefresh">Refresh</button>
+  </div>
+  <div id="gtResult" class="card"></div>
+</section>
 
-  <button id="backToMain" style="margin-top:20px">Back</button>
-</div>
+<!-- ALT DETECTOR -->
+<section id="alts" class="section">
+  <h2>Alt Detector (Compare Two Users)</h2>
+  <p class="small">Compares friends, groups, badges and name similarity. This is an estimation only, not official.</p>
+  <div class="controls">
+    <input id="altUser1" placeholder="Main username">
+    <input id="altUser2" placeholder="Potential alt username">
+  </div>
+  <button id="altCheck">Compare</button>
+  <div id="altResult" style="margin-top:12px"></div>
+</section>
+
+<!-- AVATAR EVOLUTION -->
+<section id="avatar" class="section">
+  <h2>Avatar Evolution (Saved Outfits)</h2>
+  <p class="small">Loads saved outfits via avatar API (public via roproxy) and shows thumbnails from Roblox thumbnails API.</p>
+  <div class="controls">
+    <input id="avUser" placeholder="Username">
+    <button id="avLoad">Load Outfits</button>
+  </div>
+  <div id="avResult" style="margin-top:12px"></div>
+</section>
+
+<!-- USERNAME SNIPER -->
+<section id="sniper" class="section">
+  <h2>Username Sniper-style Checker</h2>
+  <p class="small">
+    Checks if a username currently belongs to any Roblox account via the public users API.  
+    If no account is found, it <b>might</b> be available or reserved – Roblox doesn’t expose full availability without login.
+  </p>
+  <div class="controls">
+    <input id="sniperName" placeholder="Target username (exact)">
+    <button id="sniperCheck">Check Now</button>
+    <button id="sniperAuto">Start Auto Check (60s)</button>
+  </div>
+  <div id="sniperStatus" class="card"></div>
+</section>
 
 <!-- POPUP -->
-<div id="popupOverlay"><div class="popup">
-  <h3 id="popupTitle"></h3>
-  <input id="popupSearch" placeholder="Search...">
-  <div id="popupContent"></div>
-  <button onclick="closePopup()">Close</button>
-</div></div>
+<div id="popupOverlay">
+  <div class="popup">
+    <h3 id="popupTitle"></h3>
+    <input id="popupSearch" placeholder="Filter..." style="width:100%;margin-bottom:8px">
+    <div id="popupContent"></div>
+    <button onclick="closePopup()" style="margin-top:8px">Close</button>
+  </div>
+</div>
 
 <!-- LOADING -->
 <div id="loadingOverlay"><div class="spinner"></div></div>
 
 <script>
-const proxyWrap=u=>`https://corsproxy.io/?${encodeURIComponent(u)}`;
-async function fetchJson(url,opts){const r=await fetch(url,{...opts,mode:'cors'});if(!r.ok)throw new Error(r.status);return r.json();}
-const usernameEndpoints=[
- 'https://users.roproxy.com/v1/usernames/users',
- 'https://users.rprxy.xyz/v1/usernames/users',
- proxyWrap('https://users.roblox.com/v1/usernames/users')
-];
-async function lookupUser(name){
- const p={usernames:[name]};
- for(const u of usernameEndpoints){
-  try{
-   const d=await fetchJson(u,{method:"POST",body:JSON.stringify(p)});
-   if(d?.data?.length)return d.data[0];
-  }catch{}
- }
- throw new Error("Unable to reach Roblox services");
+// ---------- helpers ----------
+const proxyWrap = u => `https://corsproxy.io/?${encodeURIComponent(u)}`;
+async function fetchJson(url,opts){
+  const res = await fetch(url,{mode:'cors',credentials:'omit',...opts});
+  if(!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+async function tryMulti(urls,opts){
+  for(const u of urls){
+    try{ return await fetchJson(u,opts); }catch{}
+  }
+  return null;
 }
 
-/* PAGE SWITCHING */
-const mainPage=document.getElementById("mainPage");
-const badgePage=document.getElementById("badgePage");
-document.getElementById("goBadgePage").onclick=()=>{
- mainPage.style.display="none";
- badgePage.style.display="block";
-};
-document.getElementById("backToMain").onclick=()=>{
- badgePage.style.display="none";
- mainPage.style.display="block";
-};
+// ---------- section nav ----------
+document.querySelectorAll('nav button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const id = btn.dataset.section;
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b===btn));
+  });
+});
 
-/* LOADING */
-const loading=document.getElementById("loadingOverlay");
-const showLoading=s=>loading.style.display=s?'flex':'none';
-
-/* POPUP */
-let popupItems=[],popupOptions={};
-function showPopup(title,items,opt={}) {
- popupItems=items; popupOptions=opt;
- document.getElementById("popupTitle").textContent=title;
- document.getElementById("popupOverlay").style.display="flex";
- renderPopup(items);
- document.getElementById("popupSearch").oninput=()=>{
-  const q=document.getElementById("popupSearch").value.toLowerCase();
-  renderPopup(items.filter(i=>i.toLowerCase().includes(q)));
- };
+// ---------- popup ----------
+const popupOverlay = document.getElementById('popupOverlay');
+const popupTitle = document.getElementById('popupTitle');
+const popupContent = document.getElementById('popupContent');
+const popupSearch = document.getElementById('popupSearch');
+let popupItems = [], popupClick = null;
+function showPopup(title,items,onClick){
+  popupItems = items;
+  popupClick = onClick || null;
+  popupTitle.textContent = title;
+  renderPopup(items);
+  popupSearch.value='';
+  popupOverlay.style.display='flex';
 }
 function renderPopup(list){
- document.getElementById("popupContent").innerHTML=list.map(i=>`<div class="popup-item" data-v="${i}">${i}</div>`).join('');
- document.querySelectorAll(".popup-item").forEach(el=>{
-  if(popupOptions.onClick)el.onclick=()=>{popupOptions.onClick(el.dataset.v);closePopup();}
- });
+  popupContent.innerHTML = list.map(v=>`<div class="popup-item" data-v="${v}">${v}</div>`).join('');
+  popupContent.querySelectorAll('.popup-item').forEach(el=>{
+    el.onclick = ()=>{ if(popupClick) popupClick(el.dataset.v); };
+  });
 }
-function closePopup(){document.getElementById("popupOverlay").style.display="none";}
+popupSearch.oninput = ()=>{
+  const q = popupSearch.value.toLowerCase();
+  renderPopup(popupItems.filter(v=>v.toLowerCase().includes(q)));
+};
+function closePopup(){ popupOverlay.style.display='none'; }
 
-/* SUGGESTIONS */
-const inputEl=document.getElementById("rbxUser"),suggestList=document.getElementById("suggestionsList");
-let suggestTimeout=null;
-inputEl.oninput=()=>{
- const q=inputEl.value.trim();
- if(suggestTimeout)clearTimeout(suggestTimeout);
- if(q.length<3){suggestList.style.display="none";return;}
- suggestTimeout=setTimeout(()=>searchSuggest(q),200);
+// ---------- loading ----------
+const loading = document.getElementById('loadingOverlay');
+const setLoading = on => loading.style.display = on?'flex':'none';
+
+// ---------- lookup user ----------
+const usernameEndpoints = [
+  'https://users.roproxy.com/v1/usernames/users',
+  'https://users.rprxy.xyz/v1/usernames/users',
+  proxyWrap('https://users.roblox.com/v1/usernames/users')
+];
+async function lookupUser(name){
+  const payload = {usernames:[name],excludeBannedUsers:false};
+  for(const url of usernameEndpoints){
+    try{
+      const data = await fetchJson(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      if(data?.data?.length) return data.data[0];
+    }catch{}
+  }
+  throw new Error('Unable to reach Roblox user services.');
+}
+
+// ---------- profile section ----------
+const rbxInput = document.getElementById('rbxUser');
+const rbxResults = document.getElementById('rbxResults');
+const suggList = document.getElementById('suggestionsList');
+let suggTimer=null;
+
+rbxInput.oninput = ()=>{
+  const q = rbxInput.value.trim();
+  if(suggTimer) clearTimeout(suggTimer);
+  if(q.length<3){ suggList.style.display='none'; return; }
+  suggTimer = setTimeout(()=>searchSuggest(q),220);
 };
 async function searchSuggest(q){
- let d=null;try{
-  d=await fetchJson(proxyWrap(`https://users.roblox.com/v1/users/search?keyword=${q}&limit=10`));
- }catch{return;}
- if(!d?.data?.length){suggestList.style.display="none";return;}
- suggestList.innerHTML=d.data.map(u=>`<div class="suggestion-item" data-u="${u.name}">${u.displayName} (@${u.name})</div>`).join('');
- suggestList.style.display="block";
- document.querySelectorAll(".suggestion-item").forEach(el=>el.onclick=()=>{inputEl.value=el.dataset.u;suggestList.style.display="none";renderRoblox(el.dataset.u);});
+  try{
+    const data = await fetchJson(proxyWrap(`https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(q)}&limit=10`));
+    if(!data?.data?.length){suggList.style.display='none';return;}
+    suggList.innerHTML = data.data.map(u=>`<div class="suggestion-item" data-u="${u.name}">${u.displayName} (@${u.name})</div>`).join('');
+    suggList.style.display='block';
+    suggList.querySelectorAll('.suggestion-item').forEach(el=>{
+      el.onclick = ()=>{rbxInput.value=el.dataset.u;suggList.style.display='none';renderProfile(el.dataset.u);};
+    });
+  }catch{ suggList.style.display='none'; }
 }
+document.getElementById('rbxFetch').onclick = ()=>renderProfile(rbxInput.value.trim());
 
-/* MAIN PROFILE LOOKUP */
-document.getElementById("rbxFetch").onclick=()=>renderRoblox(inputEl.value.trim());
-async function renderRoblox(username){
- if(!username)return;
- const out=document.getElementById("rbxResults");
- out.innerHTML="<div class='card'>Loading...</div>";
- showLoading(true);
- try{
-  const user=await lookupUser(username);const id=user.id;
-  async function tryMulti(list){
-   for(const u of list){try{return await fetchJson(u);}catch{}}
-   return null;
-  }
-  const profile=await tryMulti([
-    `https://users.roproxy.com/v1/users/${id}`,
-    `https://users.rprxy.xyz/v1/users/${id}`,
-    proxyWrap(`https://users.roblox.com/v1/users/${id}`)
-  ]);
-  const friends=await tryMulti([
-    `https://friends.roproxy.com/v1/users/${id}/friends?limit=200`,
-    `https://friends.rprxy.xyz/v1/users/${id}/friends?limit=200`,
-    proxyWrap(`https://friends.roblox.com/v1/users/${id}/friends?limit=200`)
-  ]);
-  const groups=await tryMulti([
-    `https://groups.roproxy.com/v2/users/${id}/groups/roles`,
-    `https://groups.rprxy.xyz/v2/users/${id}/groups/roles`,
-    proxyWrap(`https://groups.roblox.com/v2/users/${id}/groups/roles`)
-  ]);
-  const badges=await tryMulti([
-    `https://badges.roproxy.com/v1/users/${id}/badges?limit=100`,
-    `https://badges.rprxy.xyz/v1/users/${id}/badges?limit=100`,
-    proxyWrap(`https://badges.roblox.com/v1/users/${id}/badges?limit=100`)
-  ]);
+async function renderProfile(username){
+  if(!username) return;
+  rbxResults.innerHTML = `<div class="card">Loading profile for <b>${username}</b>...</div>`;
+  setLoading(true);
+  try{
+    const user = await lookupUser(username);
+    const id = user.id;
+    const profile = await tryMulti([
+      `https://users.roproxy.com/v1/users/${id}`,
+      `https://users.rprxy.xyz/v1/users/${id}`,
+      proxyWrap(`https://users.roblox.com/v1/users/${id}`)
+    ]);
+    const friends = await tryMulti([
+      `https://friends.roproxy.com/v1/users/${id}/friends?limit=200`,
+      `https://friends.rprxy.xyz/v1/users/${id}/friends?limit=200`,
+      proxyWrap(`https://friends.roblox.com/v1/users/${id}/friends?limit=200`)
+    ]);
+    const groups = await tryMulti([
+      `https://groups.roproxy.com/v2/users/${id}/groups/roles`,
+      `https://groups.rprxy.xyz/v2/users/${id}/groups/roles`,
+      proxyWrap(`https://groups.roblox.com/v2/users/${id}/groups/roles`)
+    ]);
+    const badges = await tryMulti([
+      `https://badges.roproxy.com/v1/users/${id}/badges?limit=100`,
+      `https://badges.rprxy.xyz/v1/users/${id}/badges?limit=100`,
+      proxyWrap(`https://badges.roblox.com/v1/users/${id}/badges?limit=100`)
+    ]);
 
-  const friendsList=(friends?.data||[]).map(f=>f.name);
-  const groupsList=(groups?.data||[]).map(g=>`${g.group.name} — ${g.role?.name||"Member"}`);
-  const badgeObjs=(badges?.data||[]).map(b=>b.name);
+    const friendsList = (friends?.data||[]).map(f=>f.name);
+    const groupsList = (groups?.data||[]).map(g=>`${g.group.name} — ${g.role?.name||'Member'}`);
+    const badgeList = (badges?.data||[]).map(b=>b.name);
 
-  out.innerHTML="";
+    rbxResults.innerHTML = '';
 
-  function card(title,body,list=null){
-    const c=document.createElement("div");c.className="card";
-    c.innerHTML=`<h3>${title}</h3><p>${body}</p>`;
-    if(list&&list.length){
-      const b=document.createElement("button");b.textContent="Show All";
-      b.onclick=()=>showPopup(title,list,{onClick:name=>renderRoblox(name)});
-      c.appendChild(b);
+    function makeCard(title,body,list,onClickName){
+      const c = document.createElement('div');
+      c.className='card';
+      c.innerHTML = `<h3>${title}</h3><p>${body}</p>`;
+      if(list && list.length){
+        const btn = document.createElement('button');
+        btn.textContent='Show All';
+        btn.onclick=()=>showPopup(title,list,onClickName);
+        c.appendChild(btn);
+      }
+      rbxResults.appendChild(c);
     }
-    out.appendChild(c);
+
+    makeCard('Profile',`
+      <span class="tag">ID: ${id}</span><br>
+      <b>${profile.displayName}</b><br>@${profile.name}<br>
+      Created: ${profile.created? new Date(profile.created).toLocaleDateString(): 'Unknown'}
+    `);
+    makeCard('Friends',friendsList.slice(0,6).join(', ')||'None',friendsList,name=>renderProfile(name));
+    makeCard('Groups',groupsList.slice(0,5).join('<br>')||'None',groupsList,null);
+    if(badgeList.length) makeCard('Badges',badgeList.slice(0,5).join(', '),badgeList,null);
+
+  }catch(err){
+    rbxResults.innerHTML = `<div class="card"><h3>Error</h3><p>${err.message}</p></div>`;
   }
-
-  card("Profile",`${profile.displayName}<br>@${profile.name}`);
-  card("Friends",friendsList.slice(0,6).join(", "),friendsList);
-  card("Groups",groupsList.slice(0,4).join("<br>"),groupsList);
-  if(badgeObjs.length)card("Badges",badgeObjs.slice(0,5).join(", "),badgeObjs);
-
- }catch(e){
-  out.innerHTML=`<div class='card'>${e.message}</div>`;
- }
- showLoading(false);
+  setLoading(false);
 }
 
-/* BADGE AWARD CHECKER */
-let lastBadge=null;
-document.getElementById("badgeCheckBtn2").onclick=async()=>{
- const u=document.getElementById("badgeUser2").value.trim();
- const b=Number(document.getElementById("badgeId2").value.trim());
- const box=document.getElementById("badgeResultPage");
- if(!u||!b){box.style.display="block";box.innerHTML="<h3>Error</h3><p>Enter username + badge ID</p>";return;}
- box.style.display="block";box.innerHTML="<h3>Checking...</h3>";
- try{
-  const usr=await lookupUser(u);const id=usr.id;
-  const urls=[
-   `https://badges.roproxy.com/v1/users/${id}/badges/awarded-dates?badgeIds=${b}`,
-   `https://badges.rprxy.xyz/v1/users/${id}/badges/awarded-dates?badgeIds=${b}`,
-   proxyWrap(`https://badges.roblox.com/v1/users/${id}/badges/awarded-dates?badgeIds=${b}`)
-  ];
-  let d=null;for(const u2 of urls){try{d=await fetchJson(u2);break;}catch{}}
-  const e=d?.data?.find(x=>x.badgeId==b);
-  if(!e){box.innerHTML=`<h3>Badge Award</h3><p>${u} never earned badge ${b}</p>`;lastBadge=null;return;}
-  const date=new Date(e.awardedDate).toLocaleString();
-  const r=`User: ${u}\nBadge: ${b}\nDate: ${date}`;
-  box.innerHTML=`<h3>Badge Award</h3><p>${r.replace(/\n/g,"<br>")}</p>`;
-  lastBadge=r;
- }catch(err){box.innerHTML=`<h3>Error</h3><p>${err.message}</p>`;lastBadge=null;}
+// ---------- badge leaderboard ----------
+document.getElementById('lbScan').onclick = async()=>{
+  const badgeId = Number(document.getElementById('lbBadgeId').value.trim());
+  const raw = document.getElementById('lbUsernames').value.split(/\r?\n/).map(v=>v.trim()).filter(Boolean);
+  const box = document.getElementById('lbResult');
+  if(!badgeId || !raw.length){box.innerHTML='<div class="card">Enter badge ID and at least one username.</div>';return;}
+  box.innerHTML='<div class="card">Scanning list...</div>';
+  setLoading(true);
+  const results = [];
+  for(const name of raw){
+    try{
+      const u = await lookupUser(name);
+      const id = u.id;
+      const data = await tryMulti([
+        `https://badges.roproxy.com/v1/users/${id}/badges/awarded-dates?badgeIds=${badgeId}`,
+        `https://badges.rprxy.xyz/v1/users/${id}/badges/awarded-dates?badgeIds=${badgeId}`,
+        proxyWrap(`https://badges.roblox.com/v1/users/${id}/badges/awarded-dates?badgeIds=${badgeId}`)
+      ]);
+      const entry = data?.data?.find(x=>String(x.badgeId)===String(badgeId));
+      if(entry) results.push({name, id, date:new Date(entry.awardedDate)});
+    }catch{}
+  }
+  setLoading(false);
+  if(!results.length){box.innerHTML='<div class="card">None of these users own that badge.</div>';return;}
+  results.sort((a,b)=>a.date-b.date);
+  let html = `<div class="card"><h3>Owners (${results.length})</h3><table><tr><th>#</th><th>User</th><th>UserId</th><th>Awarded</th></tr>`;
+  results.forEach((r,i)=>{
+    html += `<tr><td>${i+1}</td><td>${r.name}</td><td>${r.id}</td><td>${r.date.toLocaleString()}</td></tr>`;
+  });
+  html+='</table></div>';
+  box.innerHTML=html;
 };
 
-/* WEBHOOK SEND */
-document.getElementById("sendToWebhook").onclick=async()=>{
- const url=document.getElementById("webhookUrl").value.trim();
- if(!url)return alert("Enter webhook URL");
- if(!lastBadge)return alert("No result to send");
- await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({content:lastBadge})});
- alert("Sent!");
+// ---------- game tracker ----------
+let lastGameDetails=null;
+document.getElementById('gtLoad').onclick = ()=>loadGameDetails(true);
+document.getElementById('gtRefresh').onclick = ()=>loadGameDetails(false);
+
+async function loadGameDetails(reset){
+  const placeId = document.getElementById('gtPlaceId').value.trim();
+  const box = document.getElementById('gtResult');
+  if(!placeId){box.innerHTML='<div class="small">Enter a placeId first.</div>';return;}
+  box.innerHTML='<div class="small">Loading place details...</div>';
+  setLoading(true);
+  try{
+    const data = await fetchJson(proxyWrap(`https://www.roblox.com/places/api-get-details?assetId=${encodeURIComponent(placeId)}`));
+    lastGameDetails = data;
+    box.innerHTML = `
+      <h3>${data.Name}</h3>
+      <p>
+        <span class="badge-pill badge-ok">UniverseId: ${data.UniverseId}</span><br>
+        Creator: <b>${data.Builder}</b> (id: ${data.BuilderId})<br>
+        Max Players: ${data.MaxPlayers}<br>
+        Online Now: <b>${data.OnlineCount}</b><br>
+        Visits: ${data.VisitedCount.toLocaleString()}<br>
+        Favorites: ${data.FavoritedCount.toLocaleString()}<br>
+        Votes: 👍 ${data.TotalUpVotes} / 👎 ${data.TotalDownVotes}
+      </p>
+      <p class="small">URL: <a href="${data.Url}" target="_blank" style="color:${getComputedStyle(document.body).getPropertyValue('--accent')||'#0ff'}">${data.Url}</a></p>
+    `;
+  }catch(err){
+    box.innerHTML=`<div class="small">Error loading place: ${err.message}</div>`;
+  }
+  setLoading(false);
+}
+
+// ---------- alt detector ----------
+function jaccard(a,b){
+  const sa = new Set(a), sb = new Set(b);
+  let inter=0;
+  sa.forEach(v=>{ if(sb.has(v)) inter++; });
+  const union = sa.size + sb.size - inter;
+  return union? inter/union : 0;
+}
+function nameSimilarity(a,b){
+  a=a.toLowerCase();b=b.toLowerCase();
+  if(a===b) return 1;
+  const common = [...new Set(a.split(/[^a-z0-9]+/).concat(b.split(/[^a-z0-9]+/)))]
+    .filter(p=>p && a.includes(p) && b.includes(p));
+  let score = common.length?0.4:0;
+  if(a.replace(/\d/g,'')===b.replace(/\d/g,'')) score=0.8;
+  return Math.min(1,score + (a[0]===b[0]?0.1:0));
+}
+document.getElementById('altCheck').onclick = async()=>{
+  const u1 = document.getElementById('altUser1').value.trim();
+  const u2 = document.getElementById('altUser2').value.trim();
+  const box = document.getElementById('altResult');
+  if(!u1||!u2){box.innerHTML='<div class="card">Enter both usernames.</div>';return;}
+  box.innerHTML='<div class="card">Fetching data...</div>';
+  setLoading(true);
+  try{
+    const [p1,p2] = await Promise.all([lookupUser(u1),lookupUser(u2)]);
+    const [g1,g2,f1,f2,b1,b2] = await Promise.all([
+      tryMulti([
+        `https://groups.roproxy.com/v2/users/${p1.id}/groups/roles`,
+        `https://groups.rprxy.xyz/v2/users/${p1.id}/groups/roles`,
+        proxyWrap(`https://groups.roblox.com/v2/users/${p1.id}/groups/roles`)
+      ]),
+      tryMulti([
+        `https://groups.roproxy.com/v2/users/${p2.id}/groups/roles`,
+        `https://groups.rprxy.xyz/v2/users/${p2.id}/groups/roles`,
+        proxyWrap(`https://groups.roblox.com/v2/users/${p2.id}/groups/roles`)
+      ]),
+      tryMulti([
+        `https://friends.roproxy.com/v1/users/${p1.id}/friends?limit=200`,
+        `https://friends.rprxy.xyz/v1/users/${p1.id}/friends?limit=200`,
+        proxyWrap(`https://friends.roblox.com/v1/users/${p1.id}/friends?limit=200`)
+      ]),
+      tryMulti([
+        `https://friends.roproxy.com/v1/users/${p2.id}/friends?limit=200`,
+        `https://friends.rprxy.xyz/v1/users/${p2.id}/friends?limit=200`,
+        proxyWrap(`https://friends.roblox.com/v1/users/${p2.id}/friends?limit=200`)
+      ]),
+      tryMulti([
+        `https://badges.roproxy.com/v1/users/${p1.id}/badges?limit=100`,
+        `https://badges.rprxy.xyz/v1/users/${p1.id}/badges?limit=100`,
+        proxyWrap(`https://badges.roblox.com/v1/users/${p1.id}/badges?limit=100`)
+      ]),
+      tryMulti([
+        `https://badges.roproxy.com/v1/users/${p2.id}/badges?limit=100`,
+        `https://badges.rprxy.xyz/v1/users/${p2.id}/badges?limit=100`,
+        proxyWrap(`https://badges.roblox.com/v1/users/${p2.id}/badges?limit=100`)
+      ])
+    ]);
+    const groups1=(g1?.data||[]).map(g=>g.group.id);
+    const groups2=(g2?.data||[]).map(g=>g.group.id);
+    const friends1=(f1?.data||[]).map(f=>f.id);
+    const friends2=(f2?.data||[]).map(f=>f.id);
+    const badges1=(b1?.data||[]).map(b=>b.id);
+    const badges2=(b2?.data||[]).map(b=>b.id);
+
+    const groupScore = jaccard(groups1,groups2);
+    const friendScore = jaccard(friends1,friends2);
+    const badgeScore = jaccard(badges1,badges2);
+    const nameScore = nameSimilarity(p1.name,p2.name);
+
+    const total = (groupScore*0.3)+(friendScore*0.3)+(badgeScore*0.25)+(nameScore*0.15);
+    const pct = Math.round(total*100);
+    let label='Low';let cls='badge-ok';
+    if(pct>=70){label='High';cls='badge-bad';}
+    else if(pct>=40){label='Medium';cls='badge-warn';}
+
+    box.innerHTML = `
+      <div class="card">
+        <h3>Similarity: ${pct}% <span class="badge-pill ${cls}">${label} alt chance</span></h3>
+        <p>
+          ${p1.name} (id: ${p1.id})<br>
+          ${p2.name} (id: ${p2.id})
+        </p>
+        <ul class="small">
+          <li>Groups overlap: ${(groupScore*100).toFixed(1)}%</li>
+          <li>Friends overlap: ${(friendScore*100).toFixed(1)}%</li>
+          <li>Badges overlap: ${(badgeScore*100).toFixed(1)}%</li>
+          <li>Name similarity: ${(nameScore*100).toFixed(1)}%</li>
+        </ul>
+        <p class="small">This is just an estimate based on public data, not proof.</p>
+      </div>
+    `;
+  }catch(err){
+    box.innerHTML=`<div class="card"><h3>Error</h3><p>${err.message}</p></div>`;
+  }
+  setLoading(false);
+};
+
+// ---------- avatar evolution / outfits ----------
+document.getElementById('avLoad').onclick = async()=>{
+  const username = document.getElementById('avUser').value.trim();
+  const box = document.getElementById('avResult');
+  if(!username){box.innerHTML='<div class="card">Enter a username.</div>';return;}
+  box.innerHTML='<div class="card">Loading outfits...</div>';
+  setLoading(true);
+  try{
+    const user = await lookupUser(username);
+    const id = user.id;
+    const outfits = await tryMulti([
+      `https://avatar.roproxy.com/v1/users/${id}/outfits?itemsPerPage=50&page=1`,
+      proxyWrap(`https://avatar.roblox.com/v1/users/${id}/outfits?itemsPerPage=50&page=1`)
+    ]);
+    if(!outfits?.data?.length){box.innerHTML='<div class="card">No public outfits found.</div>';setLoading(false);return;}
+    const ids = outfits.data.map(o=>o.id).slice(0,50);
+    const thumbData = await tryMulti([
+      `https://thumbnails.roproxy.com/v1/users/outfits?userOutfitIds=${ids.join(',')}&size=150x150&format=Png&isCircular=false`,
+      proxyWrap(`https://thumbnails.roblox.com/v1/users/outfits?userOutfitIds=${ids.join(',')}&size=150x150&format=Png&isCircular=false`)
+    ]);
+    const mapThumb = {};
+    (thumbData?.data||[]).forEach(t=>{mapThumb[t.targetId]=t.imageUrl;});
+    let html = `<div class="card"><h3>Outfits for ${username}</h3><div class="outfit-row">`;
+    outfits.data.forEach(o=>{
+      const url = mapThumb[o.id] || '';
+      html += `
+        <div class="outfit-card">
+          ${url?`<img src="${url}" alt="${o.name}">`:''}
+          <div>${o.name}</div>
+          <div class="small">Outfit ID: ${o.id}</div>
+        </div>
+      `;
+    });
+    html += '</div><p class="small">These are saved outfits – basically an avatar evolution list.</p></div>';
+    box.innerHTML = html;
+  }catch(err){
+    box.innerHTML = `<div class="card"><h3>Error</h3><p>${err.message}</p></div>`;
+  }
+  setLoading(false);
+};
+
+// ---------- username sniper ----------
+let sniperTimer=null;
+async function checkUsernameOnce(name){
+  const box = document.getElementById('sniperStatus');
+  if(!name){box.innerHTML='<div class="card">Enter a username to check.</div>';return;}
+  box.innerHTML='<div class="card">Checking...</div>';
+  try{
+    const payload={usernames:[name],excludeBannedUsers:false};
+    let data=null;
+    for(const url of usernameEndpoints){
+      try{
+        data = await fetchJson(url,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify(payload)
+        });
+        break;
+      }catch{}
+    }
+    const found = data?.data?.find(u=>u.name.toLowerCase()===name.toLowerCase());
+    if(found){
+      box.innerHTML = `
+        <div class="card">
+          <h3>${name} is <span class="badge-pill badge-bad">TAKEN</span></h3>
+          <p>UserId: ${found.id}<br>Display: ${found.displayName}</p>
+          <p class="small">Last checked: ${new Date().toLocaleTimeString()}</p>
+        </div>
+      `;
+    }else{
+      box.innerHTML = `
+        <div class="card">
+          <h3>${name}</h3>
+          <p><span class="badge-pill badge-ok">No account found with this exact username</span></p>
+          <p class="small">
+            This usually means it is available or reserved.<br>
+            Roblox's official availability endpoint requires a logged-in session, so this is the best we can do from a public page.
+          </p>
+          <p class="small">Last checked: ${new Date().toLocaleTimeString()}</p>
+        </div>
+      `;
+    }
+  }catch(err){
+    box.innerHTML = `<div class="card"><h3>Error</h3><p>${err.message}</p></div>`;
+  }
+}
+
+document.getElementById('sniperCheck').onclick = ()=>{
+  const name = document.getElementById('sniperName').value.trim();
+  checkUsernameOnce(name);
+};
+document.getElementById('sniperAuto').onclick = ()=>{
+  const btn = document.getElementById('sniperAuto');
+  const name = document.getElementById('sniperName').value.trim();
+  if(sniperTimer){
+    clearInterval(sniperTimer);sniperTimer=null;
+    btn.textContent='Start Auto Check (60s)';
+    return;
+  }
+  if(!name){alert('Enter a username first');return;}
+  btn.textContent='Stop Auto Check';
+  checkUsernameOnce(name);
+  sniperTimer = setInterval(()=>checkUsernameOnce(name),60000);
 };
 </script>
 </body>
