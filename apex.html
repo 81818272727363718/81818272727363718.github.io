@@ -171,3 +171,651 @@
         border-radius: 999px;
         padding: 7px 16px;
         border: none;
+        font-size: 13px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: transform var(--transition), box-shadow var(--transition), background var(--transition), opacity var(--transition);
+    }
+
+    .btn-primary {
+        background: radial-gradient(circle at 10% 0%, #38bdf8, #2563eb);
+        color: white;
+        box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35), 0 10px 25px rgba(37, 99, 235, 0.55);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 32px rgba(37, 99, 235, 0.8);
+    }
+
+    .btn-ghost {
+        background: rgba(15, 23, 42, 0.9);
+        color: var(--text-muted);
+        box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.4);
+    }
+
+    .btn-ghost:hover {
+        background: rgba(30, 64, 175, 0.35);
+        color: var(--accent);
+        box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.6);
+    }
+
+    button:disabled {
+        opacity: 0.6;
+        cursor: default;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .pill {
+        padding: 3px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        background: var(--accent-soft);
+        color: var(--accent);
+    }
+
+    .warning {
+        margin-top: 6px;
+        font-size: 11px;
+        color: var(--danger);
+    }
+
+    /* ====== OUTPUT LAYOUT ====== */
+    .outputs {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+        gap: 14px;
+        align-items: flex-start;
+    }
+
+    @media (max-width: 900px) {
+        .outputs {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .card {
+        background: var(--card);
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(148, 163, 184, 0.45);
+        box-shadow: var(--shadow-soft);
+        padding: 12px 12px 10px;
+        backdrop-filter: blur(16px);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.14), transparent 55%);
+        opacity: 0.7;
+        pointer-events: none;
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 6px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .card-title {
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .card-title span {
+        font-size: 11px;
+        font-weight: 400;
+        color: var(--text-muted);
+    }
+
+    .card-body {
+        position: relative;
+        z-index: 1;
+    }
+
+    .section-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    @media (max-width: 780px) {
+        .section-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .json-box {
+        background: rgba(15, 23, 42, 0.9);
+        border-radius: 10px;
+        padding: 8px;
+        font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 11px;
+        max-height: 260px;
+        overflow: auto;
+        border: 1px solid rgba(30, 64, 175, 0.7);
+        line-height: 1.4;
+        white-space: pre;
+    }
+
+    .placeholder {
+        font-size: 11px;
+        color: var(--text-muted);
+    }
+
+    .pill-outline {
+        padding: 2px 7px;
+        border-radius: 999px;
+        font-size: 10px;
+        border: 1px solid rgba(148, 163, 184, 0.5);
+        color: var(--text-muted);
+    }
+
+    .status-good {
+        color: #4ade80;
+    }
+
+    .status-bad {
+        color: #f97373;
+    }
+
+    .status-warn {
+        color: #facc15;
+    }
+
+    .muted-link {
+        font-size: 11px;
+        color: var(--text-muted);
+        text-decoration: none;
+    }
+
+    .muted-link:hover {
+        color: var(--accent);
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+        border: 2px solid rgba(148, 163, 184, 0.55);
+        border-top-color: var(--accent);
+        animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .footer-note {
+        margin-top: 12px;
+        font-size: 11px;
+        color: var(--text-muted);
+        text-align: right;
+    }
+</style>
+</head>
+<body>
+<div class="app-shell">
+    <header>
+        <div>
+            <h1>Apex Legends API Dashboard</h1>
+            <p class="subtitle">
+                Client-side demo using the <strong>apexlegendsstatus.com (Mozambique)</strong> API.
+                Enter your API key and an Apex username to pull player stats, map rotation, crafting,
+                predator RP, news and server status.
+            </p>
+        </div>
+        <span class="tag">GitHub Pages compatible • Pure HTML + JS</span>
+    </header>
+
+    <!-- ====== INPUT PANEL ====== -->
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <div class="panel-title">API & Player Settings</div>
+                <div class="small-note">
+                    Your key is sent directly from the browser to <code>https://api.mozambiquehe.re</code>.
+                </div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div>
+                <label for="apiKey">API Key</label>
+                <input id="apiKey" type="password" placeholder="YOUR_API_KEY_FROM_apexlegendsstatus.com" />
+            </div>
+            <div>
+                <label for="playerName">Player Name</label>
+                <input id="playerName" type="text" placeholder="YourApexName" />
+            </div>
+            <div>
+                <label for="platform">Platform</label>
+                <select id="platform">
+                    <option value="PC">PC (Origin/Steam)</option>
+                    <option value="PS4">PlayStation</option>
+                    <option value="X1">Xbox</option>
+                    <option value="SWITCH">Switch</option>
+                </select>
+            </div>
+            <div>
+                <label for="lang">News Language</label>
+                <select id="lang">
+                    <option value="en-US">en-US</option>
+                    <option value="fr-FR">fr-FR</option>
+                    <option value="de-DE">de-DE</option>
+                    <option value="es-ES">es-ES</option>
+                    <option value="ja-JP">ja-JP</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="btn-row">
+            <div class="btn-group">
+                <button id="btnFetchAll" class="btn-primary">
+                    <span id="btnFetchAllLabel">Fetch ALL Data</span>
+                    <span id="btnSpinner" class="spinner" style="display:none;"></span>
+                </button>
+                <button id="btnClear" class="btn-ghost">Clear output</button>
+            </div>
+            <span class="pill">Demo only – API key is visible in the browser</span>
+        </div>
+
+        <div class="warning">
+            ⚠ Never use a production / secret key in front-end code. For a real project, put this behind your own backend.
+        </div>
+    </section>
+
+    <!-- ====== OUTPUTS ====== -->
+    <section class="outputs">
+        <!-- LEFT COLUMN -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    Player & Ranked
+                    <span id="playerSummary">Waiting for request…</span>
+                </div>
+                <span id="uidBadge" class="pill-outline">UID: ?</span>
+            </div>
+            <div class="card-body section-row">
+                <div>
+                    <div class="small-note">Player Stats (bridge)</div>
+                    <div id="playerStats" class="json-box placeholder">
+                        No data yet. Press “Fetch ALL Data”.
+                    </div>
+                </div>
+                <div>
+                    <div class="small-note">Predator & Masters (predator)</div>
+                    <div id="predator" class="json-box placeholder">
+                        No data yet.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    Live Game Info
+                    <span id="statusSummary">Waiting for request…</span>
+                </div>
+                <span id="serverStatusBadge" class="pill-outline">Status: ?</span>
+            </div>
+            <div class="card-body section-row">
+                <div>
+                    <div class="small-note">Map Rotation (maprotation)</div>
+                    <div id="mapRotation" class="json-box placeholder">
+                        No data yet.
+                    </div>
+                </div>
+                <div>
+                    <div class="small-note">Crafting Rotation (crafting)</div>
+                    <div id="crafting" class="json-box placeholder">
+                        No data yet.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECOND ROW -->
+    <section class="section-row" style="margin-top:14px;">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    News (news)
+                    <span class="small-note">Lang: <span id="newsLangLabel">en-US</span></span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="news" class="json-box placeholder">
+                    No data yet.
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    Server Status (servers)
+                    <span id="serverQuickStatus" class="small-note">No data yet.</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="servers" class="json-box placeholder">
+                    No data yet.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="footer-note">
+        Data provided by
+        <a class="muted-link" href="https://apexlegendsstatus.com" target="_blank" rel="noopener noreferrer">
+            apexlegendsstatus.com
+        </a>
+        (Mozambique API).
+    </div>
+</div>
+
+<script>
+    const apiBase = "https://api.mozambiquehe.re";
+
+    const el = (id) => document.getElementById(id);
+
+    const apiKeyInput = el("apiKey");
+    const playerInput = el("playerName");
+    const platformSelect = el("platform");
+    const langSelect = el("lang");
+
+    const btnFetchAll = el("btnFetchAll");
+    const btnFetchAllLabel = el("btnFetchAllLabel");
+    const btnSpinner = el("btnSpinner");
+    const btnClear = el("btnClear");
+
+    const playerStatsBox = el("playerStats");
+    const predatorBox = el("predator");
+    const mapRotationBox = el("mapRotation");
+    const craftingBox = el("crafting");
+    const newsBox = el("news");
+    const serversBox = el("servers");
+
+    const uidBadge = el("uidBadge");
+    const playerSummary = el("playerSummary");
+    const statusSummary = el("statusSummary");
+    const serverStatusBadge = el("serverStatusBadge");
+    const serverQuickStatus = el("serverQuickStatus");
+    const newsLangLabel = el("newsLangLabel");
+
+    function setLoading(isLoading) {
+        btnFetchAll.disabled = isLoading;
+        btnSpinner.style.display = isLoading ? "inline-block" : "none";
+        btnFetchAllLabel.textContent = isLoading ? "Fetching..." : "Fetch ALL Data";
+    }
+
+    function prettyJson(obj) {
+        try {
+            return JSON.stringify(obj, null, 2);
+        } catch (e) {
+            return String(obj);
+        }
+    }
+
+    function setBox(box, data, emptyMsg) {
+        box.classList.remove("placeholder");
+        if (!data) {
+            box.textContent = emptyMsg;
+            return;
+        }
+        box.textContent = prettyJson(data);
+    }
+
+    function setError(box, msg) {
+        box.classList.remove("placeholder");
+        box.innerHTML = "[Error]\\n" + msg;
+    }
+
+    async function safeFetch(url) {
+        const res = await fetch(url);
+        const text = await res.text();
+        let json;
+        try {
+            json = JSON.parse(text);
+        } catch (e) {
+            throw new Error("Non-JSON response (" + res.status + "): " + text.slice(0, 200));
+        }
+        if (!res.ok) {
+            const msg = json && json.Error ? json.Error : ("HTTP " + res.status);
+            throw new Error(msg);
+        }
+        if (json.Error) {
+            throw new Error(json.Error);
+        }
+        return json;
+    }
+
+    async function fetchAll() {
+        const key = apiKeyInput.value.trim();
+        const playerName = playerInput.value.trim();
+        const platform = platformSelect.value;
+        const lang = langSelect.value;
+
+        if (!key) {
+            alert("Enter your Apex Legends API key first.");
+            apiKeyInput.focus();
+            return;
+        }
+
+        setLoading(true);
+        newsLangLabel.textContent = lang;
+
+        // Reset summary labels
+        playerSummary.textContent = "Fetching…";
+        statusSummary.textContent = "Fetching…";
+        uidBadge.textContent = "UID: ?";
+        serverStatusBadge.textContent = "Status: ?";
+        serverQuickStatus.textContent = "Fetching…";
+
+        // Clear boxes
+        setBox(playerStatsBox, null, "Fetching player stats…");
+        setBox(predatorBox, null, "Fetching predator info…");
+        setBox(mapRotationBox, null, "Fetching map rotation…");
+        setBox(craftingBox, null, "Fetching crafting rotation…");
+        setBox(newsBox, null, "Fetching latest news…");
+        setBox(serversBox, null, "Fetching server status…");
+
+        try {
+            let uid = null;
+            let bridgeData = null;
+
+            if (playerName) {
+                // 1) Name to UID
+                const nameToUidUrl =
+                    apiBase +
+                    "/nametouid?auth=" + encodeURIComponent(key) +
+                    "&player=" + encodeURIComponent(playerName) +
+                    "&platform=" + encodeURIComponent(platform);
+
+                const uidResult = await safeFetch(nameToUidUrl);
+                // The API returns an object with "uid" or a list. Try both patterns.
+                if (Array.isArray(uidResult) && uidResult.length > 0 && uidResult[0].uid) {
+                    uid = uidResult[0].uid;
+                } else if (uidResult && uidResult.uid) {
+                    uid = uidResult.uid;
+                }
+
+                if (!uid) {
+                    throw new Error("Could not get UID for player. Check name/platform.");
+                }
+
+                uidBadge.textContent = "UID: " + uid;
+
+                // 2) Bridge stats
+                const bridgeUrl =
+                    apiBase +
+                    "/bridge?auth=" + encodeURIComponent(key) +
+                    "&uid=" + encodeURIComponent(uid) +
+                    "&platform=" + encodeURIComponent(platform);
+
+                bridgeData = await safeFetch(bridgeUrl);
+                setBox(playerStatsBox, bridgeData, "No player data returned.");
+
+                const global = bridgeData && bridgeData.global ? bridgeData.global : null;
+                const name = global && global.name ? global.name : playerName;
+                const level = global && global.level != null ? global.level : "?";
+                const rank = global && global.rank && global.rank.rankName ? global.rank.rankName : "Unknown rank";
+
+                playerSummary.textContent = name + " • Lv " + level + " • " + rank;
+            } else {
+                playerSummary.textContent = "No player name provided.";
+                setBox(playerStatsBox, null, "Enter a player name to load stats (optional).");
+            }
+
+            // Other endpoints in parallel
+            const promises = [];
+
+            const predatorUrl = apiBase + "/predator?auth=" + encodeURIComponent(key);
+            promises.push(
+                safeFetch(predatorUrl)
+                    .then((data) => {
+                        setBox(predatorBox, data, "No predator data.");
+                    })
+                    .catch((err) => {
+                        setError(predatorBox, err.message);
+                    })
+            );
+
+            const mapUrl =
+                apiBase +
+                "/maprotation?auth=" + encodeURIComponent(key) +
+                "&version=2";
+            promises.push(
+                safeFetch(mapUrl)
+                    .then((data) => {
+                        setBox(mapRotationBox, data, "No map rotation data.");
+                    })
+                    .catch((err) => {
+                        setError(mapRotationBox, err.message);
+                    })
+            );
+
+            const craftingUrl = apiBase + "/crafting?auth=" + encodeURIComponent(key);
+            promises.push(
+                safeFetch(craftingUrl)
+                    .then((data) => {
+                        setBox(craftingBox, data, "No crafting data.");
+                    })
+                    .catch((err) => {
+                        setError(craftingBox, err.message);
+                    })
+            );
+
+            const newsUrl =
+                apiBase +
+                "/news?auth=" + encodeURIComponent(key) +
+                "&lang=" + encodeURIComponent(lang);
+            promises.push(
+                safeFetch(newsUrl)
+                    .then((data) => {
+                        setBox(newsBox, data, "No news data.");
+                    })
+                    .catch((err) => {
+                        setError(newsBox, err.message);
+                    })
+            );
+
+            const serverUrl = apiBase + "/servers?auth=" + encodeURIComponent(key);
+            promises.push(
+                safeFetch(serverUrl)
+                    .then((data) => {
+                        setBox(serversBox, data, "No server data.");
+
+                        // Try to summarise a quick status line from PC / EU-West / origin_login etc.
+                        const pc = data && data.EA_novafusion && data.EA_novafusion["EU-West"];
+                        const status = pc && pc.Status ? pc.Status : "Unknown";
+                        const responseTime = pc && pc.ResponseTime != null ? pc.ResponseTime + "ms" : "n/a";
+
+                        serverQuickStatus.textContent = "PC EU-West: " + status + " • " + responseTime;
+                        if (status.toLowerCase().includes("up") || status.toLowerCase().includes("online")) {
+                            serverStatusBadge.textContent = "Status: OK";
+                            serverStatusBadge.classList.add("status-good");
+                        } else if (status.toLowerCase().includes("slow") || status.toLowerCase().includes("degraded")) {
+                            serverStatusBadge.textContent = "Status: Issues";
+                            serverStatusBadge.classList.add("status-warn");
+                        } else {
+                            serverStatusBadge.textContent = "Status: Unknown";
+                            serverStatusBadge.classList.add("status-bad");
+                        }
+
+                        statusSummary.textContent = "Server data loaded.";
+                    })
+                    .catch((err) => {
+                        setError(serversBox, err.message);
+                        serverQuickStatus.textContent = "Error loading server status.";
+                        serverStatusBadge.textContent = "Status: Error";
+                        serverStatusBadge.classList.add("status-bad");
+                        statusSummary.textContent = "Server request failed.";
+                    })
+            );
+
+            await Promise.all(promises);
+        } catch (err) {
+            console.error(err);
+            setError(playerStatsBox, err.message);
+            playerSummary.textContent = "Error: " + err.message;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    function clearAll() {
+        playerSummary.textContent = "Waiting for request…";
+        statusSummary.textContent = "Waiting for request…";
+        uidBadge.textContent = "UID: ?";
+        serverStatusBadge.textContent = "Status: ?";
+        serverQuickStatus.textContent = "No data yet.";
+        newsLangLabel.textContent = langSelect.value;
+
+        setBox(playerStatsBox, null, "Cleared.");
+        setBox(predatorBox, null, "Cleared.");
+        setBox(mapRotationBox, null, "Cleared.");
+        setBox(craftingBox, null, "Cleared.");
+        setBox(newsBox, null, "Cleared.");
+        setBox(serversBox, null, "Cleared.");
+    }
+
+    btnFetchAll.addEventListener("click", (e) => {
+        e.preventDefault();
+        fetchAll();
+    });
+
+    btnClear.addEventListener("click", (e) => {
+        e.preventDefault();
+        clearAll();
+    });
+
+    // Allow Enter key on inputs to trigger fetch
+    [apiKeyInput, playerInput].forEach((input) => {
+        input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                fetchAll();
+            }
+        });
+    });
+</script>
+</body>
+</html>
