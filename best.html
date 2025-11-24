@@ -160,6 +160,21 @@
       font-size: 12px;
       letter-spacing: 0.1em;
     }
+    .chip {
+      padding: 8px 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+      pointer-events: auto;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+    .chip:hover { transform: translateY(-1px); border-color: rgba(110, 243, 255, 0.35); color: var(--accent); }
+    .chip strong { letter-spacing: 0.08em; }
   </style>
 </head>
 <body>
@@ -173,6 +188,10 @@
         <div class="stat">Shield <strong id="hp">100</strong></div>
         <div class="stat">Wave <strong id="wave">1</strong></div>
       </div>
+      <div id="music-toggle" class="chip" title="Toggle the streamed synthwave bed">
+        <strong>Music</strong>
+        <span id="music-status">Off</span>
+      </div>
       <div class="badge">PROTOTYPE</div>
     </div>
     <div class="bottom">
@@ -184,6 +203,7 @@
           <div><span>Pulse</span>: Space / Click (area blast)</div>
           <div><span>Survive</span>: Chain combos, grab power cells, avoid threats.</div>
           <div><span>Read</span>: Strikers dash, Weavers strafe, Bombers leave mines, Snipers fire beams.</div>
+          <div><span>Vibe</span>: Streamed synthwave soundtrack auto-plays when the match starts.</div>
         </div>
         <button id="cta">Start The Best Game</button>
       </div>
@@ -207,6 +227,8 @@
     const hpEl = document.getElementById('hp');
     const waveEl = document.getElementById('wave');
     const cta = document.getElementById('cta');
+    const musicToggle = document.getElementById('music-toggle');
+    const musicStatus = document.getElementById('music-status');
 
     let w = (canvas.width = innerWidth);
     let h = (canvas.height = innerHeight);
@@ -218,6 +240,12 @@
 
     const rand = (min, max) => Math.random() * (max - min) + min;
     const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+
+    const soundtrack = new Audio();
+    soundtrack.loop = true;
+    soundtrack.volume = 0.35;
+    let musicLoaded = false;
+    let musicLoading = false;
 
     class Particle {
       constructor(x, y, vx, vy, life, color, size = 2) {
@@ -530,6 +558,42 @@
     });
     addEventListener('keyup', (e) => keys.delete(e.code));
 
+    async function ensureMusic() {
+      if (musicLoaded && soundtrack.paused) {
+        soundtrack.play().catch(() => {});
+        musicStatus.textContent = 'On';
+        return;
+      }
+      if (musicLoaded || musicLoading) return;
+      musicLoading = true;
+      musicStatus.textContent = 'Loading';
+      try {
+        const res = await fetch('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
+        const blob = await res.blob();
+        soundtrack.src = URL.createObjectURL(blob);
+        musicLoaded = true;
+        musicStatus.textContent = 'On';
+        await soundtrack.play().catch(() => {});
+      } catch (err) {
+        console.error('music fetch failed', err);
+        musicStatus.textContent = 'Offline';
+      } finally {
+        musicLoading = false;
+      }
+    }
+
+    musicToggle.addEventListener('click', async () => {
+      await ensureMusic();
+      if (!musicLoaded) return;
+      if (soundtrack.paused) {
+        soundtrack.play().catch(() => {});
+        musicStatus.textContent = 'On';
+      } else {
+        soundtrack.pause();
+        musicStatus.textContent = 'Off';
+      }
+    });
+
     cta.addEventListener('click', start);
 
     function start() {
@@ -538,6 +602,7 @@
       enemies.length = 0; particles.length = 0; pulses.length = 0; powerups.length = 0; projectiles.length = 0; hazards.length = 0;
       spawnTimer = 0; waveTimer = 0; last = performance.now();
       pointer.x = w / 2; pointer.y = h / 2;
+      ensureMusic();
     }
 
     function spawnEnemies(dt) {
