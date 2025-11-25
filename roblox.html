@@ -1,245 +1,246 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Roblox Information Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roblox Info Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0c1018;
-  --card:#111724;
-  --border:#1f2735;
-  --accent:#8ac6ff;
-  --accent-strong:#3ea6ff;
-  --text:#e6ecf3;
-  --muted:#9aa6b5;
+  --bg:#0d1117;
+  --panel:#0f1623;
+  --surface:#121b2b;
+  --border:#1f2a3d;
+  --muted:#96a3b8;
+  --text:#e8eef6;
+  --accent:#6dd0ff;
+  --accent-2:#9cf0c9;
+  --shadow:0 18px 48px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box}
 body{
   margin:0;
-  font-family:"Inter", system-ui, sans-serif;
-  background:linear-gradient(180deg,#0b0f18 0%,#0c1018 30%,#0a0f18 100%);
+  font-family:"Inter", system-ui, -apple-system, sans-serif;
+  background:radial-gradient(circle at 20% 20%, rgba(109,208,255,.12), transparent 32%),
+             radial-gradient(circle at 80% 30%, rgba(156,240,201,.12), transparent 32%),
+             linear-gradient(180deg,#0b0f16 0%,#0d1117 55%,#0a0e15 100%);
   color:var(--text);
-  padding:28px 16px 48px;
+  min-height:100vh;
 }
-h1{
-  text-align:center;
-  letter-spacing:0.6px;
-  font-weight:800;
-  margin:6px 0 20px;
-  color:#f4f7fb;
-}
-h2{margin:6px 0 10px}
-nav{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  justify-content:center;
-  margin-bottom:18px;
-}
+h1{margin:0;font-size:28px;letter-spacing:0.3px}
+h2{margin:0 0 6px;font-size:18px}
+h3{margin:0 0 6px;font-size:16px}
+p{margin:6px 0 10px}
 button{
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:linear-gradient(180deg,#1b2433 0%,#131a28 100%);
-  color:var(--text);
-  padding:10px 16px;
-  cursor:pointer;
-  font-weight:700;
-  font-size:13px;
-  transition:all .15s ease;
-}
-button:hover,button.active{
-  border-color:var(--accent-strong);
-  color:#fff;
-  box-shadow:0 8px 22px rgba(62,166,255,.18);
-}
-input,textarea,select{
-  background:#0f1623;
-  border:1px solid var(--border);
-  color:var(--text);
-  border-radius:10px;
-  padding:10px 11px;
-}
-textarea{width:100%;min-height:120px;resize:vertical}
-.controls{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  margin:12px 0;
-}
-.controls input,.controls select{flex:1;min-width:200px}
-.section{
-  display:none;
-  background:#0f1521;
-  border-radius:18px;
-  padding:16px;
-  border:1px solid var(--border);
-  box-shadow:0 16px 40px rgba(0,0,0,.35);
-}
-.section.active{display:block}
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-  gap:12px;
-  margin-top:10px;
-}
-.card{
-  background:var(--card);
-  border-radius:14px;
-  padding:12px;
-  border:1px solid var(--border);
-  box-shadow:0 12px 30px rgba(0,0,0,.3);
-}
-.tag{
-  display:inline-block;
-  padding:3px 10px;
-  border-radius:999px;
-  font-size:11px;
-  border:1px solid var(--border);
-  color:var(--muted);
-  margin-bottom:6px;
-}
-#suggestionsList{
-  display:none;
-  position:absolute;
-  background:#0b101a;
-  border:1px solid var(--border);
-  border-radius:10px;
-  margin-top:2px;
-  width:100%;
-  z-index:30;
-  max-height:220px;
-  overflow:auto;
-}
-.suggestion-item{
-  padding:8px 9px;
-  cursor:pointer;
-  font-size:13px;
-}
-.suggestion-item:hover{background:#121a26}
-#loadingOverlay{
-  position:fixed;inset:0;
-  background:rgba(0,0,0,.55);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:200;
-}
-.spinner{
-  width:60px;height:60px;
-  border-radius:50%;
-  border:4px solid rgba(255,255,255,.12);
-  border-top-color:var(--accent-strong);
-  animation:spin .7s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-#popupOverlay{
-  position:fixed;inset:0;
-  background:rgba(0,0,0,.6);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:150;
-}
-.popup{
-  background:#0f1722;
   border-radius:12px;
   border:1px solid var(--border);
-  padding:12px;
-  width:92%;
-  max-width:520px;
-  max-height:80vh;
-  overflow:auto;
-}
-.popup-item{
-  padding:6px 4px;
-  border-bottom:1px solid #151a2a;
-  font-size:13px;
+  background:linear-gradient(180deg,#1b2434 0%,#131a28 100%);
+  color:var(--text);
+  padding:10px 14px;
+  font-weight:700;
   cursor:pointer;
+  transition:all .12s ease;
 }
-.popup-item:hover{color:var(--accent-strong)}
-table{
+button:hover,button.active{
+  border-color:var(--accent);
+  box-shadow:0 10px 24px rgba(109,208,255,.18);
+}
+input,textarea,select{
   width:100%;
-  border-collapse:collapse;
-  font-size:13px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:12px;
+  padding:12px 12px;
 }
-th,td{
-  border-bottom:1px solid rgba(230,237,243,.08);
-  padding:5px 6px;
-  text-align:left;
+textarea{min-height:120px;resize:vertical}
+.page{
+  max-width:1200px;
+  margin:0 auto;
+  padding:28px 16px 48px;
 }
-.badge-pill{
-  display:inline-block;
-  padding:2px 8px;
+.hero{
+  display:flex;
+  justify-content:space-between;
+  gap:14px;
+  align-items:flex-start;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:16px 18px;
+  box-shadow:var(--shadow);
+}
+.hero small{color:var(--muted)}
+.hero-pill{
+  display:inline-flex;
+  gap:8px;
+  align-items:center;
+  padding:6px 10px;
   border-radius:999px;
-  font-size:11px;
-  margin-right:4px;
+  background:rgba(109,208,255,.12);
+  color:var(--accent);
+  font-weight:700;
+  font-size:12px;
 }
+.layout{
+  display:grid;
+  grid-template-columns:270px 1fr;
+  gap:16px;
+  margin-top:16px;
+}
+@media(max-width:900px){.layout{grid-template-columns:1fr}}
+.sidebar{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:18px;
+  box-shadow:var(--shadow);
+  padding:12px;
+  position:sticky;
+  top:12px;
+  height:fit-content;
+}
+.side-card{
+  background:var(--surface);
+  border:1px dashed rgba(150,163,184,.4);
+  border-radius:14px;
+  padding:12px;
+  margin-bottom:10px;
+}
+.nav-list{display:flex;flex-direction:column;gap:8px;margin:10px 0 4px}
+.nav-btn{width:100%;text-align:left;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.nav-note{color:var(--muted);font-size:12px;line-height:1.5}
+.content{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.section{
+  display:none;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:16px;
+  box-shadow:var(--shadow);
+}
+.section.active{display:block}
+.section-lede{color:var(--muted);margin-top:0}
+.block-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:12px}
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px;
+  box-shadow:0 12px 30px rgba(0,0,0,.28);
+}
+.stack{display:flex;flex-direction:column;gap:10px}
+.controls{display:flex;flex-wrap:wrap;gap:10px;position:relative}
+.controls .field{flex:1;min-width:220px}
+.tag{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid var(--border);color:var(--muted);font-size:12px;margin-right:6px}
+.muted{color:var(--muted);font-size:13px}
+.small{font-size:12px;color:var(--muted)}
+.avatar-wrap{width:140px;height:140px;border-radius:16px;overflow:hidden;background:#0e1530;border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
+.avatar-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.profile-head{display:flex;gap:12px;flex-wrap:wrap}
+.table{width:100%;border-collapse:collapse;font-size:13px}
+.table th,.table td{border-bottom:1px solid rgba(230,237,243,.08);padding:6px 6px;text-align:left}
+.badge-pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;margin-right:4px}
 .badge-ok{background:rgba(0,255,140,.08);border:1px solid rgba(0,255,140,.5)}
 .badge-warn{background:rgba(255,180,0,.08);border:1px solid rgba(255,200,0,.6)}
 .badge-bad{background:rgba(255,40,100,.08);border:1px solid rgba(255,60,140,.7)}
 .outfit-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px}
-.outfit-card{
-  min-width:130px;
-  background:#0b111b;
-  border-radius:10px;
-  padding:6px;
-  border:1px solid var(--border);
-  text-align:center;
-  font-size:12px;
-}
+.outfit-card{min-width:130px;background:#0b111b;border-radius:10px;padding:6px;border:1px solid var(--border);text-align:center;font-size:12px}
 .outfit-card img{width:100%;border-radius:8px;display:block}
-.small{font-size:12px;opacity:.85}
-.profile-head{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-.avatar-wrap{width:140px;height:140px;border-radius:16px;overflow:hidden;background:#0e1530;border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
-.avatar-wrap img{width:100%;height:100%;object-fit:cover;display:block}
-.badge-graph-wrap{margin-top:12px}
-.muted{color:var(--muted)}
+#suggestionsList{display:none;position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-top:2px;width:100%;z-index:30;max-height:220px;overflow:auto}
+.suggestion-item{padding:8px 9px;cursor:pointer;font-size:13px}
+.suggestion-item:hover{background:#141c2a}
+#loadingOverlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:200}
+.spinner{width:60px;height:60px;border-radius:50%;border:4px solid rgba(255,255,255,.12);border-top-color:var(--accent);animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#popupOverlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:150}
+.popup{background:var(--panel);border-radius:12px;border:1px solid var(--border);padding:12px;width:92%;max-width:520px;max-height:80vh;overflow:auto}
+.popup-item{padding:6px 4px;border-bottom:1px solid #151a2a;font-size:13px;cursor:pointer}
+.popup-item:hover{color:var(--accent)}
 </style>
 </head>
 <body>
-<h1>Roblox Information Dashboard</h1>
-
-<nav>
-  <button data-section="profile" class="active">Profile</button>
-  <button data-section="gameinfo">Game Info</button>
-  <button data-section="avatar">Avatar Evolution</button>
-</nav>
-
-<!-- PROFILE SECTION -->
-<section id="profile" class="section active">
-  <h2>Profile / Friends / Groups / Badges</h2>
-  <div class="controls" style="position:relative">
-    <input id="rbxUser" placeholder="Roblox username">
-    <button id="rbxFetch">Fetch Profile</button>
-    <div id="suggestionsList"></div>
+<div class="page">
+  <div class="hero">
+    <div>
+      <h1>Roblox Info Hub</h1>
+      <p class="muted">Quickly look up player profiles, awarded badges, game details, and outfit history in one page.</p>
+    </div>
+    <div class="hero-pill">Navigation made simple</div>
   </div>
-  <div id="rbxResults" class="grid"></div>
-  <div id="badgeSummaryArea" class="badge-graph-wrap"></div>
-</section>
 
-<!-- GAME INFO -->
-<section id="gameinfo" class="section">
-  <h2>Game Info (Game ID → Details)</h2>
-  <p class="small">Enter a game (universe) ID to see title, creator, player counts, visits, favorites, and vote ratios.</p>
-  <div class="controls">
-    <input id="giGameId" placeholder="Game ID (e.g. 606849621)">
-    <button id="giLoad">Get Info</button>
-  </div>
-  <div id="giResult" class="card"></div>
-</section>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="side-card">
+        <h3>Go to tool</h3>
+        <div class="nav-list">
+          <button class="nav-btn active" data-section="profile">Profile lookup <span>→</span></button>
+          <button class="nav-btn" data-section="gameinfo">Game info by ID <span>→</span></button>
+          <button class="nav-btn" data-section="avatar">Avatar outfits <span>→</span></button>
+        </div>
+        <div class="nav-note">Pick a tool to load its panel. Each section explains the input it needs and shows results below.</div>
+      </div>
+      <div class="side-card">
+        <h3>Tips</h3>
+        <ul class="small" style="padding-left:18px;margin:6px 0 0">
+          <li>Use exact usernames for profiles and outfits.</li>
+          <li>Game Info expects a universe ID (not place ID).</li>
+          <li>Badge award dates load on demand to stay fast.</li>
+        </ul>
+      </div>
+    </aside>
 
-<!-- AVATAR EVOLUTION -->
-<section id="avatar" class="section">
-  <h2>Avatar Evolution (Saved Outfits)</h2>
-  <p class="small">Loads saved outfits via avatar API (public via roproxy) and shows thumbnails from Roblox thumbnails API.</p>
-  <div class="controls">
-    <input id="avUser" placeholder="Username">
-    <button id="avLoad">Load Outfits</button>
+    <main class="content">
+      <section id="profile" class="section active">
+        <div class="stack">
+          <div>
+            <h2>Profile / Friends / Groups / Badges</h2>
+            <p class="section-lede">Search a player by username. You can preview the avatar, browse friends and groups, and load badge award dates when needed.</p>
+          </div>
+          <div class="controls">
+            <div class="field"><input id="rbxUser" placeholder="Roblox username"></div>
+            <button id="rbxFetch">Fetch profile</button>
+            <div id="suggestionsList"></div>
+          </div>
+          <div id="rbxResults" class="block-grid"></div>
+          <div id="badgeSummaryArea" class="stack"></div>
+        </div>
+      </section>
+
+      <section id="gameinfo" class="section">
+        <div class="stack">
+          <div>
+            <h2>Game Info (Universe ID)</h2>
+            <p class="section-lede">Enter a universe ID to see creator, genre, engagement stats, and vote ratios. This replaces the old game tracker.</p>
+          </div>
+          <div class="controls">
+            <div class="field"><input id="giGameId" placeholder="Game ID (e.g. 606849621)"></div>
+            <button id="giLoad">Get info</button>
+          </div>
+          <div id="giResult" class="card"></div>
+        </div>
+      </section>
+
+      <section id="avatar" class="section">
+        <div class="stack">
+          <div>
+            <h2>Avatar Evolution (Saved Outfits)</h2>
+            <p class="section-lede">Look up a player to see their saved outfits and thumbnails. Great for comparing avatar changes over time.</p>
+          </div>
+          <div class="controls">
+            <div class="field"><input id="avUser" placeholder="Username"></div>
+            <button id="avLoad">Load outfits</button>
+          </div>
+          <div id="avResult" class="stack"></div>
+        </div>
+      </section>
+    </main>
   </div>
-  <div id="avResult" style="margin-top:12px"></div>
-</section>
+</div>
 
 <!-- POPUP -->
 <div id="popupOverlay">
@@ -270,12 +271,12 @@ async function tryMulti(urls,opts){
 }
 
 // ---------- section nav ----------
-document.querySelectorAll('nav button').forEach(btn=>{
+document.querySelectorAll('.nav-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     const id = btn.dataset.section;
     document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
-    document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b===btn));
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b===btn));
   });
 });
 
@@ -326,7 +327,6 @@ async function lookupUser(name){
   throw new Error('Unable to reach Roblox user services.');
 }
 
-// separate: get full profile by id
 async function getUserProfile(id){
   return await tryMulti([
     `https://users.roproxy.com/v1/users/${id}`,
@@ -406,7 +406,7 @@ async function renderProfile(username){
     `;
 
     const avatarBtn = document.createElement('button');
-    avatarBtn.textContent = 'Show Avatar';
+    avatarBtn.textContent = 'Show avatar';
     avatarBtn.style.marginTop = '10px';
     avatarBtn.onclick = ()=>loadAvatar(id, profile.name);
     profileCard.appendChild(avatarBtn);
@@ -415,10 +415,10 @@ async function renderProfile(username){
     function makeCard(title,body,list,onClickName){
       const c = document.createElement('div');
       c.className='card';
-      c.innerHTML = `<h3>${title}</h3><p>${body}</p>`;
+      c.innerHTML = `<h3>${title}</h3><p class="muted">${body}</p>`;
       if(list && list.length){
         const btn = document.createElement('button');
-        btn.textContent='Show All';
+        btn.textContent='Show all';
         btn.onclick=()=>showPopup(title,list,onClickName);
         c.appendChild(btn);
       }
@@ -433,9 +433,9 @@ async function renderProfile(username){
     badgeArea.innerHTML = '';
     const prompt = document.createElement('div');
     prompt.className='card';
-    prompt.innerHTML = '<h3>Badge Award Dates</h3><p class="small">Load this user\'s badges to see the most recent award dates without plotting a graph.</p>';
+    prompt.innerHTML = '<h3>Badge award dates</h3><p class="muted">Load this user\'s badges to see the most recent award dates without plotting a graph.</p>';
     const badgeBtn = document.createElement('button');
-    badgeBtn.textContent = 'Load Badge Award Dates';
+    badgeBtn.textContent = 'Load badge award dates';
     badgeBtn.onclick = ()=>loadBadgeAwards(id, profile.displayName || username);
     prompt.appendChild(badgeBtn);
     badgeArea.appendChild(prompt);
@@ -462,7 +462,7 @@ async function loadAvatar(id, username){
   }
 }
 
-// ---------- badges (awards + graph from profile) ----------
+// ---------- badges ----------
 async function fetchAllBadges(userId){
   let cursor = null;
   const badges = [];
@@ -488,10 +488,10 @@ async function fetchAllBadges(userId){
 function renderBadgeAwards(target, badges, username){
   const card = document.createElement('div');
   card.className='card';
-  card.innerHTML = '<h3>Badge Award Dates</h3>';
+  card.innerHTML = '<h3>Badge award dates</h3>';
   const dated = badges.filter(b=>b.awardedDate).sort((a,b)=>new Date(b.awardedDate)-new Date(a.awardedDate));
   if(!dated.length){
-    card.innerHTML += `<p class="small">No award dates were returned for ${username}'s badges.</p>`;
+    card.innerHTML += `<p class="muted">No award dates were returned for ${username}'s badges.</p>`;
     target.appendChild(card);
     return;
   }
@@ -503,6 +503,7 @@ function renderBadgeAwards(target, badges, username){
   card.appendChild(summary);
 
   const table = document.createElement('table');
+  table.className='table';
   table.innerHTML = '<tr><th style="width:60%">Badge</th><th>Awarded</th></tr>' +
     dated.slice(0,12).map(b=>`<tr><td>${b.name}</td><td>${new Date(b.awardedDate).toLocaleString()}</td></tr>`).join('');
   card.appendChild(table);
@@ -512,7 +513,7 @@ function renderBadgeAwards(target, badges, username){
 async function loadBadgeAwards(userId, username){
   const target = document.getElementById('badgeSummaryArea');
   if(!target) return;
-  target.innerHTML = '<div class="card"><h3>Badge Award Dates</h3><p class="small">Fetching badge awards...</p></div>';
+  target.innerHTML = '<div class="card"><h3>Badge award dates</h3><p class="muted">Fetching badge awards...</p></div>';
   setLoading(true);
   try{
     const fullBadges = await fetchAllBadges(userId);
@@ -520,14 +521,14 @@ async function loadBadgeAwards(userId, username){
     if(!fullBadges.length){
       const emptyCard = document.createElement('div');
       emptyCard.className='card';
-      emptyCard.innerHTML = `<h3>Badge Award Dates</h3><p class="small">No public badges available for ${username}.</p>`;
+      emptyCard.innerHTML = `<h3>Badge award dates</h3><p class="muted">No public badges available for ${username}.</p>`;
       target.appendChild(emptyCard);
       setLoading(false);
       return;
     }
     renderBadgeAwards(target, fullBadges, username);
   }catch(err){
-    target.innerHTML = `<div class="card"><h3>Badge Award Dates</h3><p class="small">Failed to load badge awards: ${err.message}</p></div>`;
+    target.innerHTML = `<div class="card"><h3>Badge award dates</h3><p class="muted">Failed to load badge awards: ${err.message}</p></div>`;
   }
   setLoading(false);
 }
@@ -562,19 +563,19 @@ async function loadGameInfo(){
     const fields = [
       {label:'Creator', value:`${game.creator?.name||'Unknown'} (ID: ${game.creator?.id||'—'})`},
       {label:'Genre', value:game.genre || 'Unknown'},
-      {label:'Playing Now', value:game.playing?.toLocaleString() || '0'},
-      {label:'Total Visits', value:game.visits?.toLocaleString() || '0'},
+      {label:'Playing now', value:game.playing?.toLocaleString() || '0'},
+      {label:'Total visits', value:game.visits?.toLocaleString() || '0'},
       {label:'Favorites', value:game.favoritedCount?.toLocaleString() || '0'},
-      {label:'Like Ratio', value:likeRatio}
+      {label:'Like ratio', value:likeRatio}
     ];
 
     const rows = fields.map(f=>`<tr><th style="width:140px">${f.label}</th><td>${f.value}</td></tr>`).join('');
 
     box.innerHTML = `
       <div class="card">
-        <h3>${game.name || 'Unknown Title'}</h3>
+        <h3>${game.name || 'Unknown title'}</h3>
         <p class="small">Game ID: ${gameId}</p>
-        <table>${rows}</table>
+        <table class="table">${rows}</table>
         <p class="small" style="margin-top:8px">Last updated: ${game.updated ? new Date(game.updated).toLocaleString() : 'Unknown'}</p>
         ${game.description ? `<p class="small">${game.description}</p>` : ''}
       </div>
