@@ -3,56 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Roblox Intelligence Toolkit</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Orbitron:wght@600&display=swap" rel="stylesheet">
+<title>Roblox Information Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#050612;
-  --card:#0b0f1f;
-  --accent:#00fff7;
-  --accent2:#ff2ed4;
+  --bg:#0d1117;
+  --card:#161b22;
+  --accent:#2d89ef;
+  --accent2:#7a6ff2;
 }
 *{box-sizing:border-box}
 body{
   margin:0;
   font-family:Inter,system-ui,sans-serif;
-  background:
-    radial-gradient(circle at 10% 0%,rgba(255,46,212,.18),transparent 45%),
-    radial-gradient(circle at 90% 100%,rgba(0,255,247,.25),transparent 45%),
-    var(--bg);
-  color:#e9faff;
-  padding:16px;
+  background:linear-gradient(145deg,rgba(22,27,34,0.94),rgba(13,17,23,0.94));
+  color:#e6edf3;
+  padding:24px 16px 36px;
 }
 h1{
   text-align:center;
-  font-family:Orbitron,sans-serif;
-  margin:6px 0 12px;
+  letter-spacing:0.8px;
+  font-weight:700;
+  margin:6px 0 18px;
 }
 nav{
   display:flex;
   flex-wrap:wrap;
   gap:8px;
   justify-content:center;
-  margin-bottom:16px;
+  margin-bottom:18px;
 }
 button{
-  border-radius:999px;
-  border:1px solid rgba(0,255,255,.4);
-  background:#0c1320;
-  color:#e9faff;
-  padding:8px 14px;
+  border-radius:10px;
+  border:1px solid rgba(45,137,239,.4);
+  background:#0f1722;
+  color:#e6edf3;
+  padding:9px 14px;
   cursor:pointer;
   font-weight:600;
   font-size:13px;
 }
 button:hover,button.active{
-  background:linear-gradient(135deg,rgba(0,255,255,.3),rgba(255,46,212,.4));
-  box-shadow:0 0 18px rgba(0,255,255,.4);
+  background:linear-gradient(135deg,rgba(45,137,239,.22),rgba(122,111,242,.35));
+  box-shadow:0 0 16px rgba(45,137,239,.35);
 }
 input,textarea,select{
-  background:#0c1020;
-  border:1px solid rgba(0,255,255,.35);
-  color:#fff;
+  background:#0f1722;
+  border:1px solid rgba(45,137,239,.35);
+  color:#e6edf3;
   border-radius:10px;
   padding:8px 10px;
 }
@@ -66,11 +64,11 @@ textarea{width:100%;min-height:120px;resize:vertical}
 .controls input,.controls select{flex:1;min-width:160px}
 .section{
   display:none;
-  background:rgba(0,0,0,.3);
+  background:rgba(0,0,0,.25);
   border-radius:14px;
   padding:14px;
-  border:1px solid rgba(255,255,255,.08);
-  box-shadow:0 18px 50px rgba(0,0,0,.55);
+  border:1px solid rgba(230,237,243,.08);
+  box-shadow:0 18px 38px rgba(0,0,0,.45);
 }
 .section.active{display:block}
 .grid{
@@ -83,7 +81,7 @@ textarea{width:100%;min-height:120px;resize:vertical}
   background:var(--card);
   border-radius:12px;
   padding:12px;
-  border:1px solid rgba(0,255,255,.28);
+  border:1px solid rgba(230,237,243,.06);
   box-shadow:0 0 18px rgba(0,0,0,.6);
 }
 .tag{
@@ -91,8 +89,8 @@ textarea{width:100%;min-height:120px;resize:vertical}
   padding:2px 10px;
   border-radius:999px;
   font-size:11px;
-  border:1px solid rgba(0,255,255,.4);
-  color:#9ffcff;
+  border:1px solid rgba(45,137,239,.45);
+  color:#b7d6ff;
   margin-bottom:4px;
 }
 #suggestionsList{
@@ -138,9 +136,9 @@ textarea{width:100%;min-height:120px;resize:vertical}
   z-index:150;
 }
 .popup{
-  background:#050814;
+  background:#0f1722;
   border-radius:12px;
-  border:1px solid rgba(0,255,255,.4);
+  border:1px solid rgba(45,137,239,.4);
   padding:12px;
   width:92%;
   max-width:520px;
@@ -160,7 +158,7 @@ table{
   font-size:13px;
 }
 th,td{
-  border-bottom:1px solid rgba(255,255,255,.06);
+  border-bottom:1px solid rgba(230,237,243,.06);
   padding:4px 6px;
   text-align:left;
 }
@@ -189,15 +187,13 @@ th,td{
 </style>
 </head>
 <body>
-<h1>ROBLOX INTELLIGENCE TOOLKIT</h1>
+<h1>Roblox Information Dashboard</h1>
 
 <nav>
   <button data-section="profile" class="active">Profile</button>
   <button data-section="badgeboard">Badge Leaderboard</button>
-  <button data-section="gametracker">Game Tracker</button>
-  <button data-section="alts">Alt Detector</button>
+  <button data-section="gameinfo">Game Info</button>
   <button data-section="avatar">Avatar Evolution</button>
-  <button data-section="deep">Deep Analytics</button>
 </nav>
 
 <!-- PROFILE SECTION -->
@@ -225,28 +221,15 @@ th,td{
   <div id="lbResult" style="margin-top:12px"></div>
 </section>
 
-<!-- GAME TRACKER -->
-<section id="gametracker" class="section">
-  <h2>Game Tracker (Place ID → Live Stats)</h2>
-  <p class="small">Uses Roblox place details + universe API to show name, creator, player count, visits, favorites and votes.</p>
+<!-- GAME INFO -->
+<section id="gameinfo" class="section">
+  <h2>Game Info (Game ID → Details)</h2>
+  <p class="small">Enter a game (universe) ID to see title, creator, player counts, visits, favorites, and vote ratios.</p>
   <div class="controls">
-    <input id="gtPlaceId" placeholder="Place ID (e.g. 1818)">
-    <button id="gtLoad">Load Game</button>
-    <button id="gtRefresh">Refresh</button>
+    <input id="giGameId" placeholder="Game ID (e.g. 606849621)">
+    <button id="giLoad">Get Info</button>
   </div>
-  <div id="gtResult" class="card"></div>
-</section>
-
-<!-- ALT DETECTOR -->
-<section id="alts" class="section">
-  <h2>Alt Detector (Advanced)</h2>
-  <p class="small">Compares account age, names, description, friends, groups, badges, and avatar assets. This is only an estimate, not proof.</p>
-  <div class="controls">
-    <input id="altUser1" placeholder="Main username">
-    <input id="altUser2" placeholder="Potential alt username">
-  </div>
-  <button id="altCheck">Compare</button>
-  <div id="altResult" style="margin-top:12px"></div>
+  <div id="giResult" class="card"></div>
 </section>
 
 <!-- AVATAR EVOLUTION -->
@@ -258,20 +241,6 @@ th,td{
     <button id="avLoad">Load Outfits</button>
   </div>
   <div id="avResult" style="margin-top:12px"></div>
-</section>
-
-<!-- DEEP ANALYTICS -->
-<section id="deep" class="section">
-  <h2>Deep Player Analytics (Fingerprint / Archetype / Uniqueness)</h2>
-  <p class="small">
-    Experimental lab combining multiple ideas: behavior fingerprint, uniqueness score, knowledge index, archetype / persona guess, and timeline signals.
-    All based only on public Roblox APIs – this is a best-effort estimate, not magic.
-  </p>
-  <div class="controls">
-    <input id="deepUser" placeholder="Username">
-    <button id="deepRun">Analyze</button>
-  </div>
-  <div id="deepResult" style="margin-top:12px"></div>
 </section>
 
 <!-- POPUP -->
@@ -485,234 +454,58 @@ document.getElementById('lbScan').onclick = async()=>{
   box.innerHTML=html;
 };
 
-// ---------- game tracker (using multiget-place-details + games API) ----------
-let lastGameDetails=null;
-document.getElementById('gtLoad').onclick = ()=>loadGameDetails(true);
-document.getElementById('gtRefresh').onclick = ()=>loadGameDetails(false);
+// ---------- game info (universe id) ----------
+document.getElementById('giLoad').onclick = ()=>loadGameInfo();
 
-async function loadGameDetails(reset){
-  const placeId = document.getElementById('gtPlaceId').value.trim();
-  const box = document.getElementById('gtResult');
-  if(!placeId){box.innerHTML='<div class="small">Enter a placeId first.</div>';return;}
-  box.innerHTML='<div class="small">Loading place + universe details...</div>';
+async function loadGameInfo(){
+  const gameId = document.getElementById('giGameId').value.trim();
+  const box = document.getElementById('giResult');
+  if(!gameId){box.innerHTML='<div class="small">Enter a game ID to continue.</div>';return;}
+
+  box.innerHTML='<div class="small">Fetching game details...</div>';
   setLoading(true);
   try{
-    const placeData = await tryMulti([
-      `https://games.roproxy.com/v1/games/multiget-place-details?placeIds=${placeId}`,
-      `https://games.rprxy.xyz/v1/games/multiget-place-details?placeIds=${placeId}`,
-      proxyWrap(`https://games.roblox.com/v1/games/multiget-place-details?placeIds=${placeId}`)
-    ]);
-    const place = placeData?.data?.[0];
-    if(!place){ throw new Error('Invalid placeId or no data'); }
-
-    const universeId = place.universeId;
-
     const gameData = await tryMulti([
-      `https://games.roproxy.com/v1/games?universeIds=${universeId}`,
-      `https://games.rprxy.xyz/v1/games?universeIds=${universeId}`,
-      proxyWrap(`https://games.roblox.com/v1/games?universeIds=${universeId}`)
+      `https://games.roproxy.com/v1/games?universeIds=${gameId}`,
+      `https://games.rprxy.xyz/v1/games?universeIds=${gameId}`,
+      proxyWrap(`https://games.roblox.com/v1/games?universeIds=${gameId}`)
     ]);
-    const game = gameData?.data?.[0] || {};
+    const game = gameData?.data?.[0];
+    if(!game) throw new Error('No data found for that game ID.');
 
-    const name = game.name || place.name || place.Name || 'Unknown';
-    const creatorName = game.creator?.name || place.builder || place.Builder || 'Unknown';
-    const creatorId = game.creator?.id || place.builderId || place.BuilderId || 'Unknown';
-    const playing = game.playing ?? place.playing ?? place.OnlineCount ?? 'Unknown';
-    const visits = game.visits ?? place.visits ?? place.VisitedCount ?? 0;
-    const favorites = game.favoritedCount ?? place.favoritedCount ?? place.FavoritedCount ?? 0;
-    const upVotes = game.upVotes ?? place.TotalUpVotes ?? 0;
-    const downVotes = game.downVotes ?? place.TotalDownVotes ?? 0;
-    const maxPlayers = game.maxPlayers ?? place.maxPlayers ?? place.MaxPlayers ?? '?';
-    const created = game.created || place.created || place.Created;
-    const updated = game.updated || place.updated || place.Updated;
-    const url = place.url || place.Url || (game.rootPlaceId ? `https://www.roblox.com/games/${game.rootPlaceId}` : '');
-
-    lastGameDetails = {placeId,universeId,game};
-
-    box.innerHTML = `
-      <h3>${name}</h3>
-      <p>
-        <span class="badge-pill badge-ok">UniverseId: ${universeId}</span><br>
-        Creator: <b>${creatorName}</b> (id: ${creatorId})<br>
-        Max Players: ${maxPlayers}<br>
-        Online Now: <b>${playing}</b><br>
-        Visits: ${Number(visits).toLocaleString()}<br>
-        Favorites: ${Number(favorites).toLocaleString()}<br>
-        Votes: 👍 ${upVotes} / 👎 ${downVotes}<br>
-        Created: ${created? new Date(created).toLocaleString():'Unknown'}<br>
-        Updated: ${updated? new Date(updated).toLocaleString():'Unknown'}
-      </p>
-      ${url?`<p class="small">URL: <a href="${url}" target="_blank" style="color:${getComputedStyle(document.body).getPropertyValue('--accent')||'#0ff'}">${url}</a></p>`:''}
-    `;
-  }catch(err){
-    box.innerHTML=`<div class="small">Error loading place: ${err.message}</div>`;
-  }
-  setLoading(false);
-}
-
-// ---------- alt detector (reworked, multi-signal) ----------
-function jaccard(a,b){
-  const sa = new Set(a), sb = new Set(b);
-  let inter=0;
-  sa.forEach(v=>{ if(sb.has(v)) inter++; });
-  const union = sa.size + sb.size - inter;
-  return union? inter/union : 0;
-}
-function simpleNameSimilarity(a,b){
-  a = (a||'').toLowerCase();
-  b = (b||'').toLowerCase();
-  if(!a || !b) return 0;
-  if(a===b) return 1;
-  const coreA = a.replace(/\d/g,'');
-  const coreB = b.replace(/\d/g,'');
-  if(coreA && coreA === coreB) return 0.9;
-  let score = 0;
-  if(a[0]===b[0]) score += 0.1;
-  if(a.slice(0,3)===b.slice(0,3)) score += 0.2;
-  if(a.includes(coreB) || b.includes(coreA)) score += 0.2;
-  return Math.min(1,score);
-}
-function descriptionSimilarity(a,b){
-  a=(a||'').toLowerCase().trim();
-  b=(b||'').toLowerCase().trim();
-  if(!a || !b) return 0;
-  if(a===b) return 1;
-  if(a.length<10 || b.length<10) return 0;
-  let matches=0;
-  const wordsA = a.split(/\s+/);
-  const wordsB = new Set(b.split(/\s+/));
-  wordsA.forEach(w=>{ if(w.length>3 && wordsB.has(w)) matches++; });
-  return Math.min(1, matches/Math.max(3,wordsA.length));
-}
-function ageSimilarity(t1,t2){
-  if(!t1 || !t2) return 0.5;
-  const d = Math.abs(new Date(t1).getTime()-new Date(t2).getTime());
-  const days = d/(1000*60*60*24);
-  if(days<7) return 1;
-  if(days<30) return 0.8;
-  if(days<90) return 0.6;
-  if(days<365) return 0.4;
-  if(days<3*365) return 0.2;
-  return 0.05;
-}
-
-document.getElementById('altCheck').onclick = async()=>{
-  const u1 = document.getElementById('altUser1').value.trim();
-  const u2 = document.getElementById('altUser2').value.trim();
-  const box = document.getElementById('altResult');
-  if(!u1||!u2){box.innerHTML='<div class="card">Enter both usernames.</div>';return;}
-  box.innerHTML='<div class="card">Fetching deep data...</div>';
-  setLoading(true);
-  try{
-    const [raw1,raw2] = await Promise.all([lookupUser(u1),lookupUser(u2)]);
-    const [prof1,prof2] = await Promise.all([getUserProfile(raw1.id),getUserProfile(raw2.id)]);
-
-    const [g1,g2,f1,f2,b1,b2,av1,av2] = await Promise.all([
-      tryMulti([
-        `https://groups.roproxy.com/v2/users/${raw1.id}/groups/roles`,
-        `https://groups.rprxy.xyz/v2/users/${raw1.id}/groups/roles`,
-        proxyWrap(`https://groups.roblox.com/v2/users/${raw1.id}/groups/roles`)
-      ]),
-      tryMulti([
-        `https://groups.roproxy.com/v2/users/${raw2.id}/groups/roles`,
-        `https://groups.rprxy.xyz/v2/users/${raw2.id}/groups/roles`,
-        proxyWrap(`https://groups.roblox.com/v2/users/${raw2.id}/groups/roles`)
-      ]),
-      tryMulti([
-        `https://friends.roproxy.com/v1/users/${raw1.id}/friends?limit=200`,
-        `https://friends.rprxy.xyz/v1/users/${raw1.id}/friends?limit=200`,
-        proxyWrap(`https://friends.roblox.com/v1/users/${raw1.id}/friends?limit=200`)
-      ]),
-      tryMulti([
-        `https://friends.roproxy.com/v1/users/${raw2.id}/friends?limit=200`,
-        `https://friends.rprxy.xyz/v1/users/${raw2.id}/friends?limit=200`,
-        proxyWrap(`https://friends.roblox.com/v1/users/${raw2.id}/friends?limit=200`)
-      ]),
-      tryMulti([
-        `https://badges.roproxy.com/v1/users/${raw1.id}/badges?limit=100`,
-        `https://badges.rprxy.xyz/v1/users/${raw1.id}/badges?limit=100`,
-        proxyWrap(`https://badges.roblox.com/v1/users/${raw1.id}/badges?limit=100`)
-      ]),
-      tryMulti([
-        `https://badges.roproxy.com/v1/users/${raw2.id}/badges?limit=100`,
-        `https://badges.rprxy.xyz/v1/users/${raw2.id}/badges?limit=100`,
-        proxyWrap(`https://badges.roblox.com/v1/users/${raw2.id}/badges?limit=100`)
-      ]),
-      tryMulti([
-        `https://avatar.roproxy.com/v1/users/${raw1.id}/avatar`,
-        `https://avatar.rprxy.xyz/v1/users/${raw1.id}/avatar`,
-        proxyWrap(`https://avatar.roblox.com/v1/users/${raw1.id}/avatar`)
-      ]),
-      tryMulti([
-        `https://avatar.roproxy.com/v1/users/${raw2.id}/avatar`,
-        `https://avatar.rprxy.xyz/v1/users/${raw2.id}/avatar`,
-        proxyWrap(`https://avatar.roblox.com/v1/users/${raw2.id}/avatar`)
-      ])
+    const voteData = await tryMulti([
+      `https://games.roproxy.com/v1/games/votes?universeIds=${gameId}`,
+      `https://games.rprxy.xyz/v1/games/votes?universeIds=${gameId}`,
+      proxyWrap(`https://games.roblox.com/v1/games/votes?universeIds=${gameId}`)
     ]);
+    const votes = voteData?.data?.[0] || {};
+    const likeRatio = votes.downVotes === 0 && votes.upVotes === 0 ? 'No votes yet' : `${Math.round((votes.upVotes/(votes.upVotes+votes.downVotes))*100)}%`;
 
-    const groups1=(g1?.data||[]).map(g=>g.group.id);
-    const groups2=(g2?.data||[]).map(g=>g.group.id);
-    const friends1=(f1?.data||[]).map(f=>f.id);
-    const friends2=(f2?.data||[]).map(f=>f.id);
-    const badges1=(b1?.data||[]).map(b=>b.id);
-    const badges2=(b2?.data||[]).map(b=>b.id);
-    const assets1=(av1?.assets||[]).map(a=>a.id);
-    const assets2=(av2?.assets||[]).map(a=>a.id);
+    const fields = [
+      {label:'Creator', value:`${game.creator?.name||'Unknown'} (ID: ${game.creator?.id||'—'})`},
+      {label:'Genre', value:game.genre || 'Unknown'},
+      {label:'Playing Now', value:game.playing?.toLocaleString() || '0'},
+      {label:'Total Visits', value:game.visits?.toLocaleString() || '0'},
+      {label:'Favorites', value:game.favoritedCount?.toLocaleString() || '0'},
+      {label:'Like Ratio', value:likeRatio}
+    ];
 
-    const groupScore = jaccard(groups1,groups2);
-    const friendScore = jaccard(friends1,friends2);
-    const badgeScore = jaccard(badges1,badges2);
-    const avatarScore = jaccard(assets1,assets2);
-    const nameScore = simpleNameSimilarity(prof1.name,prof2.name);
-    const displayScore = simpleNameSimilarity(prof1.displayName,prof2.displayName);
-    const descScore = descriptionSimilarity(prof1.description,prof2.description);
-    const ageScore = ageSimilarity(prof1.created,prof2.created);
-
-    const total =
-      groupScore * 0.18 +
-      friendScore * 0.2 +
-      badgeScore * 0.15 +
-      avatarScore * 0.22 +
-      nameScore * 0.1 +
-      displayScore * 0.05 +
-      descScore * 0.05 +
-      ageScore * 0.05;
-
-    const pct = Math.round(total*100);
-    let label='Low';let cls='badge-ok';
-    if(pct>=70){label='High';cls='badge-bad';}
-    else if(pct>=40){label='Medium';cls='badge-warn';}
-
-    const fmt = v=> (v*100).toFixed(1)+'%';
+    const rows = fields.map(f=>`<tr><th style="width:140px">${f.label}</th><td>${f.value}</td></tr>`).join('');
 
     box.innerHTML = `
       <div class="card">
-        <h3>Estimated Alt Chance: ${pct}% <span class="badge-pill ${cls}">${label}</span></h3>
-        <p>
-          ${prof1.name} (id: ${raw1.id})<br>
-          ${prof2.name} (id: ${raw2.id})
-        </p>
-        <ul class="small">
-          <li>Groups overlap: ${fmt(groupScore)}</li>
-          <li>Friends overlap: ${fmt(friendScore)}</li>
-          <li>Badges overlap: ${fmt(badgeScore)}</li>
-          <li>Avatar item overlap: ${fmt(avatarScore)}</li>
-          <li>Username similarity: ${fmt(nameScore)}</li>
-          <li>Display name similarity: ${fmt(displayScore)}</li>
-          <li>Description similarity: ${fmt(descScore)}</li>
-          <li>Account age similarity: ${fmt(ageScore)}</li>
-        </ul>
-        <p class="small">
-          This is only an estimate based on public data.<br>
-          It cannot prove alt accounts, but it can highlight suspicious overlaps.
-        </p>
+        <h3>${game.name || 'Unknown Title'}</h3>
+        <p class="small">Game ID: ${gameId}</p>
+        <table>${rows}</table>
+        <p class="small" style="margin-top:8px">Last updated: ${game.updated ? new Date(game.updated).toLocaleString() : 'Unknown'}</p>
+        ${game.description ? `<p class="small">${game.description}</p>` : ''}
       </div>
     `;
   }catch(err){
     box.innerHTML=`<div class="card"><h3>Error</h3><p>${err.message}</p></div>`;
   }
   setLoading(false);
-};
+}
 
 // ---------- avatar evolution / outfits ----------
 document.getElementById('avLoad').onclick = async()=>{
@@ -755,221 +548,6 @@ document.getElementById('avLoad').onclick = async()=>{
   setLoading(false);
 };
 
-// ---------- deep analytics ----------
-function clamp01(x){return x<0?0:x>1?1:x;}
-function scaleTo100(x){return Math.round(clamp01(x)*100);}
-
-document.getElementById('deepRun').onclick = async()=>{
-  const username = document.getElementById('deepUser').value.trim();
-  const box = document.getElementById('deepResult');
-  if(!username){box.innerHTML='<div class="card">Enter a username.</div>';return;}
-  box.innerHTML='<div class="card">Building fingerprint + archetype...</div>';
-  setLoading(true);
-  try{
-    const user = await lookupUser(username);
-    const id = user.id;
-    const profile = await getUserProfile(id);
-
-    const [friends,groups,badgesSimple,avatar, outfits] = await Promise.all([
-      tryMulti([
-        `https://friends.roproxy.com/v1/users/${id}/friends?limit=200`,
-        `https://friends.rprxy.xyz/v1/users/${id}/friends?limit=200`,
-        proxyWrap(`https://friends.roblox.com/v1/users/${id}/friends?limit=200`)
-      ]),
-      tryMulti([
-        `https://groups.roproxy.com/v2/users/${id}/groups/roles`,
-        `https://groups.rprxy.xyz/v2/users/${id}/groups/roles`,
-        proxyWrap(`https://groups.roblox.com/v2/users/${id}/groups/roles`)
-      ]),
-      tryMulti([
-        `https://badges.roproxy.com/v1/users/${id}/badges?limit=100`,
-        `https://badges.rprxy.xyz/v1/users/${id}/badges?limit=100`,
-        proxyWrap(`https://badges.roblox.com/v1/users/${id}/badges?limit=100`)
-      ]),
-      tryMulti([
-        `https://avatar.roproxy.com/v1/users/${id}/avatar`,
-        `https://avatar.rprxy.xyz/v1/users/${id}/avatar`,
-        proxyWrap(`https://avatar.roblox.com/v1/users/${id}/avatar`)
-      ]),
-      tryMulti([
-        `https://avatar.roproxy.com/v1/users/${id}/outfits?itemsPerPage=50&page=1`,
-        proxyWrap(`https://avatar.roblox.com/v1/users/${id}/outfits?itemsPerPage=50&page=1`)
-      ])
-    ]);
-
-    const friendsArr = friends?.data||[];
-    const groupsArr = groups?.data||[];
-    const badgesArr = badgesSimple?.data||[];
-    const assetsArr = avatar?.assets||[];
-    const outfitsArr = outfits?.data||[];
-
-    // Badge awarded dates for basic timeline (top 50 to reduce spam)
-    let badgeAwardData = null;
-    const badgeIds = badgesArr.map(b=>b.id).slice(0,50);
-    if(badgeIds.length){
-      badgeAwardData = await tryMulti([
-        `https://badges.roproxy.com/v1/users/${id}/badges/awarded-dates?badgeIds=${badgeIds.join(',')}`,
-        `https://badges.rprxy.xyz/v1/users/${id}/badges/awarded-dates?badgeIds=${badgeIds.join(',')}`,
-        proxyWrap(`https://badges.roblox.com/v1/users/${id}/badges/awarded-dates?badgeIds=${badgeIds.join(',')}`)
-      ]);
-    }
-
-    const created = profile.created ? new Date(profile.created) : null;
-    const now = new Date();
-    const ageDays = created ? Math.max(1, (now-created)/(1000*60*60*24)) : 365;
-    const totalBadges = badgesArr.length;
-    const badgesPerDay = totalBadges/ageDays;
-
-    // rough knowledge index: more badges per day + older account -> higher
-    let knowledgeRaw = 0;
-    knowledgeRaw += Math.min(1, badgesPerDay/0.5); // 0.5 badges/day ~ 100
-    if(ageDays>365) knowledgeRaw += 0.1;
-    if(ageDays>3*365) knowledgeRaw += 0.1;
-    const knowledgeScore = scaleTo100(knowledgeRaw/1.2);
-
-    // uniqueness: many groups + many badges + many distinct assets + outfits
-    const groupCount = groupsArr.length;
-    const assetCount = assetsArr.length;
-    const outfitCount = outfitsArr.length;
-    let uniqRaw = 0;
-    uniqRaw += Math.min(0.4, groupCount/50*0.4);
-    uniqRaw += Math.min(0.3, totalBadges/200*0.3);
-    uniqRaw += Math.min(0.2, assetCount/50*0.2);
-    uniqRaw += Math.min(0.1, outfitCount/10*0.1);
-    const uniquenessScore = scaleTo100(uniqRaw);
-
-    // activity pattern from badge awarded dates
-    let earliest=null, latest=null;
-    if(badgeAwardData?.data?.length){
-      badgeAwardData.data.forEach(b=>{
-        if(!b.awardedDate) return;
-        const d = new Date(b.awardedDate);
-        if(!earliest || d<earliest) earliest=d;
-        if(!latest || d>latest) latest=d;
-      });
-    }
-
-    // archetype tags from groups + badges + description
-    const archetypeCounts = {
-      social:0, combat:0, horror:0, sim:0, obby:0, roleplay:0, trader:0, dev:0
-    };
-    const addTagFromText = txt=>{
-      const t = (txt||'').toLowerCase();
-      if(!t) return;
-      if(/hangout|club|cafe|social|vibe|lounge/.test(t)) archetypeCounts.social++;
-      if(/army|military|war|clan|pvp|fps|gun|arsenal|combat|fight|arena/.test(t)) archetypeCounts.combat++;
-      if(/horror|scary|backrooms|doors|fear|nightmare|spooky/.test(t)) archetypeCounts.horror++;
-      if(/simulator|tycoon|farm|mining|grind|clicker/.test(t)) archetypeCounts.sim++;
-      if(/obby|parkour|tower|jump|difficulty chart/.test(t)) archetypeCounts.obby++;
-      if(/rp|roleplay|city rp|school rp|family/.test(t)) archetypeCounts.roleplay++;
-      if(/limited|trade|trader|flip|investment|rap|sniper|ugc/.test(t)) archetypeCounts.trader++;
-      if(/dev|developer|scripter|studio|builder|build/.test(t)) archetypeCounts.dev++;
-    };
-
-    groupsArr.forEach(g=>{ addTagFromText(g.group.name); addTagFromText(g.group.description); });
-    badgesArr.forEach(b=>addTagFromText(b.name));
-    addTagFromText(profile.description);
-
-    let topArchetype='Unknown';
-    let topVal=0;
-    Object.entries(archetypeCounts).forEach(([k,v])=>{
-      if(v>topVal){topVal=v;topArchetype=k;}
-    });
-    const archetypeLabels={
-      social:'Social / Hangout Player',
-      combat:'Combat / PvP / FPS',
-      horror:'Horror / Challenge Seeker',
-      sim:'Simulator / Tycoon Grinder',
-      obby:'Obby / Parkour Skill Player',
-      roleplay:'Roleplay / Story Player',
-      trader:'Trader / Economy / UGC',
-      dev:'Developer / Builder / Scripter',
-      Unknown:'Unknown / Mixed'
-    };
-    const archetypeText = archetypeLabels[topArchetype] || 'Unknown / Mixed';
-
-    // simple persona guess
-    let persona=[];
-    if(knowledgeScore>70) persona.push('High game knowledge');
-    if(uniquenessScore>70) persona.push('Unique profile fingerprint');
-    if(groupCount>50) persona.push('Heavy group user');
-    if(totalBadges>500) persona.push('Badge collector');
-    if(assetCount>50) persona.push('Fashion / avatar-focused');
-    if(persona.length===0) persona.push('Casual / normal player');
-
-    // timeline summary
-    let timelineLines=[];
-    if(created){
-      timelineLines.push(`Account created: ${created.toLocaleDateString()}`);
-      timelineLines.push(`Account age: ~${Math.round(ageDays)} days`);
-    }
-    if(earliest && latest){
-      const spanDays = Math.max(1,(latest-earliest)/(1000*60*60*24));
-      timelineLines.push(`First recorded badge: ${earliest.toLocaleDateString()}`);
-      timelineLines.push(`Most recent badge: ${latest.toLocaleDateString()}`);
-      timelineLines.push(`Badge activity span: ~${Math.round(spanDays)} days`);
-    }else if(totalBadges){
-      timelineLines.push(`Badges: ${totalBadges} (no award dates available from proxies)`);
-    }else{
-      timelineLines.push('No public badges picked up in the APIs.');
-    }
-
-    const fingerprintId = `${id}-${totalBadges}-${groupCount}-${assetCount}`; // just a symbolic ID
-
-    box.innerHTML = `
-      <div class="card">
-        <h3>Fingerprint Overview</h3>
-        <p>
-          <span class="tag">User: ${profile.name} (${profile.displayName})</span><br>
-          <span class="tag">UserId: ${id}</span><br>
-          <span class="tag">Fingerprint ID: ${fingerprintId}</span>
-        </p>
-        <ul class="small">
-          <li>Friends: ${friendsArr.length}</li>
-          <li>Groups: ${groupCount}</li>
-          <li>Badges (sampled): ${totalBadges}</li>
-          <li>Avatar assets (equipped inventory sample): ${assetCount}</li>
-          <li>Saved outfits: ${outfitCount}</li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <h3>Scores</h3>
-        <p>
-          <span class="badge-pill badge-ok">Knowledge Index: ${knowledgeScore}/100</span><br>
-          <span class="badge-pill badge-warn">Uniqueness Score: ${uniquenessScore}/100</span><br>
-          <span class="badge-pill badge-ok">Account Age (days): ${Math.round(ageDays)}</span>
-        </p>
-        <p class="small">
-          Knowledge Index is based on badges per day and account age.<br>
-          Uniqueness Score uses groups, badges, avatar assets, and outfits.
-        </p>
-      </div>
-
-      <div class="card">
-        <h3>Archetype & Persona</h3>
-        <p><b>Dominant Archetype:</b> ${archetypeText}</p>
-        <p><b>Persona Hints:</b></p>
-        <ul class="small">
-          ${persona.map(p=>`<li>${p}</li>`).join('')}
-        </ul>
-      </div>
-
-      <div class="card">
-        <h3>Timeline Signals</h3>
-        <ul class="small">
-          ${timelineLines.map(l=>`<li>${l}</li>`).join('')}
-        </ul>
-        <p class="small">
-          This is a rough behavior timeline built from account age and badge award dates (when available). It doesn't see private data or exact play sessions.
-        </p>
-      </div>
-    `;
-  }catch(err){
-    box.innerHTML = `<div class="card"><h3>Error</h3><p>${err.message}</p></div>`;
-  }
-  setLoading(false);
-};
 </script>
 </body>
 </html>
