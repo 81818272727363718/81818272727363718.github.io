@@ -1,88 +1,86 @@
-
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Roblox Information Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0c0f1a;
-  --card:#11162b;
-  --accent:#ffb347;
-  --accent2:#7cf2ff;
-  --glow:0 16px 50px rgba(255,179,71,.25);
+  --bg:#0c1018;
+  --card:#111724;
+  --border:#1f2735;
+  --accent:#8ac6ff;
+  --accent-strong:#3ea6ff;
+  --text:#e6ecf3;
+  --muted:#9aa6b5;
 }
 *{box-sizing:border-box}
 body{
   margin:0;
-  font-family:"Fredoka", "Inter", system-ui, sans-serif;
-  background:radial-gradient(circle at 10% 10%, rgba(255,179,71,.22), transparent 30%),
-             radial-gradient(circle at 90% 0%, rgba(124,242,255,.18), transparent 32%),
-             radial-gradient(circle at 25% 80%, rgba(255,114,182,.18), transparent 35%),
-             #0b0f1f;
-  color:#f7fbff;
-  padding:26px 14px 48px;
+  font-family:"Inter", system-ui, sans-serif;
+  background:linear-gradient(180deg,#0b0f18 0%,#0c1018 30%,#0a0f18 100%);
+  color:var(--text);
+  padding:28px 16px 48px;
 }
 h1{
   text-align:center;
-  letter-spacing:1px;
+  letter-spacing:0.6px;
   font-weight:800;
-  margin:10px 0 18px;
-  color:#ffe6b5;
-  text-shadow:0 4px 0 rgba(0,0,0,.35);
+  margin:6px 0 20px;
+  color:#f4f7fb;
 }
+h2{margin:6px 0 10px}
 nav{
   display:flex;
   flex-wrap:wrap;
-  gap:8px;
+  gap:10px;
   justify-content:center;
   margin-bottom:18px;
 }
 button{
-  border-radius:12px;
-  border:2px dashed rgba(255,179,71,.6);
-  background:linear-gradient(135deg,rgba(255,179,71,.2),rgba(124,242,255,.18));
-  color:#0f1424;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:linear-gradient(180deg,#1b2433 0%,#131a28 100%);
+  color:var(--text);
   padding:10px 16px;
   cursor:pointer;
   font-weight:700;
   font-size:13px;
-  box-shadow:0 8px 0 rgba(0,0,0,.25);
+  transition:all .15s ease;
 }
 button:hover,button.active{
-  background:linear-gradient(135deg,rgba(255,179,71,.32),rgba(124,242,255,.28));
-  transform:translateY(-1px);
-  box-shadow:0 10px 0 rgba(0,0,0,.2);
+  border-color:var(--accent-strong);
+  color:#fff;
+  box-shadow:0 8px 22px rgba(62,166,255,.18);
 }
 input,textarea,select{
-  background:#0c1227;
-  border:1px solid rgba(255,179,71,.5);
-  color:#ffe6c9;
+  background:#0f1623;
+  border:1px solid var(--border);
+  color:var(--text);
   border-radius:10px;
-  padding:8px 10px;
+  padding:10px 11px;
 }
 textarea{width:100%;min-height:120px;resize:vertical}
 .controls{
   display:flex;
   flex-wrap:wrap;
-  gap:8px;
-  margin:10px 0;
+  gap:10px;
+  margin:12px 0;
 }
-.controls input,.controls select{flex:1;min-width:160px}
+.controls input,.controls select{flex:1;min-width:200px}
 .section{
   display:none;
-  background:rgba(15,19,40,.72);
-  border-radius:16px;
-  padding:14px;
-  border:2px solid rgba(255,179,71,.22);
-  box-shadow:var(--glow);
+  background:#0f1521;
+  border-radius:18px;
+  padding:16px;
+  border:1px solid var(--border);
+  box-shadow:0 16px 40px rgba(0,0,0,.35);
 }
 .section.active{display:block}
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
   gap:12px;
   margin-top:10px;
 }
@@ -90,24 +88,24 @@ textarea{width:100%;min-height:120px;resize:vertical}
   background:var(--card);
   border-radius:14px;
   padding:12px;
-  border:1px solid rgba(255,179,71,.28);
-  box-shadow:var(--glow);
+  border:1px solid var(--border);
+  box-shadow:0 12px 30px rgba(0,0,0,.3);
 }
 .tag{
   display:inline-block;
-  padding:2px 10px;
+  padding:3px 10px;
   border-radius:999px;
   font-size:11px;
-  border:1px solid rgba(255,179,71,.55);
-  color:#ffd7a0;
-  margin-bottom:4px;
+  border:1px solid var(--border);
+  color:var(--muted);
+  margin-bottom:6px;
 }
 #suggestionsList{
   display:none;
   position:absolute;
-  background:#050814;
-  border:1px solid rgba(0,255,255,.3);
-  border-radius:8px;
+  background:#0b101a;
+  border:1px solid var(--border);
+  border-radius:10px;
   margin-top:2px;
   width:100%;
   z-index:30;
@@ -115,11 +113,11 @@ textarea{width:100%;min-height:120px;resize:vertical}
   overflow:auto;
 }
 .suggestion-item{
-  padding:6px 8px;
+  padding:8px 9px;
   cursor:pointer;
   font-size:13px;
 }
-.suggestion-item:hover{background:#141c30}
+.suggestion-item:hover{background:#121a26}
 #loadingOverlay{
   position:fixed;inset:0;
   background:rgba(0,0,0,.55);
@@ -131,8 +129,8 @@ textarea{width:100%;min-height:120px;resize:vertical}
 .spinner{
   width:60px;height:60px;
   border-radius:50%;
-  border:4px solid rgba(0,255,255,.2);
-  border-top-color:var(--accent);
+  border:4px solid rgba(255,255,255,.12);
+  border-top-color:var(--accent-strong);
   animation:spin .7s linear infinite;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -147,7 +145,7 @@ textarea{width:100%;min-height:120px;resize:vertical}
 .popup{
   background:#0f1722;
   border-radius:12px;
-  border:1px solid rgba(45,137,239,.4);
+  border:1px solid var(--border);
   padding:12px;
   width:92%;
   max-width:520px;
@@ -160,15 +158,15 @@ textarea{width:100%;min-height:120px;resize:vertical}
   font-size:13px;
   cursor:pointer;
 }
-.popup-item:hover{color:var(--accent)}
+.popup-item:hover{color:var(--accent-strong)}
 table{
   width:100%;
   border-collapse:collapse;
   font-size:13px;
 }
 th,td{
-  border-bottom:1px solid rgba(230,237,243,.06);
-  padding:4px 6px;
+  border-bottom:1px solid rgba(230,237,243,.08);
+  padding:5px 6px;
   text-align:left;
 }
 .badge-pill{
@@ -178,24 +176,26 @@ th,td{
   font-size:11px;
   margin-right:4px;
 }
-.badge-ok{background:rgba(0,255,140,.16);border:1px solid rgba(0,255,140,.5)}
-.badge-warn{background:rgba(255,180,0,.16);border:1px solid rgba(255,200,0,.6)}
-.badge-bad{background:rgba(255,40,100,.16);border:1px solid rgba(255,60,140,.7)}
+.badge-ok{background:rgba(0,255,140,.08);border:1px solid rgba(0,255,140,.5)}
+.badge-warn{background:rgba(255,180,0,.08);border:1px solid rgba(255,200,0,.6)}
+.badge-bad{background:rgba(255,40,100,.08);border:1px solid rgba(255,60,140,.7)}
 .outfit-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px}
 .outfit-card{
   min-width:130px;
-  background:#050814;
+  background:#0b111b;
   border-radius:10px;
   padding:6px;
-  border:1px solid rgba(255,179,71,.5);
+  border:1px solid var(--border);
   text-align:center;
   font-size:12px;
 }
 .outfit-card img{width:100%;border-radius:8px;display:block}
 .small{font-size:12px;opacity:.85}
 .profile-head{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-.avatar-wrap{width:140px;height:140px;border-radius:16px;overflow:hidden;background:#0e1530;border:1px solid rgba(103,213,255,.35);display:flex;align-items:center;justify-content:center}
+.avatar-wrap{width:140px;height:140px;border-radius:16px;overflow:hidden;background:#0e1530;border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
 .avatar-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.badge-graph-wrap{margin-top:12px}
+.muted{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -203,7 +203,6 @@ th,td{
 
 <nav>
   <button data-section="profile" class="active">Profile</button>
-  <button data-section="badgeboard">Badge Graph</button>
   <button data-section="gameinfo">Game Info</button>
   <button data-section="avatar">Avatar Evolution</button>
 </nav>
@@ -217,18 +216,7 @@ th,td{
     <div id="suggestionsList"></div>
   </div>
   <div id="rbxResults" class="grid"></div>
-</section>
-
-<!-- BADGE GRAPH -->
-<section id="badgeboard" class="section">
-  <h2>Badge Timeline Graph</h2>
-  <p class="small">Enter a Roblox username and we will plot every badge they own in the order it was awarded.</p>
-  <div class="controls">
-    <input id="bgUser" placeholder="Roblox username">
-    <button id="bgLoad">Graph Badges</button>
-  </div>
-  <div id="lbResult" style="margin-top:12px"></div>
-  <canvas id="badgeCanvas" width="900" height="420" style="width:100%;max-width:960px;background:#0b1124;border-radius:12px;border:1px dashed rgba(255,179,71,.35);display:none"></canvas>
+  <div id="badgeSummaryArea" class="badge-graph-wrap"></div>
 </section>
 
 <!-- GAME INFO -->
@@ -441,6 +429,19 @@ async function renderProfile(username){
     makeCard('Groups',groupsList.slice(0,5).join('<br>')||'None',groupsList,null);
     if(badgeList.length) makeCard('Badges',badgeList.slice(0,5).join(', '),badgeList,null);
 
+    const badgeArea = document.getElementById('badgeSummaryArea');
+    badgeArea.innerHTML = '';
+    const fullBadges = await fetchAllBadges(id);
+    if(!fullBadges.length){
+      const emptyCard = document.createElement('div');
+      emptyCard.className='card';
+      emptyCard.innerHTML='<h3>Badge Details</h3><p class="small">No public badges available for this user.</p>';
+      badgeArea.appendChild(emptyCard);
+    }else{
+      renderBadgeGraph(badgeArea, fullBadges, profile.displayName || username);
+      renderBadgeAwards(badgeArea, fullBadges, profile.displayName || username);
+    }
+
   }catch(err){
     rbxResults.innerHTML = `<div class="card"><h3>Error</h3><p>${err.message}</p></div>`;
   }
@@ -463,68 +464,83 @@ async function loadAvatar(id, username){
   }
 }
 
-// ---------- badge graph ----------
-document.getElementById('bgLoad').onclick = ()=>graphBadges();
-
-async function graphBadges(){
-  const username = document.getElementById('bgUser').value.trim();
-  const box = document.getElementById('lbResult');
-  const canvas = document.getElementById('badgeCanvas');
-  const ctx = canvas.getContext('2d');
-  canvas.style.display='none';
-  if(!username){box.innerHTML='<div class="card">Enter a username to graph their badges.</div>';return;}
-  box.innerHTML='<div class="card">Loading badges...</div>';
-  setLoading(true);
-  try{
-    const user = await lookupUser(username);
-    const id = user.id;
-    let cursor = null;
-    const badges = [];
-    let safety = 0;
-    while(safety < 12){
-      const urlBase = cursor ?
-        [`https://badges.roproxy.com/v1/users/${id}/badges?limit=100&cursor=${cursor}`,
-         proxyWrap(`https://badges.roblox.com/v1/users/${id}/badges?limit=100&cursor=${cursor}`)]:
-        [`https://badges.roproxy.com/v1/users/${id}/badges?limit=100&sortOrder=Desc`,
-         proxyWrap(`https://badges.roblox.com/v1/users/${id}/badges?limit=100&sortOrder=Desc`)];
-      const data = await tryMulti(urlBase);
-      if(!data?.data?.length) break;
-      badges.push(...data.data);
-      cursor = data.nextPageCursor;
-      if(!cursor) break;
-      safety++;
-    }
-
-    if(!badges.length){
-      box.innerHTML = `<div class="card"><h3>No badges found</h3><p>${username} does not have public badges.</p></div>`;
-      setLoading(false);
-      return;
-    }
-
-    const dated = badges
-      .filter(b=>b.awardedDate)
-      .map(b=>({
-        name:b.name,
-        date:new Date(b.awardedDate)
-      }))
-      .sort((a,b)=>a.date-b.date);
-
-    if(!dated.length){
-      box.innerHTML = `<div class="card"><h3>No award dates</h3><p>Badges for ${username} did not return award dates to plot.</p></div>`;
-      setLoading(false);
-      return;
-    }
-
-    const points = dated.map((b,i)=>({x:b.date, y:i+1}));
-    drawBadgeGraph(ctx, points, username);
-    canvas.style.display='block';
-    const first = dated[0].date.toLocaleDateString();
-    const last = dated[dated.length-1].date.toLocaleDateString();
-    box.innerHTML = `<div class="card"><h3>${username}'s Badge Timeline</h3><p class="small">${dated.length} badges from ${first} to ${last}</p></div>`;
-  }catch(err){
-    box.innerHTML = `<div class="card"><h3>Error</h3><p>${err.message}</p></div>`;
+// ---------- badges (awards + graph from profile) ----------
+async function fetchAllBadges(userId){
+  let cursor = null;
+  const badges = [];
+  for(let i=0;i<15;i++){
+    const urlBase = cursor ?
+      [
+        `https://badges.roproxy.com/v1/users/${userId}/badges?limit=100&cursor=${cursor}`,
+        proxyWrap(`https://badges.roblox.com/v1/users/${userId}/badges?limit=100&cursor=${cursor}`)
+      ]:
+      [
+        `https://badges.roproxy.com/v1/users/${userId}/badges?limit=100&sortOrder=Desc`,
+        proxyWrap(`https://badges.roblox.com/v1/users/${userId}/badges?limit=100&sortOrder=Desc`)
+      ];
+    const data = await tryMulti(urlBase);
+    if(!data?.data?.length) break;
+    badges.push(...data.data);
+    cursor = data.nextPageCursor;
+    if(!cursor) break;
   }
-  setLoading(false);
+  return badges;
+}
+
+function renderBadgeAwards(target, badges, username){
+  const card = document.createElement('div');
+  card.className='card';
+  card.innerHTML = '<h3>Badge Award Dates</h3>';
+  const dated = badges.filter(b=>b.awardedDate).sort((a,b)=>new Date(b.awardedDate)-new Date(a.awardedDate));
+  if(!dated.length){
+    card.innerHTML += `<p class="small">No award dates were returned for ${username}'s badges.</p>`;
+    target.appendChild(card);
+    return;
+  }
+  const summary = document.createElement('p');
+  const first = new Date(dated[dated.length-1].awardedDate).toLocaleDateString();
+  const last = new Date(dated[0].awardedDate).toLocaleDateString();
+  summary.className='small';
+  summary.textContent = `${dated.length} badges with award dates (from ${first} to ${last}).`;
+  card.appendChild(summary);
+
+  const table = document.createElement('table');
+  table.innerHTML = '<tr><th style="width:60%">Badge</th><th>Awarded</th></tr>' +
+    dated.slice(0,12).map(b=>`<tr><td>${b.name}</td><td>${new Date(b.awardedDate).toLocaleString()}</td></tr>`).join('');
+  card.appendChild(table);
+  target.appendChild(card);
+}
+
+function renderBadgeGraph(target, badges, username){
+  const card = document.createElement('div');
+  card.className='card';
+  card.innerHTML = `<h3>${username}'s Badge Timeline</h3>`;
+  const canvas = document.createElement('canvas');
+  canvas.id = 'badgeCanvas';
+  canvas.width = 900;
+  canvas.height = 420;
+  canvas.style.width='100%';
+  canvas.style.maxWidth='960px';
+  canvas.style.background='#0b1124';
+  canvas.style.borderRadius='12px';
+  canvas.style.border='1px solid var(--border)';
+  const dated = badges
+    .filter(b=>b.awardedDate)
+    .map(b=>({name:b.name, date:new Date(b.awardedDate)}))
+    .sort((a,b)=>a.date-b.date);
+  if(!dated.length){
+    card.innerHTML += '<p class="small">No award dates to plot.</p>';
+    target.appendChild(card);
+    return;
+  }
+  const points = dated.map((b,i)=>({x:b.date,y:i+1}));
+  drawBadgeGraph(canvas.getContext('2d'), points, username);
+  const meta = document.createElement('p');
+  meta.className='small';
+  meta.textContent = `${dated.length} badges from ${dated[0].date.toLocaleDateString()} to ${dated[dated.length-1].date.toLocaleDateString()}.`;
+  card.appendChild(canvas);
+  card.appendChild(meta);
+  target.appendChild(card);
 }
 
 function drawBadgeGraph(ctx, points, username){
@@ -537,15 +553,15 @@ function drawBadgeGraph(ctx, points, username){
   const maxX = points[points.length-1].x.getTime();
   const spread = Math.max(maxX - minX, 1);
 
-  // background doodle
+  // background
   const grad = ctx.createLinearGradient(0,0,w,h);
-  grad.addColorStop(0,'rgba(255,179,71,0.18)');
-  grad.addColorStop(1,'rgba(124,242,255,0.18)');
+  grad.addColorStop(0,'rgba(62,166,255,0.12)');
+  grad.addColorStop(1,'rgba(255,255,255,0.04)');
   ctx.fillStyle = grad;
   ctx.fillRect(0,0,w,h);
 
   // axes
-  ctx.strokeStyle = 'rgba(255,230,181,0.8)';
+  ctx.strokeStyle = 'rgba(154,166,181,0.9)';
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(pad,h-pad);
@@ -555,14 +571,14 @@ function drawBadgeGraph(ctx, points, username){
   ctx.stroke();
 
   // labels
-  ctx.fillStyle = '#ffe6b5';
+  ctx.fillStyle = '#e6ecf3';
   ctx.font = '12px Inter, sans-serif';
   ctx.fillText('Badges', pad-10, pad-12);
   ctx.fillText('Time', w-pad-20, h-pad+26);
-  ctx.font = '14px Fredoka, sans-serif';
+  ctx.font = '14px Inter, sans-serif';
   ctx.fillText(`${username} badge journey`, pad, pad-20);
 
-  ctx.strokeStyle = 'rgba(255,179,71,0.9)';
+  ctx.strokeStyle = 'rgba(62,166,255,0.95)';
   ctx.lineWidth = 3;
   ctx.beginPath();
   points.forEach((p,i)=>{
@@ -573,7 +589,7 @@ function drawBadgeGraph(ctx, points, username){
   ctx.stroke();
 
   ctx.fillStyle = '#0f1424';
-  ctx.strokeStyle = '#7cf2ff';
+  ctx.strokeStyle = '#8ac6ff';
   points.forEach(p=>{
     const x = pad + ((p.x.getTime()-minX)/spread) * (w - pad*2);
     const y = h - pad - (p.y/maxY) * (h - pad*2);
