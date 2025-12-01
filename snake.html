@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clash Royale Clone (Single File)</title>
-    <!-- CSS STYLES EMBEDDED HERE -->
+    <title>Clash Royale Clone (Enhanced)</title>
     <style>
         body {
             display: flex;
@@ -13,11 +12,12 @@
             background-color: #333;
             margin: 0;
             height: 100vh;
+            font-family: sans-serif;
         }
         #game-container {
             width: 800px;
             height: 600px;
-            background-color: #4CAF50; /* Green arena */
+            background-color: #4CAF50;
             position: relative;
             border: 2px solid #000;
             overflow: hidden;
@@ -28,7 +28,7 @@
             left: 0;
             right: 0;
             height: 40px;
-            background-color: #2196F3; /* Blue river */
+            background-color: #2196F3;
             transform: translateY(-50%);
             border-top: 2px solid #000;
             border-bottom: 2px solid #000;
@@ -54,171 +54,319 @@
             padding-top: 5px;
             box-sizing: border-box;
             user-select: none;
+            position: relative;
         }
-        .card-slot:hover {
+        .card-slot:hover:not(.disabled) {
             background-color: #fff;
         }
-        .troop {
+        .card-slot.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .elixir-cost {
             position: absolute;
-            width: 30px;
-            height: 40px;
-            background-color: red; /* Enemy (Red) */
+            bottom: 5px;
+            right: 5px;
+            background: #f44336;
+            color: white;
             border-radius: 50%;
-            transition: top 0.1s linear, left 0.1s linear;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
         }
-        .troop.player {
-            background-color: blue; /* Player (Blue) */
-        }
-        .health-bar {
+        .troop, .tower {
             position: absolute;
-            bottom: 100%;
-            left: 0;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        .troop {
+             width: 30px;
+            height: 40px;
+            border-radius: 50%;
+        }
+        .tower {
+            width: 60px;
+            height: 80px;
+            background-color: grey;
+            border: 2px solid black;
+        }
+        .tower.player { background-color: lightblue; border-color: blue; }
+        .tower.enemy { background-color: lightcoral; border-color: red; }
+
+        .health-bar {
             width: 100%;
             height: 5px;
             background-color: grey;
+            margin-bottom: 2px;
         }
         .health-bar-inner {
-            width: 100%;
             height: 100%;
             background-color: green;
+        }
+        #elixir-bar-container {
+            position: absolute;
+            bottom: 110px;
+            left: 20px;
+            width: 200px;
+            height: 20px;
+            background-color: black;
+            border: 2px solid white;
+        }
+        #elixir-bar {
+            height: 100%;
+            width: 0%;
+            background-color: purple;
+            transition: width 0.1s linear;
+        }
+        #elixir-count {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+        }
+        #game-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 36px;
+            color: white;
+            text-shadow: 2px 2px 4px #000000;
+            display: none;
         }
     </style>
 </head>
 <body>
     <div id="game-container">
         <div id="river"></div>
+        <div id="game-message"></div>
+        
+        <div id="elixir-bar-container">
+            <div id="elixir-bar"></div>
+            <span id="elixir-count">0 / 10</span>
+        </div>
+
+        <!-- Troops and Towers will be spawned dynamically by JS -->
         <div id="ui-bar">
-            <!-- The JS function deployTroop is called inline here -->
-            <div class="card-slot" onclick="deployTroop(1)">Knight</div>
-            <div class="card-slot" onclick="deployTroop(2)">Archer</div>
-            <div class="card-slot" onclick="deployTroop(3)">Giant</div>
+            <!-- Cards with cost display -->
+            <div id="card-1" class="card-slot" onclick="deployTroop(1)">
+                Knight <span class="elixir-cost">3</span>
+            </div>
+            <div id="card-2" class="card-slot" onclick="deployTroop(2)">
+                Archer <span class="elixir-cost">4</span>
+            </div>
+            <div id="card-3" class="card-slot" onclick="deployTroop(3)">
+                Giant <span class="elixir-cost">5</span>
+            </div>
         </div>
     </div>
     
-    <!-- JAVASCRIPT LOGIC EMBEDDED HERE -->
     <script>
         const gameContainer = document.getElementById('game-container');
-        const uiBar = document.getElementById('ui-bar');
-        // Ensure dimensions are correct once loaded
-        const arenaHeight = 500; // Hardcoded height for simplicity in single script
+        const elixirBar = document.getElementById('elixir-bar');
+        const elixirCountEl = document.getElementById('elixir-count');
+        const gameMessageEl = document.getElementById('game-message');
+        const arenaHeight = 500;
         const playerBaseY = arenaHeight - 50;
         const enemyBaseY = 50;
+        const TROOP_RADIUS = 15; // Width/2 of the troop element
 
         let troopId = 0;
-        const activeTroops = [];
+        const activeUnits = [];
+        let playerElixir = 0;
+        const MAX_ELIXIR = 10;
+        const ELIXIR_RATE = 1000; // 1 Elixir per second
 
-        // Troop Stats (simple base stats)
         const TROOP_STATS = {
-            1: { name: 'Knight', hp: 100, speed: 2, color: 'blue' },
-            2: { name: 'Archer', hp: 50, speed: 3, color: 'lightblue' },
-            3: { name: 'Giant', hp: 200, speed: 1, color: 'darkblue' },
+            1: { name: 'Knight', hp: 100, speed: 2, cost: 3, dmg: 15, range: 40, color: 'blue' },
+            2: { name: 'Archer', hp: 50, speed: 3, cost: 4, dmg: 10, range: 150, color: 'lightblue' },
+            3: { name: 'Giant', hp: 200, speed: 1, cost: 5, dmg: 25, range: 40, color: 'darkblue' },
         };
 
-        function createTroopElement(type, isPlayer) {
-            const stats = TROOP_STATS[type];
-            const troopEl = document.createElement('div');
-            troopEl.classList.add('troop');
-            if (isPlayer) {
-                troopEl.classList.add('player');
-            }
-            troopEl.style.backgroundColor = stats.color;
+        // --- Elixir System ---
+        function updateElixir(amount) {
+            playerElixir = Math.min(MAX_ELIXIR, playerElixir + amount);
+            elixirBar.style.width = `${(playerElixir / MAX_ELIXIR) * 100}%`;
+            elixirCountEl.textContent = `${Math.floor(playerElixir)} / ${MAX_ELIXIR}`;
+            updateCardAvailability();
+        }
+        setInterval(() => updateElixir(1), ELIXIR_RATE);
 
-            // Health Bar
+        function updateCardAvailability() {
+            Object.keys(TROOP_STATS).forEach(type => {
+                const cardEl = document.getElementById(`card-${type}`);
+                if (playerElixir >= TROOP_STATS[type].cost) {
+                    cardEl.classList.remove('disabled');
+                } else {
+                    cardEl.classList.add('disabled');
+                }
+            });
+        }
+
+        // --- Troop/Tower Creation ---
+        function createHealthBar(unitData) {
             const healthBar = document.createElement('div');
             healthBar.classList.add('health-bar');
             const healthBarInner = document.createElement('div');
             healthBarInner.classList.add('health-bar-inner');
             healthBar.appendChild(healthBarInner);
-            troopEl.appendChild(healthBar);
-
-            return troopEl;
+            unitData.healthBar = healthBarInner;
+            return healthBar;
         }
 
-        // Make this function globally accessible because it's called from an inline HTML onclick
-        window.deployTroop = function(type) {
-            // Simple random X position deployment near the player base
-            const startX = Math.random() * (gameContainer.clientWidth - 40) + 20;
-            const startY = playerBaseY;
+        function createUnit(type, isPlayer, x, y, isTower = false) {
+            const stats = isTower ? { hp: 500, maxHp: 500, dmg: 30, range: 200, speed: 0 } : TROOP_STATS[type];
+            const unitEl = document.createElement('div');
+            unitEl.classList.add(isTower ? 'tower' : 'troop');
+            unitEl.classList.add(isPlayer ? 'player' : 'enemy');
+            if (!isTower) unitEl.style.backgroundColor = stats.color;
+            unitEl.style.left = `${x}px`;
+            unitEl.style.top = `${y}px`;
 
-            const troopEl = createTroopElement(type, true);
-            troopEl.style.left = `${startX}px`;
-            troopEl.style.top = `${startY}px`;
-
-            const troopData = {
+            const unitData = {
                 id: troopId++,
                 type: type,
-                element: troopEl,
-                x: startX,
-                y: startY,
-                hp: TROOP_STATS[type].hp,
-                maxHp: TROOP_STATS[type].hp,
-                speed: TROOP_STATS[type].speed,
-                isPlayer: true,
-                targetY: enemyBaseY // Target the enemy base
+                element: unitEl,
+                x: x,
+                y: y,
+                hp: stats.hp,
+                maxHp: stats.hp,
+                speed: stats.speed,
+                dmg: stats.dmg,
+                range: stats.range,
+                isPlayer: isPlayer,
+                isTower: isTower,
+                target: null,
+                attackCooldown: 0,
             };
-
-            activeTroops.push(troopData);
-            gameContainer.appendChild(troopEl);
-            console.log(`Deployed ${TROOP_STATS[type].name}`);
+            
+            unitEl.appendChild(createHealthBar(unitData));
+            activeUnits.push(unitData);
+            gameContainer.appendChild(unitEl);
+            return unitData;
         }
 
-        // Main game loop
-        function updateGame() {
-            activeTroops.forEach(troop => {
-                // Simple movement logic: move towards target Y position
-                if (troop.isPlayer) {
-                    if (troop.y > troop.targetY) {
-                        troop.y -= troop.speed;
-                    }
-                } else {
-                    if (troop.y < troop.targetY) {
-                        troop.y += troop.speed;
+        window.deployTroop = function(type) {
+            const stats = TROOP_STATS[type];
+            if (playerElixir >= stats.cost) {
+                // Deploy in the player's half, randomly along the back
+                const startX = Math.random() * (gameContainer.clientWidth - 40) + 20;
+                const startY = Math.random() * (arenaHeight / 2 - 100) + (arenaHeight / 2 + 50);
+                createUnit(type, true, startX, startY);
+                updateElixir(-stats.cost);
+            }
+        }
+
+        // --- Game Logic ---
+
+        function getDistance(unit1, unit2) {
+            const dx = unit1.x - unit2.x;
+            const dy = unit1.y - unit2.y;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        function findTarget(unit) {
+            let closestTarget = null;
+            let minDist = Infinity;
+
+            for (const otherUnit of activeUnits) {
+                if (unit.isPlayer !== otherUnit.isPlayer) { // Target enemies
+                    const dist = getDistance(unit, otherUnit);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        closestTarget = otherUnit;
                     }
                 }
+            }
+            unit.target = closestTarget;
+        }
 
-                // Update DOM position
-                troop.element.style.top = `${troop.y}px`;
-            });
+        function handleCombat(unit) {
+            if (!unit.target || unit.target.hp <= 0) {
+                findTarget(unit);
+                return;
+            }
 
-            // In a real game, you would handle collision detection, combat, and troop removal here.
+            const distanceToTarget = getDistance(unit, unit.target);
+
+            if (distanceToTarget <= unit.range) {
+                // Stop moving and attack
+                unit.attackCooldown -= 16; // Roughly 16ms per frame
+                if (unit.attackCooldown <= 0) {
+                    unit.target.hp -= unit.dmg;
+                    unit.attackCooldown = 1000; // Attack every 1 second
+                    // Update target health bar visually
+                    const hpPercent = (unit.target.hp / unit.target.maxHp) * 100;
+                    unit.target.healthBar.style.width = `${Math.max(0, hpPercent)}%`;
+                }
+            } else if (!unit.isTower) {
+                // Move towards target if out of range and not a tower
+                const angle = Math.atan2(unit.target.y - unit.y, unit.target.x - unit.x);
+                unit.x += Math.cos(angle) * unit.speed;
+                unit.y += Math.sin(angle) * unit.speed;
+            }
+        }
+
+        function checkWinLoss() {
+            const playerTowers = activeUnits.filter(u => u.isTower && u.isPlayer && u.hp > 0);
+            const enemyTowers = activeUnits.filter(u => u.isTower && !u.isPlayer && u.hp > 0);
+
+            if (enemyTowers.length === 0) {
+                gameMessageEl.textContent = "YOU WIN! 🎉";
+                gameMessageEl.style.display = 'block';
+                return true;
+            } else if (playerTowers.length === 0) {
+                gameMessageEl.textContent = "YOU LOSE! 💀";
+                gameMessageEl.style.display = 'block';
+                return true;
+            }
+            return false;
+        }
+
+        function updateGame() {
+            if (checkWinLoss()) return; // Stop game loop on win/loss
+
+            // Filter out destroyed units and update positions/combat
+            for (let i = activeUnits.length - 1; i >= 0; i--) {
+                const unit = activeUnits[i];
+                if (unit.hp <= 0) {
+                    unit.element.remove();
+                    activeUnits.splice(i, 1);
+                    continue;
+                }
+
+                handleCombat(unit);
+
+                // Update DOM position for moving units
+                if (unit.speed > 0) {
+                    unit.element.style.left = `${unit.x - TROOP_RADIUS}px`;
+                    unit.element.style.top = `${unit.y - TROOP_RADIUS}px`;
+                }
+            }
+
             requestAnimationFrame(updateGame);
         }
 
-        // Start the game loop
-        requestAnimationFrame(updateGame);
-
-        // Optional: Spawn a dummy enemy troop to fight against
-        function spawnInitialEnemy() {
-            const startX = Math.random() * (gameContainer.clientWidth - 40) + 20;
-            const startY = enemyBaseY;
-            const type = 1; // Knight enemy
-
-            const troopEl = createTroopElement(type, false);
-            troopEl.style.left = `${startX}px`;
-            troopEl.style.top = `${startY}px`;
-            troopEl.style.backgroundColor = 'red'; // Ensure enemy is red
-
-            const troopData = {
-                id: troopId++,
-                type: type,
-                element: troopEl,
-                x: startX,
-                y: startY,
-                hp: TROOP_STATS[type].hp,
-                maxHp: TROOP_STATS[type].hp,
-                speed: TROOP_STATS[type].speed * 0.8, // Slower enemy
-                isPlayer: false,
-                targetY: playerBaseY // Target the player base
-            };
-
-            activeTroops.push(troopData);
-            gameContainer.appendChild(troopEl);
-            console.log("Spawned initial enemy Knight");
-        }
-
-        // Run the initial enemy spawn after the DOM loads
+        // --- Initialization ---
         document.addEventListener('DOMContentLoaded', (event) => {
-            spawnInitialEnemy();
+            // Spawn player towers (centered X position)
+            createUnit(null, true, gameContainer.clientWidth / 2, arenaHeight - 120, true);
+            // Spawn enemy towers
+            createUnit(null, false, gameContainer.clientWidth / 2, 40, true);
+            
+            // Initial Elixir update
+            updateElixir(0); 
+
+            // Start the game loop
+            requestAnimationFrame(updateGame);
         });
     </script>
 </body>
