@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Mini Plants vs Zombies Clone</title>
+  <title>Plants vs Zombies – Tile Clone</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -97,11 +97,12 @@
       display: flex;
       gap: 8px;
       margin-bottom: 10px;
+      flex-wrap: wrap;
     }
 
     .seed-card {
       width: 100px;
-      height: 60px;
+      height: 64px;
       border-radius: 10px;
       background: linear-gradient(145deg, #f7f7c1, #f0e5a2);
       border: 2px solid #c1b676;
@@ -176,8 +177,8 @@
     }
 
     .plant {
-      width: 60px;
-      height: 60px;
+      width: 70px;
+      height: 70px;
       border-radius: 50%;
       background: radial-gradient(circle at 30% 20%, #7ef57e, #2d8a2d);
       border: 2px solid #1a541a;
@@ -195,6 +196,16 @@
       text-shadow: 0 0 4px rgba(255,255,255,0.6);
     }
 
+    .plant.sunflower {
+      background: radial-gradient(circle at 30% 20%, #ffe97a, #d68a1f);
+      color: #5c3404;
+    }
+
+    .plant.wallnut {
+      background: radial-gradient(circle at 30% 20%, #c49b6b, #79532e);
+      color: #301b08;
+    }
+
     #entities {
       position: absolute;
       inset: 0;
@@ -204,7 +215,7 @@
 
     .zombie {
       position: absolute;
-      width: 60px;
+      width: 70px;
       height: 80px;
       border-radius: 10px;
       background: linear-gradient(180deg, #719c61, #3e5a37);
@@ -224,13 +235,16 @@
       margin-bottom: 2px;
     }
 
-    .bullet {
+    .shot-flash {
       position: absolute;
-      width: 14px;
-      height: 14px;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
       background: radial-gradient(circle, #c7ff4f, #4baa10);
-      box-shadow: 0 0 8px rgba(190,255,90,0.9);
+      box-shadow: 0 0 10px rgba(190,255,90,0.9);
+      opacity: 0.9;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
     }
 
     #overlay-message {
@@ -284,14 +298,14 @@
       }
       .seed-card {
         width: 90px;
-        height: 56px;
+        height: 60px;
       }
     }
   </style>
 </head>
 <body>
   <div id="game-container">
-    <h1>Plants vs Zombies – Mini Clone</h1>
+    <h1>Plants vs Zombies – Tile Clone</h1>
 
     <div id="top-bar">
       <div id="sun-counter">☀ Sun: <span id="sun-amount">150</span></div>
@@ -303,9 +317,20 @@
       <div class="seed-card selected" data-plant="peashooter" data-cost="100">
         <div class="seed-name">Peashooter</div>
         <div class="seed-cost">Cost: 100 ☀</div>
-        <div style="font-size:11px; opacity:0.8;">Shoots peas at zombies.</div>
+        <div style="font-size:11px; opacity:0.8;">Shoots zombie in its tile.</div>
       </div>
-      <!-- Add more plant cards later if you want -->
+
+      <div class="seed-card" data-plant="sunflower" data-cost="50">
+        <div class="seed-name">Sunflower</div>
+        <div class="seed-cost">Cost: 50 ☀</div>
+        <div style="font-size:11px; opacity:0.8;">Generates extra sun.</div>
+      </div>
+
+      <div class="seed-card" data-plant="wallnut" data-cost="50">
+        <div class="seed-name">Wall-nut</div>
+        <div class="seed-cost">Cost: 50 ☀</div>
+        <div style="font-size:11px; opacity:0.8;">High HP shield.</div>
+      </div>
     </div>
 
     <div id="board">
@@ -328,22 +353,33 @@
      ***********************/
     const ROWS = 5;
     const COLS = 9;
-    const CELL_SIZE = 80; // used for positioning entities
+    const CELL_SIZE = 80; // each tile is 80x80
 
     const PLANT_TYPES = {
       peashooter: {
         name: "Peashooter",
         cost: 100,
-        reloadTime: 1.4,   // seconds between shots
-        bulletSpeed: 180,  // px per second
+        reloadTime: 1.2,   // seconds between shots
         bulletDamage: 20,
         hp: 100
+      },
+      sunflower: {
+        name: "Sunflower",
+        cost: 50,
+        generateInterval: 6, // seconds between suns
+        hp: 80
+      },
+      wallnut: {
+        name: "Wall-nut",
+        cost: 50,
+        hp: 320
       }
     };
 
     const ZOMBIE_CONFIG = {
-      speed: 18,          // px per second
       maxHp: 100,
+      stepTime: 1.4,          // seconds to move one tile left
+      biteDps: 18,            // damage per second to plant in same tile
       spawnIntervalMin: 3,
       spawnIntervalMax: 5
     };
@@ -366,9 +402,8 @@
      * GAME STATE
      ***********************/
     let cells = [];          // [row][col] => cell element
-    let plants = [];         // {row, col, type, hp, reload}
-    let zombies = [];        // {row, x, hp, el}
-    let bullets = [];        // {row, x, el, damage, speed}
+    let plants = [];         // {row, col, type, hp, reload, generateTimer, el}
+    let zombies = [];        // {row, col, hp, stepTimer, el}
     let sun = 150;
     let currentPlantType = "peashooter";
 
@@ -439,50 +474,65 @@
     }
 
     /***********************
-     * PLANTS & BULLETS
+     * PLANTS
      ***********************/
     function placePlant(row, col, type) {
       const cell = cells[row][col];
 
       const plantEl = document.createElement("div");
       plantEl.className = "plant";
-      plantEl.textContent = "P";
+      plantEl.dataset.type = type;
+
+      let label = "";
+      if (type === "peashooter") {
+        label = "P";
+      } else if (type === "sunflower") {
+        plantEl.classList.add("sunflower");
+        label = "S";
+      } else if (type === "wallnut") {
+        plantEl.classList.add("wallnut");
+        label = "W";
+      }
+      plantEl.textContent = label;
+
       cell.appendChild(plantEl);
 
-      plants.push({
+      const conf = PLANT_TYPES[type];
+
+      const plant = {
         row,
         col,
         type,
-        hp: PLANT_TYPES[type].hp,
+        hp: conf.hp,
         reload: 0,
+        generateTimer: conf.generateInterval || 0,
         el: plantEl
-      });
+      };
+
+      plants.push(plant);
     }
 
-    function shootFromPlant(plant) {
-      const config = PLANT_TYPES[plant.type];
-      const bullet = document.createElement("div");
-      bullet.className = "bullet";
-      entitiesEl.appendChild(bullet);
+    function flashPlantShot(plant) {
+      if (!plant.el) return;
+      // shake/scale the plant
+      plant.el.style.transform = "translate(-50%, -50%) scale(1.1)";
+      setTimeout(() => {
+        if (plant.el) {
+          plant.el.style.transform = "translate(-50%, -50%) scale(1)";
+        }
+      }, 120);
 
-      const x = (plant.col + 0.5) * CELL_SIZE + 20; // slightly to the right of plant
-      const y = plant.row * CELL_SIZE + CELL_SIZE * 0.5 - 4;
-
-      bullets.push({
-        row: plant.row,
-        x,
-        y,
-        damage: config.bulletDamage,
-        speed: config.bulletSpeed,
-        el: bullet
-      });
-
-      updateBulletElementPosition(bullet, x, y);
-    }
-
-    function updateBulletElementPosition(el, x, y) {
-      el.style.left = x + "px";
-      el.style.top = y + "px";
+      // small flash on tile
+      const flash = document.createElement("div");
+      flash.className = "shot-flash";
+      const x = plant.col * CELL_SIZE + CELL_SIZE / 2;
+      const y = plant.row * CELL_SIZE + CELL_SIZE / 2;
+      flash.style.left = x + "px";
+      flash.style.top = y + "px";
+      entitiesEl.appendChild(flash);
+      setTimeout(() => {
+        if (flash.parentNode) flash.parentNode.removeChild(flash);
+      }, 140);
     }
 
     /***********************
@@ -494,23 +544,23 @@
       zombieEl.className = "zombie";
       entitiesEl.appendChild(zombieEl);
 
-      const x = COLS * CELL_SIZE + 40; // start just off-screen to the right
-      const y = row * CELL_SIZE + CELL_SIZE * 0.1;
-
-      zombies.push({
+      const z = {
         row,
-        x,
-        y,
+        col: COLS, // start just off-board to the right
         hp: ZOMBIE_CONFIG.maxHp,
+        stepTimer: 0,
         el: zombieEl
-      });
+      };
 
-      updateZombieElementPosition(zombieEl, x, y);
+      zombies.push(z);
+      updateZombieElementPosition(z);
     }
 
-    function updateZombieElementPosition(el, x, y) {
-      el.style.left = x + "px";
-      el.style.top = y + "px";
+    function updateZombieElementPosition(z) {
+      const x = z.col * CELL_SIZE + (CELL_SIZE - 70) / 2;
+      const y = z.row * CELL_SIZE + (CELL_SIZE - 80) / 2;
+      z.el.style.left = x + "px";
+      z.el.style.top = y + "px";
     }
 
     function scheduleNextZombieSpawn() {
@@ -539,7 +589,6 @@
 
       if (!gameOver) {
         updatePlants(delta);
-        updateBullets(delta);
         updateZombies(delta);
         handleSpawning(delta);
       }
@@ -548,77 +597,73 @@
     }
 
     function updatePlants(delta) {
-      plants.forEach(plant => {
+      // We might remove plants while iterating, so copy first
+      for (let i = plants.length - 1; i >= 0; i--) {
+        const plant = plants[i];
         const config = PLANT_TYPES[plant.type];
-        plant.reload -= delta;
 
-        // Check if there is any zombie in this row to shoot
-        const hasZombieInRow = zombies.some(z => z.row === plant.row);
-        if (hasZombieInRow && plant.reload <= 0) {
-          shootFromPlant(plant);
-          plant.reload = config.reloadTime;
-        }
-      });
-    }
-
-    function updateBullets(delta) {
-      const toRemove = [];
-      bullets.forEach((b, index) => {
-        b.x += b.speed * delta;
-
-        // off board
-        if (b.x > COLS * CELL_SIZE + 60) {
-          entitiesEl.removeChild(b.el);
-          toRemove.push(index);
-          return;
-        }
-
-        // collision with zombie in same row
-        for (let i = 0; i < zombies.length; i++) {
-          const z = zombies[i];
-          if (z.row !== b.row) continue;
-
-          const zombieFront = z.x;
-          const zombieBack = z.x - 40; // body width approx
-
-          if (b.x >= zombieBack && b.x <= zombieFront) {
-            // hit
-            z.hp -= b.damage;
-            entitiesEl.removeChild(b.el);
-            toRemove.push(index);
-
-            if (z.hp <= 0) {
-              entitiesEl.removeChild(z.el);
-              zombies.splice(i, 1);
-              // reward a bit of sun
-              sun += 25;
-              updateSunDisplay();
-            }
-            break;
+        // Sunflower: generate sun
+        if (plant.type === "sunflower") {
+          plant.generateTimer -= delta;
+          if (plant.generateTimer <= 0) {
+            sun += 25;
+            updateSunDisplay();
+            plant.generateTimer = config.generateInterval;
           }
         }
 
-        if (!toRemove.includes(index)) {
-          updateBulletElementPosition(b.el, b.x, b.y);
-        }
-      });
+        // Peashooter: only shoot when zombie is in same tile
+        if (plant.type === "peashooter") {
+          plant.reload -= delta;
+          const targetZombie = zombies.find(z => z.row === plant.row && z.col === plant.col);
+          if (targetZombie && plant.reload <= 0) {
+            targetZombie.hp -= config.bulletDamage;
+            flashPlantShot(plant);
+            plant.reload = config.reloadTime;
 
-      // remove bullets from array (backwards so indexes don't shift)
-      toRemove.sort((a, b) => b - a).forEach(i => bullets.splice(i, 1));
+            if (targetZombie.hp <= 0) {
+              removeZombie(targetZombie);
+              sun += 25; // small reward
+              updateSunDisplay();
+            }
+          }
+        }
+
+        // Check if plant died from zombie biting
+        if (plant.hp <= 0) {
+          removePlant(plant);
+        }
+      }
     }
 
     function updateZombies(delta) {
       for (let i = zombies.length - 1; i >= 0; i--) {
         const z = zombies[i];
-        z.x -= ZOMBIE_CONFIG.speed * delta;
 
-        // If zombie reaches left edge: game over
-        if (z.x < 0) {
-          triggerGameOver(false);
-          return;
+        // Check if zombie is sharing tile with a plant
+        const plant = plants.find(p => p.row === z.row && p.col === z.col);
+
+        if (plant) {
+          // Zombie eats plant instead of moving
+          plant.hp -= ZOMBIE_CONFIG.biteDps * delta;
+          updateZombieElementPosition(z);
+          continue;
         }
 
-        updateZombieElementPosition(z.el, z.x, z.y);
+        // No plant in this tile -> move left tile-by-tile
+        z.stepTimer -= delta;
+        if (z.stepTimer <= 0) {
+          z.col -= 1;
+          z.stepTimer += ZOMBIE_CONFIG.stepTime;
+
+          // If zombie reaches left of board -> game over
+          if (z.col < 0) {
+            triggerGameOver(false);
+            return;
+          }
+        }
+
+        updateZombieElementPosition(z);
       }
     }
 
@@ -629,6 +674,31 @@
       if (zombieSpawnTimer >= nextSpawnTime) {
         spawnZombie();
         scheduleNextZombieSpawn();
+      }
+    }
+
+    /***********************
+     * REMOVE HELPERS
+     ***********************/
+    function removeZombie(zombie) {
+      const idx = zombies.indexOf(zombie);
+      if (idx !== -1) {
+        const z = zombies[idx];
+        if (z.el && z.el.parentNode) {
+          z.el.parentNode.removeChild(z.el);
+        }
+        zombies.splice(idx, 1);
+      }
+    }
+
+    function removePlant(plant) {
+      const idx = plants.indexOf(plant);
+      if (idx !== -1) {
+        const p = plants[idx];
+        if (p.el && p.el.parentNode) {
+          p.el.parentNode.removeChild(p.el);
+        }
+        plants.splice(idx, 1);
       }
     }
 
@@ -655,11 +725,9 @@
         }
       });
       zombies.forEach(z => z.el && z.el.remove());
-      bullets.forEach(b => b.el && b.el.remove());
 
       plants = [];
       zombies = [];
-      bullets = [];
       sun = 150;
       updateSunDisplay();
       currentPlantType = "peashooter";
@@ -687,7 +755,7 @@
       waveStarted = true;
       running = true;
       scheduleNextZombieSpawn();
-      statusTextEl.textContent = "Wave started! Zombies will spawn from the right.";
+      statusTextEl.textContent = "Wave started! Zombies move tile by tile from the right.";
       requestAnimationFrame(gameLoop);
     });
 
@@ -697,7 +765,7 @@
       requestAnimationFrame(gameLoop);
     });
 
-    // Auto-start loop so plants animate even before wave
+    // Auto-start loop so animations run even before wave
     running = true;
     requestAnimationFrame(gameLoop);
   </script>
